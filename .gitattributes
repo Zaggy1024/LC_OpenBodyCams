@@ -1,0 +1,2 @@
+*.sln text eol=crlf
+*.csproj text eol=crlf
