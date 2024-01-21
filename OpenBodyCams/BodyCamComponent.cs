@@ -13,6 +13,8 @@ namespace OpenBodyCams
 {
     public class BodyCamComponent : MonoBehaviour
     {
+        const int DEFAULT_LAYER = 0;
+        const int ENEMIES_LAYER = 19;
         const int BODY_CAM_ONLY_LAYER = 31;
         const float PAN_SPEED = 40.0f;
 
@@ -29,7 +31,7 @@ namespace OpenBodyCams
         private Renderer[] currentPlayerMoreCompanyCosmetics;
         private PlayerModelState currentPlayerModelState;
 
-        private Renderer currentlyViewedMesh;
+        private Renderer[] currentlyViewedMeshes;
 
         private float elapsedSinceLastFrame = 0;
         private float timePerFrame = 0;
@@ -121,7 +123,7 @@ namespace OpenBodyCams
             var mapScreen = StartOfRound.Instance.mapScreen;
 
             currentPlayer = mapScreen.targetedPlayer;
-            currentlyViewedMesh = null;
+            currentlyViewedMeshes = new Renderer[0];
 
             if (MoreCompanyCompatibilityPatch.f_CosmeticApplication_spawnedCosmetics is object)
             {
@@ -149,9 +151,14 @@ namespace OpenBodyCams
             string attachmentPoint = null;
             Vector3 offset = Vector3.zero;
 
+            Renderer[] CollectModelsToHide(Transform parent)
+            {
+                return parent.GetComponentsInChildren<Renderer>().Where(r => r.gameObject.layer == DEFAULT_LAYER || r.gameObject.layer == ENEMIES_LAYER).ToArray();
+            }
+
             if (attachToObject.GetComponent<RadarBoosterItem>() is object)
             {
-                currentlyViewedMesh = attachToObject.transform.Find("AnimContainer/Rod")?.GetComponent<MeshRenderer>();
+                currentlyViewedMeshes = new Renderer[] { attachToObject.transform.Find("AnimContainer/Rod").GetComponent<Renderer>() };
                 offset = new Vector3(0, 1.5f, 0);
                 panCamera = true;
             }
@@ -159,17 +166,21 @@ namespace OpenBodyCams
             {
                 if (currentPlayer.isPlayerDead == true && currentPlayer.deadBody is object)
                 {
-                    if (currentPlayer.redirectToEnemy is MaskedPlayerEnemy masked)
+                    if (currentPlayer.redirectToEnemy is object)
                     {
-                        if (Plugin.CameraMode.Value == CameraModeOptions.Head)
-                            attachToObject = masked.headTiltTarget;
+                        if (currentPlayer.redirectToEnemy is MaskedPlayerEnemy masked)
+                        {
+                            if (Plugin.CameraMode.Value == CameraModeOptions.Head)
+                                attachToObject = masked.headTiltTarget;
+                            else
+                                attachToObject = masked.animationContainer.Find("metarig/spine/spine.001/spine.002/spine.003");
+                        }
                         else
-                            attachToObject = masked.animationContainer.Find("metarig/spine/spine.001/spine.002/spine.003");
-                        currentlyViewedMesh = masked.rendererLOD0;
-                    }
-                    else if (currentPlayer.redirectToEnemy is object)
-                    {
-                        attachToObject = currentPlayer.redirectToEnemy.eye;
+                        {
+                            attachToObject = currentPlayer.redirectToEnemy.eye;
+                        }
+
+                        currentlyViewedMeshes = CollectModelsToHide(currentPlayer.redirectToEnemy.transform);
                     }
                     else if (currentPlayer.deadBody is object)
                     {
@@ -177,6 +188,7 @@ namespace OpenBodyCams
                             attachToObject = currentPlayer.deadBody.transform.Find("spine.001/spine.002/spine.003/spine.004");
                         else
                             attachToObject = currentPlayer.deadBody.transform.Find("spine.001/spine.002/spine.003");
+                        currentlyViewedMeshes = CollectModelsToHide(currentPlayer.deadBody.transform);
                     }
                 }
                 else
@@ -288,8 +300,8 @@ namespace OpenBodyCams
             if ((object)renderedCamera != camera)
                 return;
 
-            if (currentlyViewedMesh is object)
-                currentlyViewedMesh.forceRenderingOff = true;
+            foreach (var mesh in currentlyViewedMeshes)
+                mesh.forceRenderingOff = true;
 
             var localPlayer = StartOfRound.Instance.localPlayerController;
             if ((object)localPlayer == currentPlayer)
@@ -304,8 +316,8 @@ namespace OpenBodyCams
             if ((object)renderedCamera != camera)
                 return;
 
-            if (currentlyViewedMesh is object)
-                currentlyViewedMesh.forceRenderingOff = false;
+            foreach (var mesh in currentlyViewedMeshes)
+                mesh.forceRenderingOff = false;
 
             var localPlayer = StartOfRound.Instance.localPlayerController;
             if ((object)localPlayer == currentPlayer)
