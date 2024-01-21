@@ -14,7 +14,7 @@ The camera view will display only the first person hands and disable the third p
   - Camera setup logic is done ahead of time based on game events whenever possible.
 
 # Configuration
-- Camera mode: The attachment point of the camera, the head and the body are selectable.
+- Camera mode: The attachment point of the camera. The head and the body are selectable.
 - Resolution: The horizontal resolution of the rendered view.
 - Field of view: The vertical FOV of the body cam's view.
 - Render distance: The far clip plane of the camera.
