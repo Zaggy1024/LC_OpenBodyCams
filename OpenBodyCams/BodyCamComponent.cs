@@ -27,11 +27,11 @@ namespace OpenBodyCams
         private MeshRenderer monitorMesh;
         private Material monitorMaterial;
 
-        private Renderer[] localPlayerMoreCompanyCosmetics;
+        private Renderer[] localPlayerMoreCompanyCosmetics = new Renderer[0];
         private PlayerModelState localPlayerModelState;
 
         private PlayerControllerB currentPlayer;
-        private Renderer[] currentPlayerMoreCompanyCosmetics;
+        private Renderer[] currentPlayerMoreCompanyCosmetics = new Renderer[0];
         private PlayerModelState currentPlayerModelState;
 
         private Renderer[] currentlyViewedMeshes;
