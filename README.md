@@ -1,11 +1,12 @@
 # OpenBodyCams
 An open-source implementation of a body/head camera that is displayed on the bottom right monitor in the ship, with the goal of appearing almost identical to the player's actual perspective while providing good performance.
 
-The camera view will use only the first person hands and disable the third person model to prevent obstructed vision.
+The camera view will display only the first person hands and disable the third person model as well as MoreCompany cosmetics to prevent obstructed vision.
 
 # Features
 - Selectable camera perspective between the head and body.
 - Camera view is designed to render identically for the local player as well other players in the game.
+- MoreCompany cosmetics hidden on the first person view, so installing MoreCompany alongside this mod will cause no issues. Your cosmetics will also appear on the camera when viewing yourself from someone else's perspective.
 - All enemies, terrain, etc. that is visible to the player will be visible in the camera view.
 - The same green flash animation used when switching targets on the radar is displayed by the camera view.
 - Performance:
