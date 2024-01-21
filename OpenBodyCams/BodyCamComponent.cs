@@ -132,10 +132,25 @@ namespace OpenBodyCams
             {
                 if (currentPlayer.isPlayerDead == true && currentPlayer.deadBody is object)
                 {
-                    if (Plugin.CameraMode.Value == CameraModeOptions.Head)
-                        attachToObject = currentPlayer.deadBody.transform.Find("spine.001/spine.002/spine.003/spine.004");
-                    else
-                        attachToObject = currentPlayer.deadBody.transform.Find("spine.001/spine.002/spine.003");
+                    if (currentPlayer.redirectToEnemy is MaskedPlayerEnemy masked)
+                    {
+                        if (Plugin.CameraMode.Value == CameraModeOptions.Head)
+                            attachToObject = masked.headTiltTarget;
+                        else
+                            attachToObject = masked.animationContainer.Find("metarig/spine/spine.001/spine.002/spine.003");
+                        currentlyViewedMesh = masked.rendererLOD0;
+                    }
+                    else if (currentPlayer.redirectToEnemy is object)
+                    {
+                        attachToObject = currentPlayer.redirectToEnemy.eye;
+                    }
+                    else if (currentPlayer.deadBody is object)
+                    {
+                        if (Plugin.CameraMode.Value == CameraModeOptions.Head)
+                            attachToObject = currentPlayer.deadBody.transform.Find("spine.001/spine.002/spine.003/spine.004");
+                        else
+                            attachToObject = currentPlayer.deadBody.transform.Find("spine.001/spine.002/spine.003");
+                    }
                 }
                 else
                 {
