@@ -218,6 +218,7 @@ namespace OpenBodyCams
 
             // Save
             state.shadowMode = player.thisPlayerModel.shadowCastingMode;
+            state.armsEnabled = player.thisPlayerModelArms.enabled;
             state.armsHidden = player.thisPlayerModelArms.forceRenderingOff;
 
             if (player.currentlyHeldObjectServer is object)
@@ -240,6 +241,7 @@ namespace OpenBodyCams
             {
                 case Perspective.FirstPerson:
                     player.thisPlayerModel.shadowCastingMode = ShadowCastingMode.ShadowsOnly;
+                    player.thisPlayerModelArms.enabled = true;
                     player.thisPlayerModelArms.forceRenderingOff = false;
 
                     if (player.currentlyHeldObjectServer is object)
@@ -250,6 +252,7 @@ namespace OpenBodyCams
                     break;
                 case Perspective.ThirdPerson:
                     player.thisPlayerModel.shadowCastingMode = ShadowCastingMode.On;
+                    player.thisPlayerModelArms.enabled = false;
                     player.thisPlayerModelArms.forceRenderingOff = true;
 
                     if (player.currentlyHeldObjectServer is object)
@@ -267,6 +270,7 @@ namespace OpenBodyCams
                 return;
 
             player.thisPlayerModel.shadowCastingMode = state.shadowMode;
+            player.thisPlayerModelArms.enabled = state.armsEnabled;
             player.thisPlayerModelArms.forceRenderingOff = state.armsHidden;
 
             foreach (var cosmetic in moreCompanyCosmetics)
@@ -356,6 +360,7 @@ namespace OpenBodyCams
     internal struct PlayerModelState
     {
         public ShadowCastingMode shadowMode;
+        public bool armsEnabled;
         public bool armsHidden;
         public bool moreCompanyCosmeticsHidden;
         public Vector3 heldItemPosition;
