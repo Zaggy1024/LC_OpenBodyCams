@@ -12,9 +12,12 @@ The camera view will use only the first person hands and disable the third perso
   - The camera is attached to the player model in the engine rather than copying the transform from it.
   - Camera setup logic is done ahead of time based on game events whenever possible.
 
-# Customization
-- Camera mode: Select the attachment point of the camera between the head and the body.
-- Resolution: Specify the horizontal resolution of the rendered view.
-- Render distance: Determines the far clip plane of the camera.
+# Configuration
+- Camera mode: The attachment point of the camera, the head and the body are selectable.
+- Resolution: The horizontal resolution of the rendered view.
+- Render distance: The far clip plane of the camera.
 - Framerate: The number of frames to render per second. The default setting renders at the game's framerate and has the least impact on performance.
-- Disable internal ship camera: A little extra in case it can help with performance, this disables the camera at the front of the ship facing towards the center.
+- Disable internal ship camera: Disables the camera at the front of the ship facing towards the center. This may improve performance inside the ship slightly.
+
+# Notes
+As mentioned above, using no framerate limit results in the best performance. Forcing the camera to render at certain intervals outside of the render pipeline seems to cause a lot of overhead, so setting the framerate limit to anything above 30fps may cause a severe dip in the game's framerate.
