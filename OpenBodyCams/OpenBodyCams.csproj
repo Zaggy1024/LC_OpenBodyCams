@@ -72,10 +72,13 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BodyCamComponent.cs" />
+    <Compile Include="Patches\Common.cs" />
+    <Compile Include="Patches\MoreCompanyCompatibilityPatch.cs" />
     <Compile Include="Patches\PatchManualCameraRenderer.cs" />
     <Compile Include="Patches\PatchMasked.cs" />
     <Compile Include="Patches\PatchPlayerControllerB.cs" />
     <Compile Include="Patches\PatchStartOfRound.cs" />
+    <Compile Include="Patches\Reflection.cs" />
     <Compile Include="Plugin.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

@@ -45,6 +45,8 @@ namespace OpenBodyCams
             harmony.PatchAll(typeof(PatchHauntedMaskItem));
             harmony.PatchAll(typeof(PatchMaskedPlayerEnemy));
 
+            MoreCompanyCompatibilityPatch.ApplyPatches(harmony);
+
             CameraMode = Config.Bind("Camera", "Mode", CameraModeOptions.Head, "Choose where to attach the camera. 'Head' will attach the camera to the right side of the head, 'Body' will attach it to the chest.");
             HorizontalResolution = Config.Bind("Camera", "HorizontalResolution", 160, "The horizontal resolution of the rendering. The vertical resolution is calculated based on the aspect ratio of the monitor.");
             RenderDistance = Config.Bind("Camera", "RenderDistance", 25f, "The far clip plane for the body cam. Lowering may improve framerates.");
