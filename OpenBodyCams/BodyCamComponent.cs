@@ -167,7 +167,7 @@ namespace OpenBodyCams
             }
             else if (currentPlayer is object)
             {
-                if (currentPlayer.isPlayerDead == true && currentPlayer.deadBody is object)
+                if (currentPlayer.isPlayerDead && currentPlayer.deadBody is object)
                 {
                     if (currentPlayer.redirectToEnemy is object)
                     {
