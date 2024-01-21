@@ -24,6 +24,8 @@ namespace OpenBodyCams
         private PlayerControllerB currentPlayer;
         private PlayerModelState currentPlayerModelState;
 
+        private Renderer currentlyViewedMesh;
+
         private float elapsedSinceLastFrame = 0;
         private float timePerFrame = 0;
 
@@ -114,6 +116,7 @@ namespace OpenBodyCams
             var mapScreen = StartOfRound.Instance.mapScreen;
 
             currentPlayer = mapScreen.targetedPlayer;
+            currentlyViewedMesh = null;
 
             Transform attachToObject = mapScreen.radarTargets[mapScreen.targetTransformIndex].transform;
             string attachmentPoint = null;
@@ -121,6 +124,7 @@ namespace OpenBodyCams
 
             if (attachToObject.GetComponent<RadarBoosterItem>() is object)
             {
+                currentlyViewedMesh = attachToObject.transform.Find("AnimContainer/Rod")?.GetComponent<MeshRenderer>();
                 offset = new Vector3(0, 1.5f, 0);
                 panCamera = true;
             }
@@ -227,6 +231,9 @@ namespace OpenBodyCams
             if ((object)renderedCamera != camera)
                 return;
 
+            if (currentlyViewedMesh is object)
+                currentlyViewedMesh.forceRenderingOff = true;
+
             var localPlayer = StartOfRound.Instance.localPlayerController;
             if ((object)localPlayer == currentPlayer)
                 return;
@@ -240,12 +247,15 @@ namespace OpenBodyCams
             if ((object)renderedCamera != camera)
                 return;
 
+            if (currentlyViewedMesh is object)
+                currentlyViewedMesh.forceRenderingOff = false;
+
             var localPlayer = StartOfRound.Instance.localPlayerController;
             if ((object)localPlayer == currentPlayer)
                 return;
 
             RestoreState(localPlayer, localPlayerModelState);
-            RestoreState(currentPlayer currentPlayerModelState);
+            RestoreState(currentPlayer, currentPlayerModelState);
         }
 
         public void Update()
