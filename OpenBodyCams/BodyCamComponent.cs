@@ -18,6 +18,9 @@ namespace OpenBodyCams
         const int BODY_CAM_ONLY_LAYER = 31;
         const float PAN_SPEED = 40.0f;
 
+        public static readonly Vector3 BODY_CAM_OFFSET = new Vector3(0.07f, 0, 0.15f);
+        public static readonly Vector3 CAMERA_CONTAINER_OFFSET = new Vector3(0.07f, 0, 0.125f);
+
         public GameObject cameraObject;
         public Camera camera;
 
@@ -171,9 +174,15 @@ namespace OpenBodyCams
                         if (currentPlayer.redirectToEnemy is MaskedPlayerEnemy masked)
                         {
                             if (Plugin.CameraMode.Value == CameraModeOptions.Head)
+                            {
                                 attachToObject = masked.headTiltTarget;
+                                offset = CAMERA_CONTAINER_OFFSET;
+                            }
                             else
+                            {
                                 attachToObject = masked.animationContainer.Find("metarig/spine/spine.001/spine.002/spine.003");
+                                offset = BODY_CAM_OFFSET;
+                            }
                         }
                         else
                         {
@@ -185,23 +194,31 @@ namespace OpenBodyCams
                     else if (currentPlayer.deadBody is object)
                     {
                         if (Plugin.CameraMode.Value == CameraModeOptions.Head)
-                            attachToObject = currentPlayer.deadBody.transform.Find("spine.001/spine.002/spine.003/spine.004");
+                        {
+                            attachToObject = currentPlayer.deadBody.transform.Find("spine.001/spine.002/spine.003/spine.004/spine.004_end");
+                            offset = CAMERA_CONTAINER_OFFSET - new Vector3(0, 0.15f, 0);
+                        }
                         else
+                        {
                             attachToObject = currentPlayer.deadBody.transform.Find("spine.001/spine.002/spine.003");
+                            offset = BODY_CAM_OFFSET;
+                        }
                         currentlyViewedMeshes = CollectModelsToHide(currentPlayer.deadBody.transform);
                     }
                 }
                 else
                 {
                     if (Plugin.CameraMode.Value == CameraModeOptions.Head)
+                    {
                         attachToObject = currentPlayer.gameplayCamera.transform;
+                        offset = CAMERA_CONTAINER_OFFSET;
+                    }
                     else
+                    {
                         attachToObject = currentPlayer.playerGlobalHead.transform.parent;
+                        offset = BODY_CAM_OFFSET;
+                    }
                 }
-                if (Plugin.CameraMode.Value == CameraModeOptions.Head)
-                    offset = new Vector3(0.07f, 0, 0.125f);
-                else
-                    offset = new Vector3(0.07f, 0.1f, 0.2f);
                 panCamera = false;
             }
 
