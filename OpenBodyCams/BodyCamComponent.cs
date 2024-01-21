@@ -98,6 +98,7 @@ namespace OpenBodyCams
         public void UpdateSettings()
         {
             camera.targetTexture = new RenderTexture(Plugin.HorizontalResolution.Value, Plugin.HorizontalResolution.Value * 3 / 4, 32);
+            camera.fieldOfView = Plugin.FieldOfView.Value;
             monitorMaterial.mainTexture = camera.targetTexture;
 
             camera.farClipPlane = Plugin.RenderDistance.Value;

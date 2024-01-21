@@ -26,6 +26,7 @@ namespace OpenBodyCams
 
         public static ConfigEntry<CameraModeOptions> CameraMode;
         public static ConfigEntry<int> HorizontalResolution;
+        public static ConfigEntry<float> FieldOfView;
         public static ConfigEntry<float> RenderDistance;
         public static ConfigEntry<float> Framerate;
 
@@ -49,11 +50,13 @@ namespace OpenBodyCams
 
             CameraMode = Config.Bind("Camera", "Mode", CameraModeOptions.Head, "Choose where to attach the camera. 'Head' will attach the camera to the right side of the head, 'Body' will attach it to the chest.");
             HorizontalResolution = Config.Bind("Camera", "HorizontalResolution", 160, "The horizontal resolution of the rendering. The vertical resolution is calculated based on the aspect ratio of the monitor.");
+            FieldOfView = Config.Bind("Camera", "FieldOfView", 65f, "The vertical FOV of the camera in degrees.");
             RenderDistance = Config.Bind("Camera", "RenderDistance", 25f, "The far clip plane for the body cam. Lowering may improve framerates.");
             Framerate = Config.Bind("Camera", "Framerate", 0f, "The number of frames to render per second. Higher framerates will negatively affect performance. A value of 0 will render at the game's framerate and results in best performance.");
 
             CameraMode.SettingChanged += (s, e) => BodyCam.UpdateSettings();
             HorizontalResolution.SettingChanged += (s, e) => BodyCam.UpdateSettings();
+            FieldOfView.SettingChanged += (s, e) => BodyCam.UpdateSettings();
             RenderDistance.SettingChanged += (s, e) => BodyCam.UpdateSettings();
             Framerate.SettingChanged += (s, e) => BodyCam.UpdateSettings();
 
