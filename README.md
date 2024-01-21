@@ -15,6 +15,7 @@ The camera view will use only the first person hands and disable the third perso
 # Configuration
 - Camera mode: The attachment point of the camera, the head and the body are selectable.
 - Resolution: The horizontal resolution of the rendered view.
+- Field of view: The vertical FOV of the body cam's view.
 - Render distance: The far clip plane of the camera.
 - Framerate: The number of frames to render per second. The default setting renders at the game's framerate and has the least impact on performance.
 - Disable internal ship camera: Disables the camera at the front of the ship facing towards the center. This may improve performance inside the ship slightly.
