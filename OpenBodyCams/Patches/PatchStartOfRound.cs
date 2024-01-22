@@ -73,5 +73,12 @@ namespace OpenBodyCams.Patches
             if (Plugin.DisableInternalShipCamera.Value)
                 DisableShipCamera();
         }
+
+        [HarmonyPostfix]
+        [HarmonyPatch("ReviveDeadPlayers")]
+        static void ReviveDeadPlayersPostfix()
+        {
+            Plugin.BodyCam.UpdateCurrentTarget();
+        }
     }
 }
