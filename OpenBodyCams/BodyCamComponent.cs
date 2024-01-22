@@ -48,15 +48,26 @@ namespace OpenBodyCams
         {
             Plugin.BodyCam = this;
 
+            RenderPipelineManager.beginCameraRendering += BeginCameraRendering;
+            RenderPipelineManager.endCameraRendering += EndCameraRendering;
+
+            monitorMesh = GetComponent<MeshRenderer>();
+            monitorMaterial = monitorMesh.materials.First(material => material.mainTexture.name == "shipScreen2") ?? throw new Exception("Failed to get the ship screen material.");
+
+            EnsureCameraExists();
+        }
+
+        public void EnsureCameraExists()
+        {
+            if (cameraObject != null)
+                return;
+
             cameraObject = new GameObject("BodyCam");
             camera = cameraObject.AddComponent<Camera>();
             camera.nearClipPlane = 0.05f;
             camera.cullingMask = unchecked((int)0b1010_0001_0011_1011_0001_0111_0101_1011);
             var cameraData = cameraObject.AddComponent<HDAdditionalCameraData>();
             cameraData.volumeLayerMask = 1;
-
-            monitorMesh = GetComponent<MeshRenderer>();
-            monitorMaterial = monitorMesh.materials.First(material => material.mainTexture.name == "shipScreen2") ?? throw new Exception("Failed to get the ship screen material.");
 
             var greenFlashParent = new GameObject("CameraGreenTransitionScaler");
             greenFlashParent.transform.SetParent(cameraObject.transform, false);
@@ -90,9 +101,6 @@ namespace OpenBodyCams
             nightVisionLight.cullingMask = 1 << BODY_CAM_ONLY_LAYER;
 
             UpdateSettings();
-
-            RenderPipelineManager.beginCameraRendering += BeginCameraRendering;
-            RenderPipelineManager.endCameraRendering += EndCameraRendering;
         }
 
         public void UpdateSettings()
@@ -124,6 +132,8 @@ namespace OpenBodyCams
 
         public void UpdateCurrentTarget()
         {
+            EnsureCameraExists();
+
             var mapScreen = StartOfRound.Instance.mapScreen;
 
             // Ensure that we have a reference to null if the targeted player is being destroyed.
@@ -345,6 +355,8 @@ namespace OpenBodyCams
 
         public void Update()
         {
+            EnsureCameraExists();
+
             var spectatedPlayer = StartOfRound.Instance.localPlayerController;
             if (spectatedPlayer == null)
                 return;
