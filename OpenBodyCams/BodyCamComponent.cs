@@ -126,7 +126,8 @@ namespace OpenBodyCams
         {
             var mapScreen = StartOfRound.Instance.mapScreen;
 
-            currentPlayer = mapScreen.targetedPlayer;
+            // Ensure that we have a reference to null if the targeted player is being destroyed.
+            currentPlayer = mapScreen.targetedPlayer != null ? mapScreen.targetedPlayer : null;
             currentlyViewedMeshes = new Renderer[0];
 
             if (MoreCompanyCompatibilityPatch.f_CosmeticApplication_spawnedCosmetics is object)
@@ -160,7 +161,7 @@ namespace OpenBodyCams
                 return parent.GetComponentsInChildren<Renderer>().Where(r => r.gameObject.layer == DEFAULT_LAYER || r.gameObject.layer == ENEMIES_LAYER).ToArray();
             }
 
-            if (attachToObject.GetComponent<RadarBoosterItem>() is object)
+            if (attachToObject.GetComponent<RadarBoosterItem>() != null)
             {
                 currentlyViewedMeshes = new Renderer[] { attachToObject.transform.Find("AnimContainer/Rod").GetComponent<Renderer>() };
                 offset = new Vector3(0, 1.5f, 0);
@@ -168,44 +169,41 @@ namespace OpenBodyCams
             }
             else if (currentPlayer is object)
             {
-                if (currentPlayer.isPlayerDead && currentPlayer.deadBody is object)
+                if (currentPlayer.redirectToEnemy != null)
                 {
-                    if (currentPlayer.redirectToEnemy is object)
-                    {
-                        if (currentPlayer.redirectToEnemy is MaskedPlayerEnemy masked)
-                        {
-                            if (Plugin.CameraMode.Value == CameraModeOptions.Head)
-                            {
-                                attachToObject = masked.headTiltTarget;
-                                offset = CAMERA_CONTAINER_OFFSET;
-                            }
-                            else
-                            {
-                                attachToObject = masked.animationContainer.Find("metarig/spine/spine.001/spine.002/spine.003");
-                                offset = BODY_CAM_OFFSET;
-                            }
-                        }
-                        else
-                        {
-                            attachToObject = currentPlayer.redirectToEnemy.eye;
-                        }
-
-                        currentlyViewedMeshes = CollectModelsToHide(currentPlayer.redirectToEnemy.transform);
-                    }
-                    else if (currentPlayer.deadBody is object)
+                    if (currentPlayer.redirectToEnemy is MaskedPlayerEnemy masked)
                     {
                         if (Plugin.CameraMode.Value == CameraModeOptions.Head)
                         {
-                            attachToObject = currentPlayer.deadBody.transform.Find("spine.001/spine.002/spine.003/spine.004/spine.004_end");
-                            offset = CAMERA_CONTAINER_OFFSET - new Vector3(0, 0.15f, 0);
+                            attachToObject = masked.headTiltTarget;
+                            offset = CAMERA_CONTAINER_OFFSET;
                         }
                         else
                         {
-                            attachToObject = currentPlayer.deadBody.transform.Find("spine.001/spine.002/spine.003");
+                            attachToObject = masked.animationContainer.Find("metarig/spine/spine.001/spine.002/spine.003");
                             offset = BODY_CAM_OFFSET;
                         }
-                        currentlyViewedMeshes = CollectModelsToHide(currentPlayer.deadBody.transform);
                     }
+                    else
+                    {
+                        attachToObject = currentPlayer.redirectToEnemy.eye;
+                    }
+
+                    currentlyViewedMeshes = CollectModelsToHide(currentPlayer.redirectToEnemy.transform);
+                }
+                else if (currentPlayer.isPlayerDead && currentPlayer.deadBody != null)
+                {
+                    if (Plugin.CameraMode.Value == CameraModeOptions.Head)
+                    {
+                        attachToObject = currentPlayer.deadBody.transform.Find("spine.001/spine.002/spine.003/spine.004/spine.004_end");
+                        offset = CAMERA_CONTAINER_OFFSET - new Vector3(0, 0.15f, 0);
+                    }
+                    else
+                    {
+                        attachToObject = currentPlayer.deadBody.transform.Find("spine.001/spine.002/spine.003");
+                        offset = BODY_CAM_OFFSET;
+                    }
+                    currentlyViewedMeshes = CollectModelsToHide(currentPlayer.deadBody.transform);
                 }
                 else
                 {
@@ -223,7 +221,7 @@ namespace OpenBodyCams
                 panCamera = false;
             }
 
-            if (attachToObject is null)
+            if (attachToObject == null)
                 return;
 
             var attachmentPointObject = attachToObject.transform;
