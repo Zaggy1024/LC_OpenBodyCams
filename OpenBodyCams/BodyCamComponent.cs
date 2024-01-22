@@ -127,14 +127,14 @@ namespace OpenBodyCams
             var mapScreen = StartOfRound.Instance.mapScreen;
 
             // Ensure that we have a reference to null if the targeted player is being destroyed.
-            currentPlayer = mapScreen.targetedPlayer != null ? mapScreen.targetedPlayer : null;
+            currentPlayer = mapScreen.targetedPlayer;
             currentlyViewedMeshes = new Renderer[0];
 
             if (MoreCompanyCompatibilityPatch.f_CosmeticApplication_spawnedCosmetics is object)
             {
                 Renderer[] CollectCosmetics(PlayerControllerB player, bool hidden)
                 {
-                    if (player?.GetComponentInChildren(MoreCompanyCompatibilityPatch.t_CosmeticApplication) is Behaviour cosmeticApplication)
+                    if (player != null && player.GetComponentInChildren(MoreCompanyCompatibilityPatch.t_CosmeticApplication) is Behaviour cosmeticApplication)
                     {
                         Plugin.Instance.Logger.LogInfo($"Getting MoreCompany cosmetic models for {player.playerUsername}");
                         var cosmeticsList = (IList)MoreCompanyCompatibilityPatch.f_CosmeticApplication_spawnedCosmetics.GetValue(cosmeticApplication);
@@ -241,7 +241,7 @@ namespace OpenBodyCams
 
         private static void SaveStateAndApplyPerspective(PlayerControllerB player, Renderer[] moreCompanyCosmetics, ref PlayerModelState state, Perspective perspective)
         {
-            if (player is null)
+            if (player == null)
                 return;
 
             // Save
@@ -249,7 +249,7 @@ namespace OpenBodyCams
             state.armsEnabled = player.thisPlayerModelArms.enabled;
             state.armsHidden = player.thisPlayerModelArms.forceRenderingOff;
 
-            if (player.currentlyHeldObjectServer is object)
+            if (player.currentlyHeldObjectServer != null)
             {
                 state.heldItemPosition = player.currentlyHeldObjectServer.transform.position;
                 state.heldItemRotation = player.currentlyHeldObjectServer.transform.rotation;
@@ -272,7 +272,7 @@ namespace OpenBodyCams
                     player.thisPlayerModelArms.enabled = true;
                     player.thisPlayerModelArms.forceRenderingOff = false;
 
-                    if (player.currentlyHeldObjectServer is object)
+                    if (player.currentlyHeldObjectServer != null)
                         AttachItem(player.currentlyHeldObjectServer, player.localItemHolder);
 
                     foreach (var cosmetic in moreCompanyCosmetics)
@@ -283,7 +283,7 @@ namespace OpenBodyCams
                     player.thisPlayerModelArms.enabled = false;
                     player.thisPlayerModelArms.forceRenderingOff = true;
 
-                    if (player.currentlyHeldObjectServer is object)
+                    if (player.currentlyHeldObjectServer != null)
                         AttachItem(player.currentlyHeldObjectServer, player.serverItemHolder);
 
                     foreach (var cosmetic in moreCompanyCosmetics)
@@ -294,7 +294,7 @@ namespace OpenBodyCams
 
         private static void RestoreState(PlayerControllerB player, Renderer[] moreCompanyCosmetics, PlayerModelState state)
         {
-            if (player is null)
+            if (player == null)
                 return;
 
             player.thisPlayerModel.shadowCastingMode = state.shadowMode;
@@ -304,7 +304,7 @@ namespace OpenBodyCams
             foreach (var cosmetic in moreCompanyCosmetics)
                 cosmetic.forceRenderingOff = state.moreCompanyCosmeticsHidden;
 
-            if (player.currentlyHeldObjectServer is object)
+            if (player.currentlyHeldObjectServer != null)
             {
                 player.currentlyHeldObjectServer.transform.position = state.heldItemPosition;
                 player.currentlyHeldObjectServer.transform.rotation = state.heldItemRotation;
@@ -346,9 +346,9 @@ namespace OpenBodyCams
         public void Update()
         {
             var spectatedPlayer = StartOfRound.Instance.localPlayerController;
-            if (spectatedPlayer is null)
+            if (spectatedPlayer == null)
                 return;
-            if (spectatedPlayer.spectatedPlayerScript is object)
+            if (spectatedPlayer.spectatedPlayerScript != null)
                 spectatedPlayer = spectatedPlayer.spectatedPlayerScript;
             bool enable = monitorMesh.isVisible && spectatedPlayer.isInHangarShipRoom;
 
