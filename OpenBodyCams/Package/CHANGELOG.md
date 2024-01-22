@@ -1,3 +1,6 @@
+## Version 1.0.4
+- Fixes an issue where the local player's body would be invisible in the body cam with LethalEmotesAPI or MirrorDecor installed.
+
 ## Version 1.0.3
 - Fixed an error that would occur when a third person emote was started by the LethalEmotesAPI mod.
 - Added a config option to disable MoreCompany cosmetic support that can be used if compatibility issues arise.
