@@ -261,7 +261,7 @@ namespace OpenBodyCams
             ThirdPerson,
         }
 
-        private static void SaveStateAndApplyPerspective(PlayerControllerB player, Renderer[] moreCompanyCosmetics, ref PlayerModelState state, Perspective perspective)
+        private static void SaveStateAndApplyPerspective(PlayerControllerB player, ref Renderer[] moreCompanyCosmetics, ref PlayerModelState state, Perspective perspective)
         {
             if (player == null)
                 return;
@@ -277,7 +277,12 @@ namespace OpenBodyCams
                 state.heldItemRotation = player.currentlyHeldObjectServer.transform.rotation;
             }
 
-            state.moreCompanyCosmeticsHidden = moreCompanyCosmetics.Length > 0 ? moreCompanyCosmetics[0].forceRenderingOff : false;
+            if (moreCompanyCosmetics.Length > 0)
+            {
+                if (moreCompanyCosmetics[0] == null)
+                    moreCompanyCosmetics = CollectMoreCompanyCosmetics(player, hidden: false);
+                state.moreCompanyCosmeticsHidden = moreCompanyCosmetics.Length > 0 && moreCompanyCosmetics[0].forceRenderingOff;
+            }
 
             // Modify
             void AttachItem(GrabbableObject item, Transform holder)
@@ -345,8 +350,8 @@ namespace OpenBodyCams
             if ((object)localPlayer == currentPlayer)
                 return;
 
-            SaveStateAndApplyPerspective(currentPlayer, currentPlayerMoreCompanyCosmetics, ref currentPlayerModelState, Perspective.FirstPerson);
-            SaveStateAndApplyPerspective(localPlayer, localPlayerMoreCompanyCosmetics, ref localPlayerModelState, Perspective.ThirdPerson);
+            SaveStateAndApplyPerspective(currentPlayer, ref currentPlayerMoreCompanyCosmetics, ref currentPlayerModelState, Perspective.FirstPerson);
+            SaveStateAndApplyPerspective(localPlayer, ref localPlayerMoreCompanyCosmetics, ref localPlayerModelState, Perspective.ThirdPerson);
         }
 
         private void EndCameraRendering(ScriptableRenderContext context, Camera renderedCamera)
