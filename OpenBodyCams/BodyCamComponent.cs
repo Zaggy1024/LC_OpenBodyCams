@@ -131,6 +131,27 @@ namespace OpenBodyCams
             greenFlashAnimator.SetTrigger("Transition");
         }
 
+        private static Renderer[] CollectMoreCompanyCosmetics(PlayerControllerB player, bool hidden)
+        {
+            if (!Plugin.EnableMoreCompanyCosmeticsCompatibility.Value)
+                return new Renderer[0];
+            if (player == null)
+                return new Renderer[0];
+
+            if (player.GetComponentInChildren(MoreCompanyCompatibilityPatch.t_CosmeticApplication) is Behaviour cosmeticApplication)
+            {
+                Plugin.Instance.Logger.LogInfo($"Getting MoreCompany cosmetic models for {player.playerUsername}");
+                var cosmeticsList = (IList)MoreCompanyCompatibilityPatch.f_CosmeticApplication_spawnedCosmetics.GetValue(cosmeticApplication);
+                var result = cosmeticsList.Cast<Component>().SelectMany(cosmetic => cosmetic.GetComponentsInChildren<Renderer>()).ToArray();
+                cosmeticApplication.enabled = true;
+                foreach (var cosmeticRenderer in result)
+                    cosmeticRenderer.forceRenderingOff = hidden;
+                return result;
+            }
+
+            return new Renderer[0];
+        }
+
         public void UpdateCurrentTarget()
         {
             EnsureCameraExists();
@@ -147,24 +168,8 @@ namespace OpenBodyCams
 
             if (MoreCompanyCompatibilityPatch.f_CosmeticApplication_spawnedCosmetics is object)
             {
-                Renderer[] CollectCosmetics(PlayerControllerB player, bool hidden)
-                {
-                    if (player != null && player.GetComponentInChildren(MoreCompanyCompatibilityPatch.t_CosmeticApplication) is Behaviour cosmeticApplication)
-                    {
-                        Plugin.Instance.Logger.LogInfo($"Getting MoreCompany cosmetic models for {player.playerUsername}");
-                        var cosmeticsList = (IList)MoreCompanyCompatibilityPatch.f_CosmeticApplication_spawnedCosmetics.GetValue(cosmeticApplication);
-                        var result = cosmeticsList.Cast<Component>().SelectMany(cosmetic => cosmetic.GetComponentsInChildren<Renderer>()).ToArray();
-                        cosmeticApplication.enabled = true;
-                        foreach (var cosmeticRenderer in result)
-                            cosmeticRenderer.forceRenderingOff = hidden;
-                        return result;
-                    }
-
-                    return new Renderer[0];
-                }
-
-                currentPlayerMoreCompanyCosmetics = CollectCosmetics(currentPlayer, hidden: false);
-                localPlayerMoreCompanyCosmetics = CollectCosmetics(StartOfRound.Instance.localPlayerController, hidden: true);
+                currentPlayerMoreCompanyCosmetics = CollectMoreCompanyCosmetics(currentPlayer, hidden: false);
+                localPlayerMoreCompanyCosmetics = CollectMoreCompanyCosmetics(StartOfRound.Instance.localPlayerController, hidden: true);
             }
 
             Vector3 offset = Vector3.zero;

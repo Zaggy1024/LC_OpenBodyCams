@@ -31,6 +31,7 @@ namespace OpenBodyCams
         public static ConfigEntry<float> Framerate;
 
         public static ConfigEntry<bool> DisableInternalShipCamera;
+        public static ConfigEntry<bool> EnableMoreCompanyCosmeticsCompatibility;
 
         public new ManualLogSource Logger => base.Logger;
 
@@ -46,8 +47,6 @@ namespace OpenBodyCams
             harmony.PatchAll(typeof(PatchHauntedMaskItem));
             harmony.PatchAll(typeof(PatchMaskedPlayerEnemy));
 
-            MoreCompanyCompatibilityPatch.ApplyPatches(harmony);
-
             CameraMode = Config.Bind("Camera", "Mode", CameraModeOptions.Head, "Choose where to attach the camera. 'Head' will attach the camera to the right side of the head, 'Body' will attach it to the chest.");
             HorizontalResolution = Config.Bind("Camera", "HorizontalResolution", 160, "The horizontal resolution of the rendering. The vertical resolution is calculated based on the aspect ratio of the monitor.");
             FieldOfView = Config.Bind("Camera", "FieldOfView", 65f, "The vertical FOV of the camera in degrees.");
@@ -60,7 +59,12 @@ namespace OpenBodyCams
             RenderDistance.SettingChanged += (s, e) => BodyCam.UpdateSettings();
             Framerate.SettingChanged += (s, e) => BodyCam.UpdateSettings();
 
+            EnableMoreCompanyCosmeticsCompatibility = Config.Bind("Compatibility", "EnableMoreCompanyCosmeticsCompatibility", true, "If this is enabled, a patch will be applied to MoreCompany to spawn cosmetics for the local player, and all cosmetics will be shown and hidden based on the camera's perspective.");
+
             DisableInternalShipCamera = Config.Bind("Misc", "DisableInternalShipCamera", false, "Whether to disable the internal ship camera displayed above the bodycam monitor.");
+
+            if (EnableMoreCompanyCosmeticsCompatibility.Value)
+                MoreCompanyCompatibilityPatch.ApplyPatches(harmony);
         }
     }
 }
