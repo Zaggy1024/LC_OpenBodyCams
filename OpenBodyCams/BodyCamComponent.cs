@@ -15,6 +15,7 @@ namespace OpenBodyCams
     {
         const int DEFAULT_LAYER = 0;
         const int ENEMIES_LAYER = 19;
+        const int ENEMIES_NOT_RENDERED_LAYER = 23;
         const int BODY_CAM_ONLY_LAYER = 31;
         const float PAN_SPEED = 40.0f;
 
@@ -27,11 +28,11 @@ namespace OpenBodyCams
         private MeshRenderer monitorMesh;
         private Material monitorMaterial;
 
-        private Renderer[] localPlayerMoreCompanyCosmetics = new Renderer[0];
+        private GameObject[] localPlayerMoreCompanyCosmetics = new GameObject[0];
         private PlayerModelState localPlayerModelState;
 
         private PlayerControllerB currentPlayer;
-        private Renderer[] currentPlayerMoreCompanyCosmetics = new Renderer[0];
+        private GameObject[] currentPlayerMoreCompanyCosmetics = new GameObject[0];
         private PlayerModelState currentPlayerModelState;
 
         private Transform currentActualTarget;
@@ -131,25 +132,30 @@ namespace OpenBodyCams
             greenFlashAnimator.SetTrigger("Transition");
         }
 
-        private static Renderer[] CollectMoreCompanyCosmetics(PlayerControllerB player, bool hidden)
+        private static void SetCosmeticHidden(GameObject cosmetic, bool hidden)
+        {
+            cosmetic.layer = hidden ? ENEMIES_NOT_RENDERED_LAYER : DEFAULT_LAYER;
+        }
+
+        private static GameObject[] CollectMoreCompanyCosmetics(PlayerControllerB player, bool hidden)
         {
             if (!Plugin.EnableMoreCompanyCosmeticsCompatibility.Value)
-                return new Renderer[0];
+                return new GameObject[0];
             if (player == null)
-                return new Renderer[0];
+                return new GameObject[0];
 
             if (player.GetComponentInChildren(MoreCompanyCompatibilityPatch.t_CosmeticApplication) is Behaviour cosmeticApplication)
             {
                 Plugin.Instance.Logger.LogInfo($"Getting MoreCompany cosmetic models for {player.playerUsername}");
                 var cosmeticsList = (IList)MoreCompanyCompatibilityPatch.f_CosmeticApplication_spawnedCosmetics.GetValue(cosmeticApplication);
-                var result = cosmeticsList.Cast<Component>().SelectMany(cosmetic => cosmetic.GetComponentsInChildren<Renderer>()).ToArray();
+                var result = cosmeticsList.Cast<Component>().SelectMany(cosmetic => cosmetic.GetComponentsInChildren<Transform>()).Select(cosmeticObject => cosmeticObject.gameObject).ToArray();
                 cosmeticApplication.enabled = true;
-                foreach (var cosmeticRenderer in result)
-                    cosmeticRenderer.forceRenderingOff = hidden;
+                foreach (var cosmeticObject in result)
+                    SetCosmeticHidden(cosmeticObject, hidden);
                 return result;
             }
 
-            return new Renderer[0];
+            return new GameObject[0];
         }
 
         public void UpdateCurrentTarget()
@@ -261,15 +267,17 @@ namespace OpenBodyCams
             ThirdPerson,
         }
 
-        private static void SaveStateAndApplyPerspective(PlayerControllerB player, ref Renderer[] moreCompanyCosmetics, ref PlayerModelState state, Perspective perspective)
+        private static void SaveStateAndApplyPerspective(PlayerControllerB player, ref GameObject[] moreCompanyCosmetics, ref PlayerModelState state, Perspective perspective)
         {
             if (player == null)
                 return;
 
             // Save
-            state.shadowMode = player.thisPlayerModel.shadowCastingMode;
+            state.bodyShadowMode = player.thisPlayerModel.shadowCastingMode;
+            state.bodyLayer = player.thisPlayerModel.gameObject.layer;
+
             state.armsEnabled = player.thisPlayerModelArms.enabled;
-            state.armsHidden = player.thisPlayerModelArms.forceRenderingOff;
+            state.armsLayer = player.thisPlayerModelArms.gameObject.layer;
 
             if (player.currentlyHeldObjectServer != null)
             {
@@ -281,7 +289,7 @@ namespace OpenBodyCams
             {
                 if (moreCompanyCosmetics[0] == null)
                     moreCompanyCosmetics = CollectMoreCompanyCosmetics(player, hidden: false);
-                state.moreCompanyCosmeticsHidden = moreCompanyCosmetics.Length > 0 && moreCompanyCosmetics[0].forceRenderingOff;
+                state.moreCompanyCosmeticsLayer = moreCompanyCosmetics[0].layer;
             }
 
             // Modify
@@ -296,40 +304,46 @@ namespace OpenBodyCams
             {
                 case Perspective.FirstPerson:
                     player.thisPlayerModel.shadowCastingMode = ShadowCastingMode.ShadowsOnly;
+                    player.thisPlayerModel.gameObject.layer = ENEMIES_NOT_RENDERED_LAYER;
+
                     player.thisPlayerModelArms.enabled = true;
-                    player.thisPlayerModelArms.forceRenderingOff = false;
+                    player.thisPlayerModelArms.gameObject.layer = DEFAULT_LAYER;
 
                     if (player.currentlyHeldObjectServer != null)
                         AttachItem(player.currentlyHeldObjectServer, player.localItemHolder);
 
                     foreach (var cosmetic in moreCompanyCosmetics)
-                        cosmetic.forceRenderingOff = true;
+                        SetCosmeticHidden(cosmetic, true);
                     break;
                 case Perspective.ThirdPerson:
                     player.thisPlayerModel.shadowCastingMode = ShadowCastingMode.On;
+                    player.thisPlayerModel.gameObject.layer = DEFAULT_LAYER;
+
                     player.thisPlayerModelArms.enabled = false;
-                    player.thisPlayerModelArms.forceRenderingOff = true;
+                    player.thisPlayerModelArms.gameObject.layer = ENEMIES_NOT_RENDERED_LAYER;
 
                     if (player.currentlyHeldObjectServer != null)
                         AttachItem(player.currentlyHeldObjectServer, player.serverItemHolder);
 
                     foreach (var cosmetic in moreCompanyCosmetics)
-                        cosmetic.forceRenderingOff = false;
+                        SetCosmeticHidden(cosmetic, false);
                     break;
             }
         }
 
-        private static void RestoreState(PlayerControllerB player, Renderer[] moreCompanyCosmetics, PlayerModelState state)
+        private static void RestoreState(PlayerControllerB player, GameObject[] moreCompanyCosmetics, PlayerModelState state)
         {
             if (player == null)
                 return;
 
-            player.thisPlayerModel.shadowCastingMode = state.shadowMode;
+            player.thisPlayerModel.shadowCastingMode = state.bodyShadowMode;
+            player.thisPlayerModel.gameObject.layer = state.bodyLayer;
+
             player.thisPlayerModelArms.enabled = state.armsEnabled;
-            player.thisPlayerModelArms.forceRenderingOff = state.armsHidden;
+            player.thisPlayerModelArms.gameObject.layer = state.armsLayer;
 
             foreach (var cosmetic in moreCompanyCosmetics)
-                cosmetic.forceRenderingOff = state.moreCompanyCosmeticsHidden;
+                cosmetic.layer = state.moreCompanyCosmeticsLayer;
 
             if (player.currentlyHeldObjectServer != null)
             {
@@ -416,10 +430,11 @@ namespace OpenBodyCams
 
     internal struct PlayerModelState
     {
-        public ShadowCastingMode shadowMode;
+        public ShadowCastingMode bodyShadowMode;
+        public int bodyLayer;
         public bool armsEnabled;
-        public bool armsHidden;
-        public bool moreCompanyCosmeticsHidden;
+        public int armsLayer;
+        public int moreCompanyCosmeticsLayer;
         public Vector3 heldItemPosition;
         public Quaternion heldItemRotation;
     }
