@@ -361,11 +361,10 @@ namespace OpenBodyCams
                 mesh.forceRenderingOff = true;
 
             var localPlayer = StartOfRound.Instance.localPlayerController;
-            if ((object)localPlayer == currentPlayer)
-                return;
 
             SaveStateAndApplyPerspective(currentPlayer, ref currentPlayerMoreCompanyCosmetics, ref currentPlayerModelState, Perspective.FirstPerson);
-            SaveStateAndApplyPerspective(localPlayer, ref localPlayerMoreCompanyCosmetics, ref localPlayerModelState, Perspective.ThirdPerson);
+            if ((object)currentPlayer != localPlayer)
+                SaveStateAndApplyPerspective(localPlayer, ref localPlayerMoreCompanyCosmetics, ref localPlayerModelState, Perspective.ThirdPerson);
         }
 
         private void EndCameraRendering(ScriptableRenderContext context, Camera renderedCamera)
@@ -377,11 +376,10 @@ namespace OpenBodyCams
                 mesh.forceRenderingOff = false;
 
             var localPlayer = StartOfRound.Instance.localPlayerController;
-            if ((object)localPlayer == currentPlayer)
-                return;
 
-            RestoreState(localPlayer, localPlayerMoreCompanyCosmetics, localPlayerModelState);
             RestoreState(currentPlayer, currentPlayerMoreCompanyCosmetics, currentPlayerModelState);
+            if ((object)currentPlayer != localPlayer)
+                RestoreState(localPlayer, localPlayerMoreCompanyCosmetics, localPlayerModelState);
         }
 
         public void Update()
