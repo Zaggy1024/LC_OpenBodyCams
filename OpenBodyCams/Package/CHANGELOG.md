@@ -1,3 +1,7 @@
+## Version 1.0.6
+- Prevented MoreCompany cosmetics from appearing when joining a game with the camera viewing someone with cosmetics equipped.
+- Made the body cam to attach to dead bodies on clients other than the one of the player that died.
+
 ## Version 1.0.5
 - Fixed an compatibility issue with MirrorDecor that caused the first person arms to be invisible in the body cam.
 
