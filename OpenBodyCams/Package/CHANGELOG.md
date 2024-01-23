@@ -1,5 +1,8 @@
+## Version 1.0.5
+- Fixed an compatibility issue with MirrorDecor that caused the first person arms to be invisible in the body cam.
+
 ## Version 1.0.4
-- Fixes an issue where the local player's body would be invisible in the body cam with LethalEmotesAPI or MirrorDecor installed.
+- Fixed an issue where the local player's body would be invisible in the body cam with LethalEmotesAPI or MirrorDecor installed.
 
 ## Version 1.0.3
 - Fixed an error that would occur when a third person emote was started by the LethalEmotesAPI mod.
