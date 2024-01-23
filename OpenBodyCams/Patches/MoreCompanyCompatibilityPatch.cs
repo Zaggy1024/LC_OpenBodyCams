@@ -25,7 +25,11 @@ namespace OpenBodyCams.Patches
                 return;
             }
 
-            harmony.CreateProcessor(m_ClientReceiveMessagePatch_HandleDataMessage).AddTranspiler(typeof(MoreCompanyCompatibilityPatch).GetMethod(nameof(ClientReceiveMessagePatch_HandleDataMessageTranspiler))).Patch();
+            var thisType = typeof(MoreCompanyCompatibilityPatch);
+            harmony.CreateProcessor(m_ClientReceiveMessagePatch_HandleDataMessage)
+                .AddTranspiler(thisType.GetMethod(nameof(ClientReceiveMessagePatch_HandleDataMessageTranspiler)))
+                .AddPostfix(thisType.GetMethod(nameof(ClientReceiveMessagePatch_HandleDataMessagePostfix)))
+                .Patch();
             Plugin.Instance.Logger.LogInfo($"Patched MoreCompany to spawn cosmetics on the local player.");
         }
 
@@ -55,6 +59,11 @@ namespace OpenBodyCams.Patches
             });
 
             return instructionsList;
+        }
+
+        public static void ClientReceiveMessagePatch_HandleDataMessagePostfix()
+        {
+            Plugin.BodyCam.UpdateCurrentTarget();
         }
     }
 }
