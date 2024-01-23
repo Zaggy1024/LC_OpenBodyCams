@@ -10,7 +10,16 @@ namespace OpenBodyCams.Patches
         [HarmonyPatch(nameof(PlayerControllerB.KillPlayer))]
         static void KillPlayerPostfix(PlayerControllerB __instance)
         {
-            Plugin.BodyCam.UpdateCurrentTarget();
+            if (__instance.IsOwner)
+                Plugin.BodyCam.UpdateCurrentTarget();
+        }
+
+        [HarmonyPostfix]
+        [HarmonyPatch("KillPlayerClientRpc")]
+        static void KillPlayerClientRpcPostfix(PlayerControllerB __instance)
+        {
+            if (!__instance.IsOwner)
+                Plugin.BodyCam.UpdateCurrentTarget();
         }
     }
 }
