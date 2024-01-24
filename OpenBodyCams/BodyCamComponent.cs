@@ -71,6 +71,10 @@ namespace OpenBodyCams
             nightVisionLight.enabled = true;
             nightVisionLight.cullingMask = 1 << BODY_CAM_ONLY_LAYER;
 
+            // By default, the map's night vision light renders on all layers, so let's change that so we don't see it on the body cam.
+            var mapLight = StartOfRound.Instance.mapScreen.mapCameraLight;
+            mapLight.cullingMask = 1 << mapLight.gameObject.layer;
+
             EnsureCameraExists();
         }
 
