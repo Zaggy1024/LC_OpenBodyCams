@@ -421,7 +421,7 @@ namespace OpenBodyCams
                 return;
             if (spectatedPlayer.spectatedPlayerScript != null)
                 spectatedPlayer = spectatedPlayer.spectatedPlayerScript;
-            bool enable = monitorMesh.isVisible && spectatedPlayer.isInHangarShipRoom;
+            bool enable = monitorMesh.isVisible && spectatedPlayer.isInHangarShipRoom && currentActualTarget != null;
 
             if (!enable)
             {
