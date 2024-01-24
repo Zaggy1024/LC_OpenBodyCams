@@ -27,6 +27,7 @@ namespace OpenBodyCams
 
         public GameObject cameraObject;
         public Camera camera;
+        public Light nightVisionLight;
 
         private MeshRenderer monitorMesh;
         private Material monitorMaterial;
@@ -90,6 +91,11 @@ namespace OpenBodyCams
             var cameraData = cameraObject.AddComponent<HDAdditionalCameraData>();
             cameraData.volumeLayerMask = 1;
 
+            var nightVision = Instantiate(nightVisionPrefab);
+            nightVision.transform.SetParent(cameraObject.transform, false);
+            nightVision.SetActive(true);
+            nightVisionLight = nightVision.GetComponent<Light>();
+
             UpdateSettings();
 
             var greenFlashParent = new GameObject("CameraGreenTransitionScaler");
@@ -112,10 +118,6 @@ namespace OpenBodyCams
             fogShaderPlane.transform.localRotation = Quaternion.Euler(270, 0, 0);
             fogShaderPlane.layer = BODY_CAM_ONLY_LAYER;
             Destroy(fogShaderPlane.GetComponent<MeshCollider>());
-
-            var nightVision = Instantiate(nightVisionPrefab);
-            nightVision.transform.SetParent(cameraObject.transform, false);
-            nightVision.SetActive(true);
         }
 
         public void UpdateSettings()
@@ -136,6 +138,9 @@ namespace OpenBodyCams
                 timePerFrame = 0;
                 camera.enabled = false;
             }
+
+            nightVisionLight.intensity = Plugin.NightVisionIntensityBase * Plugin.NightVisionBrightness.Value;
+            nightVisionLight.range = Plugin.NightVisionRangeBase * Plugin.NightVisionBrightness.Value;
 
             UpdateCurrentTarget();
         }

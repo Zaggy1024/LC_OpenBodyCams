@@ -29,6 +29,9 @@ namespace OpenBodyCams
         public static ConfigEntry<float> FieldOfView;
         public static ConfigEntry<float> RenderDistance;
         public static ConfigEntry<float> Framerate;
+        public const float NightVisionIntensityBase = 367;
+        public const float NightVisionRangeBase = 12;
+        public static ConfigEntry<float> NightVisionBrightness;
 
         public static ConfigEntry<bool> DisableInternalShipCamera;
         public static ConfigEntry<bool> EnableMoreCompanyCosmeticsCompatibility;
@@ -52,12 +55,14 @@ namespace OpenBodyCams
             FieldOfView = Config.Bind("Camera", "FieldOfView", 65f, "The vertical FOV of the camera in degrees.");
             RenderDistance = Config.Bind("Camera", "RenderDistance", 25f, "The far clip plane for the body cam. Lowering may improve framerates.");
             Framerate = Config.Bind("Camera", "Framerate", 0f, "The number of frames to render per second. Higher framerates will negatively affect performance. A value of 0 will render at the game's framerate and results in best performance.");
+            NightVisionBrightness = Config.Bind("Camera", "NightVisionBrightness", 1f, "A multiplier for the intensity of the area light used to brighten dark areas. A value of 1 is identical to the player's actual vision.");
 
             CameraMode.SettingChanged += (s, e) => BodyCam.UpdateSettings();
             HorizontalResolution.SettingChanged += (s, e) => BodyCam.UpdateSettings();
             FieldOfView.SettingChanged += (s, e) => BodyCam.UpdateSettings();
             RenderDistance.SettingChanged += (s, e) => BodyCam.UpdateSettings();
             Framerate.SettingChanged += (s, e) => BodyCam.UpdateSettings();
+            NightVisionBrightness.SettingChanged += (s, e) => BodyCam.UpdateSettings();
 
             EnableMoreCompanyCosmeticsCompatibility = Config.Bind("Compatibility", "EnableMoreCompanyCosmeticsCompatibility", true, "If this is enabled, a patch will be applied to MoreCompany to spawn cosmetics for the local player, and all cosmetics will be shown and hidden based on the camera's perspective.");
 
