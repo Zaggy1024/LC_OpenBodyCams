@@ -19,6 +19,7 @@ The camera view will display only the first person hands and disable the third p
 - Field of view: The vertical FOV of the body cam's view.
 - Render distance: The far clip plane of the camera.
 - Framerate: The number of frames to render per second. The default setting renders at the game's framerate and has the least impact on performance.
+- Night vision brightness: A multiplier for the brightness and range of the night vision light. A value of 1 matches the vision of the player being viewed.
 - Disable internal ship camera: Disables the camera at the front of the ship facing towards the center. This may improve performance inside the ship slightly.
 
 # Notes

@@ -1,6 +1,9 @@
+## Version 1.0.8
+- Added an option to adjust the brightness of the night vision light. This can be used to counteract the green tint of the screen making it difficult to see when players are in dark areas.
+
 ## Version 1.0.7
 - Fixed a compatibility issue with Immersive Visor which would cause the body cam to render to the screen instead of a texture when a player respawned.
-- Prevent the radar map's night vision light from showing up on the body cam.
+- Prevented the radar map's night vision light from showing up on the body cam.
 
 ## Version 1.0.6
 - Prevented MoreCompany cosmetics from appearing and obstructing the view when joining a game with the camera viewing someone with cosmetics equipped.
