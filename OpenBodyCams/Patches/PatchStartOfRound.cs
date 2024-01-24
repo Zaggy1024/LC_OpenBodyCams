@@ -8,7 +8,19 @@ namespace OpenBodyCams.Patches
     [HarmonyPatch(typeof(StartOfRound))]
     internal class PatchStartOfRound
     {
-        private static Material blackScreenMaterial;
+        public static Material blackScreenMaterial;
+
+        [HarmonyPostfix]
+        [HarmonyPatch("Awake")]
+        static void AwakePostfix()
+        {
+            blackScreenMaterial = StartOfRound.Instance.mapScreen.offScreenMat;
+
+            InitializeBodyCam();
+
+            if (Plugin.DisableInternalShipCamera.Value)
+                DisableShipCamera();
+        }
 
         static void InitializeBodyCam()
         {
@@ -61,18 +73,6 @@ namespace OpenBodyCams.Patches
             shipCameraRenderer.mesh.sharedMaterials = newMaterials;
 
             shipCamera.enabled = false;
-        }
-
-        [HarmonyPostfix]
-        [HarmonyPatch("Awake")]
-        static void AwakePostfix()
-        {
-            blackScreenMaterial = StartOfRound.Instance.mapScreen.offScreenMat;
-
-            InitializeBodyCam();
-
-            if (Plugin.DisableInternalShipCamera.Value)
-                DisableShipCamera();
         }
 
         [HarmonyPostfix]
