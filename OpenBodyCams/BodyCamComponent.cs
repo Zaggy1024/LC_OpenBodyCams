@@ -22,6 +22,9 @@ namespace OpenBodyCams
         public static readonly Vector3 BODY_CAM_OFFSET = new Vector3(0.07f, 0, 0.15f);
         public static readonly Vector3 CAMERA_CONTAINER_OFFSET = new Vector3(0.07f, 0, 0.125f);
 
+        private static Material fogShaderMaterial;
+        private static GameObject nightVisionPrefab;
+
         public GameObject cameraObject;
         public Camera camera;
 
@@ -56,6 +59,18 @@ namespace OpenBodyCams
             monitorMesh = GetComponent<MeshRenderer>();
             monitorMaterial = monitorMesh.materials.First(material => material.mainTexture.name == "shipScreen2") ?? throw new Exception("Failed to get the ship screen material.");
 
+            var aPlayerScript = StartOfRound.Instance.allPlayerScripts[0];
+
+            fogShaderMaterial = aPlayerScript.localVisor.transform.Find("ScavengerHelmet/Plane").GetComponent<MeshRenderer>().sharedMaterial;
+
+            nightVisionPrefab = Instantiate(aPlayerScript.nightVision.gameObject);
+            nightVisionPrefab.name = "NightVision";
+            nightVisionPrefab.transform.localPosition = Vector3.zero;
+            nightVisionPrefab.SetActive(false);
+            var nightVisionLight = nightVisionPrefab.GetComponent<Light>();
+            nightVisionLight.enabled = true;
+            nightVisionLight.cullingMask = 1 << BODY_CAM_ONLY_LAYER;
+
             EnsureCameraExists();
         }
 
@@ -83,12 +98,10 @@ namespace OpenBodyCams
             greenFlashObject.layer = BODY_CAM_ONLY_LAYER;
             greenFlashAnimator = greenFlashObject.GetComponent<Animator>() ?? throw new Exception("Green flash object copied from the map screen has no Animator.");
 
-            var aPlayerScript = StartOfRound.Instance.allPlayerScripts[0];
-
             var fogShaderPlane = GameObject.CreatePrimitive(PrimitiveType.Plane);
             fogShaderPlane.transform.SetParent(cameraObject.transform, false);
             var fogShaderPlaneMesh = fogShaderPlane.GetComponent<MeshRenderer>();
-            fogShaderPlaneMesh.sharedMaterial = aPlayerScript.localVisor.transform.Find("ScavengerHelmet/Plane").GetComponent<MeshRenderer>().sharedMaterial;
+            fogShaderPlaneMesh.sharedMaterial = fogShaderMaterial;
             fogShaderPlaneMesh.shadowCastingMode = ShadowCastingMode.Off;
             fogShaderPlaneMesh.receiveShadows = false;
             fogShaderPlane.transform.localPosition = new Vector3(0, 0, 0.5f);
@@ -96,13 +109,9 @@ namespace OpenBodyCams
             fogShaderPlane.layer = BODY_CAM_ONLY_LAYER;
             Destroy(fogShaderPlane.GetComponent<MeshCollider>());
 
-            var nightVision = Instantiate(aPlayerScript.nightVision.gameObject);
-            nightVision.name = "NightVision";
+            var nightVision = Instantiate(nightVisionPrefab);
             nightVision.transform.SetParent(cameraObject.transform, false);
-            nightVision.transform.localPosition = Vector3.zero;
-            var nightVisionLight = nightVision.GetComponent<Light>();
-            nightVisionLight.enabled = true;
-            nightVisionLight.cullingMask = 1 << BODY_CAM_ONLY_LAYER;
+            nightVision.SetActive(true);
         }
 
         public void UpdateSettings()
