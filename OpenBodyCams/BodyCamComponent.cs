@@ -36,7 +36,7 @@ namespace OpenBodyCams
         private PlayerModelState currentPlayerModelState;
 
         private Transform currentActualTarget;
-        private Renderer[] currentlyViewedMeshes;
+        private Renderer[] currentlyViewedMeshes = new Renderer[0];
 
         private float elapsedSinceLastFrame = 0;
         private float timePerFrame = 0;
