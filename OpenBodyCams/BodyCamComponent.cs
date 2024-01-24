@@ -370,6 +370,8 @@ namespace OpenBodyCams
             if ((object)renderedCamera != camera)
                 return;
 
+            if (currentlyViewedMeshes.Length > 0 && currentlyViewedMeshes[0] == null)
+                return;
             foreach (var mesh in currentlyViewedMeshes)
                 mesh.forceRenderingOff = true;
 
@@ -385,6 +387,8 @@ namespace OpenBodyCams
             if ((object)renderedCamera != camera)
                 return;
 
+            if (currentlyViewedMeshes.Length > 0 && currentlyViewedMeshes[0] == null)
+                return;
             foreach (var mesh in currentlyViewedMeshes)
                 mesh.forceRenderingOff = false;
 
