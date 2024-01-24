@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 
 using HarmonyLib;
 
@@ -11,7 +11,8 @@ namespace OpenBodyCams.Patches
         [HarmonyPatch("updateMapTarget")]
         static IEnumerator updateMapTargetPostfix(IEnumerator result, ManualCameraRenderer __instance, int __0)
         {
-            Plugin.BodyCam?.StartTargetTransition();
+            if (__instance == StartOfRound.Instance.mapScreen)
+                Plugin.BodyCam?.StartTargetTransition();
 
             while (result.MoveNext())
                 yield return result.Current;
