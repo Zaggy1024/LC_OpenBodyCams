@@ -1,4 +1,4 @@
-using System.Linq;
+using System;
 
 using UnityEngine;
 using HarmonyLib;
@@ -8,6 +8,8 @@ namespace OpenBodyCams.Patches
     [HarmonyPatch(typeof(StartOfRound))]
     internal class PatchStartOfRound
     {
+        private static Material blackScreenMaterial;
+
         static void InitializeBodyCam()
         {
             var bottomMonitors = GameObject.Find("Environment/HangarShip/ShipModels2b/MonitorWall/Cube.001");
@@ -37,12 +39,9 @@ namespace OpenBodyCams.Patches
                 return;
             }
 
-            var blackScreenMaterial = shipCameraRenderer.mesh.materials.First(material => material.name.StartsWith("BlackScreen"));
-            var shipScreenMaterialIndex = 0;
-            while (!shipCameraRenderer.mesh.sharedMaterials[shipScreenMaterialIndex].name.StartsWith("ShipScreen1Mat"))
-                shipScreenMaterialIndex++;
+            var shipScreenMaterialIndex = Array.FindIndex(shipCameraRenderer.mesh.sharedMaterials, material => material.name.StartsWith("ShipScreen1Mat"));
 
-            if (blackScreenMaterial == null || shipScreenMaterialIndex >= shipCameraRenderer.mesh.sharedMaterials.Length)
+            if (blackScreenMaterial == null || shipScreenMaterialIndex == -1)
             {
                 Plugin.Instance.Logger.LogError("Internal ship camera monitor does not have the expected materials.");
                 return;
@@ -68,6 +67,8 @@ namespace OpenBodyCams.Patches
         [HarmonyPatch("Awake")]
         static void AwakePostfix()
         {
+            blackScreenMaterial = StartOfRound.Instance.mapScreen.offScreenMat;
+
             InitializeBodyCam();
 
             if (Plugin.DisableInternalShipCamera.Value)
