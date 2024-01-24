@@ -29,6 +29,8 @@ namespace OpenBodyCams
         public Camera camera;
         public Light nightVisionLight;
 
+        private ManualCameraRenderer mapRenderer;
+
         private MeshRenderer monitorMesh;
         private Material monitorMaterial;
 
@@ -53,6 +55,8 @@ namespace OpenBodyCams
         public void Start()
         {
             Plugin.BodyCam = this;
+
+            mapRenderer = GetComponentsInChildren<ManualCameraRenderer>().First(renderer => renderer.cam == renderer.mapCamera);
 
             RenderPipelineManager.beginCameraRendering += BeginCameraRendering;
             RenderPipelineManager.endCameraRendering += EndCameraRendering;
@@ -178,13 +182,22 @@ namespace OpenBodyCams
 
         public void UpdateCurrentTarget()
         {
+            UpdateCurrentTargetInternal();
+            if (currentActualTarget == null)
+            {
+                cameraObject.transform.SetParent(null, false);
+                cameraObject.transform.localPosition = Vector3.zero;
+                cameraObject.transform.localRotation = Quaternion.identity;
+            }
+        }
+
+        private void UpdateCurrentTargetInternal()
+        {
             EnsureCameraExists();
 
-            var mapScreen = StartOfRound.Instance.mapScreen;
-
             // Ensure that we have a reference to null if the targeted player is being destroyed.
-            currentPlayer = mapScreen.targetedPlayer;
-            currentActualTarget = mapScreen.radarTargets[mapScreen.targetTransformIndex].transform;
+            currentPlayer = mapRenderer.targetedPlayer;
+            currentActualTarget = mapRenderer.radarTargets[mapRenderer.targetTransformIndex].transform;
             currentlyViewedMeshes = new Renderer[0];
 
             if (currentActualTarget == null)
@@ -267,12 +280,7 @@ namespace OpenBodyCams
             }
 
             if (currentActualTarget == null)
-            {
-                cameraObject.transform.SetParent(null, false);
-                cameraObject.transform.localPosition = Vector3.zero;
-                cameraObject.transform.localRotation = Quaternion.identity;
                 return;
-            }
 
             cameraObject.transform.SetParent(currentActualTarget.transform, false);
             cameraObject.transform.localPosition = offset;
