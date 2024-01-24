@@ -71,6 +71,8 @@ namespace OpenBodyCams
             var cameraData = cameraObject.AddComponent<HDAdditionalCameraData>();
             cameraData.volumeLayerMask = 1;
 
+            UpdateSettings();
+
             var greenFlashParent = new GameObject("CameraGreenTransitionScaler");
             greenFlashParent.transform.SetParent(cameraObject.transform, false);
             greenFlashParent.transform.localScale = new Vector3(1, 0.004f, 1);
@@ -101,8 +103,6 @@ namespace OpenBodyCams
             var nightVisionLight = nightVision.GetComponent<Light>();
             nightVisionLight.enabled = true;
             nightVisionLight.cullingMask = 1 << BODY_CAM_ONLY_LAYER;
-
-            UpdateSettings();
         }
 
         public void UpdateSettings()
