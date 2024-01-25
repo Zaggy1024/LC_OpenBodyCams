@@ -455,7 +455,7 @@ namespace OpenBodyCams
                 if (elapsedSinceLastFrame >= timePerFrame)
                 {
                     camera.Render();
-                    elapsedSinceLastFrame = 0;
+                    elapsedSinceLastFrame %= timePerFrame;
                 }
             }
             else
