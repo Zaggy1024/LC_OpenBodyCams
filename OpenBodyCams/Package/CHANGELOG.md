@@ -1,3 +1,6 @@
+## Version 1.0.9
+- Made the bodycam monitor turn off when the radar map is powered down by the button or a lightning strike.
+
 ## Version 1.0.8
 - Added an option to adjust the brightness of the night vision light. This can be used to counteract the green tint of the screen making it difficult to see when players are in dark areas.
 
