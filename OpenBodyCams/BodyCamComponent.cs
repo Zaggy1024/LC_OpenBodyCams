@@ -35,6 +35,7 @@ namespace OpenBodyCams
 
         private ManualCameraRenderer mapRenderer;
         private bool mapScreenOn = true;
+        private bool enableCamera = true;
 
         private MeshRenderer monitorMesh;
         private int monitorMaterialIndex;
@@ -157,6 +158,8 @@ namespace OpenBodyCams
             nightVisionLight.intensity = Plugin.NightVisionIntensityBase * Plugin.NightVisionBrightness.Value;
             nightVisionLight.range = Plugin.NightVisionRangeBase * Plugin.NightVisionBrightness.Value;
 
+            enableCamera = Plugin.EnableCamera.Value;
+
             UpdateCurrentTarget();
         }
 
@@ -188,12 +191,24 @@ namespace OpenBodyCams
             SetMaterial(monitorMesh, monitorMaterialIndex, monitorOffMaterial);
         }
 
+        private bool ShouldRenderCamera()
+        {
+            return mapScreenOn && enableCamera;
+        }
+
         public void UpdateCurrentTarget()
         {
-            mapScreenOn = (bool)f_ManualCameraRenderer_isScreenOn.GetValue(mapRenderer);
-            SetScreenPowered(mapScreenOn);
+            currentPlayer = null;
+            currentActualTarget = null;
+            currentlyViewedMeshes = new Renderer[0];
 
-            UpdateCurrentTargetInternal();
+            mapScreenOn = (bool)f_ManualCameraRenderer_isScreenOn.GetValue(mapRenderer);
+            var shouldRender = ShouldRenderCamera();
+            SetScreenPowered(shouldRender);
+
+            if (shouldRender)
+                UpdateCurrentTargetInternal();
+
             if (currentActualTarget == null)
             {
                 cameraObject.transform.SetParent(null, false);
@@ -210,7 +225,6 @@ namespace OpenBodyCams
             // Ensure that we have a reference to null if the targeted player is being destroyed.
             currentPlayer = mapRenderer.targetedPlayer;
             currentActualTarget = mapRenderer.radarTargets[mapRenderer.targetTransformIndex].transform;
-            currentlyViewedMeshes = new Renderer[0];
 
             if (currentActualTarget == null)
                 return;
@@ -437,7 +451,7 @@ namespace OpenBodyCams
                 return;
             if (spectatedPlayer.spectatedPlayerScript != null)
                 spectatedPlayer = spectatedPlayer.spectatedPlayerScript;
-            bool enable = monitorMesh.isVisible && spectatedPlayer.isInHangarShipRoom && mapScreenOn && currentActualTarget != null;
+            bool enable = monitorMesh.isVisible && spectatedPlayer.isInHangarShipRoom && currentActualTarget != null && ShouldRenderCamera();
 
             if (!enable)
             {

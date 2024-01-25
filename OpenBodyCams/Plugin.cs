@@ -33,6 +33,7 @@ namespace OpenBodyCams
         public const float NightVisionIntensityBase = 367;
         public const float NightVisionRangeBase = 12;
         public static ConfigEntry<float> NightVisionBrightness;
+        public static ConfigEntry<bool> EnableCamera;
 
         public static ConfigEntry<bool> EnableMoreCompanyCosmeticsCompatibility;
         public static ConfigEntry<bool> EnableAdvancedCompanyCosmeticsCompatibility;
@@ -59,6 +60,7 @@ namespace OpenBodyCams
             RenderDistance = Config.Bind("Camera", "RenderDistance", 25f, "The far clip plane for the body cam. Lowering may improve framerates.");
             Framerate = Config.Bind("Camera", "Framerate", 0f, "The number of frames to render per second. A value of 0 will render at the game's framerate and results in best performance. Higher framerates will negatively affect performance, values between 0 and 30 are recommended.");
             NightVisionBrightness = Config.Bind("Camera", "NightVisionBrightness", 1f, "A multiplier for the intensity of the area light used to brighten dark areas. A value of 1 is identical to the player's actual vision.");
+            EnableCamera = Config.Bind("Camera", "EnableCamera", true, "Disables rendering of the body cam, and can be enabled/disabled during a game with LethalConfig.");
 
             CameraMode.SettingChanged += (s, e) => BodyCam.UpdateSettings();
             HorizontalResolution.SettingChanged += (s, e) => BodyCam.UpdateSettings();
@@ -66,6 +68,7 @@ namespace OpenBodyCams
             RenderDistance.SettingChanged += (s, e) => BodyCam.UpdateSettings();
             Framerate.SettingChanged += (s, e) => BodyCam.UpdateSettings();
             NightVisionBrightness.SettingChanged += (s, e) => BodyCam.UpdateSettings();
+            EnableCamera.SettingChanged += (s, e) => BodyCam.UpdateSettings();
 
             EnableMoreCompanyCosmeticsCompatibility = Config.Bind("Compatibility", "EnableMoreCompanyCosmeticsCompatibility", true, "If this is enabled, a patch will be applied to MoreCompany to spawn cosmetics for the local player, and all cosmetics will be shown and hidden based on the camera's perspective.");
             EnableAdvancedCompanyCosmeticsCompatibility = Config.Bind("Compatibility", "EnableAdvancedCompanyCosmeticsCompatibility", true, "When this is enabled and AdvancedCompany is installed, all cosmetics will be shown and hidden based on the camera's perspective.");
