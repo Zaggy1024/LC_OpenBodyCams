@@ -1,4 +1,4 @@
-using System.Collections;
+﻿using System.Collections;
 
 using HarmonyLib;
 
@@ -19,6 +19,14 @@ namespace OpenBodyCams.Patches
 
             if (__instance != StartOfRound.Instance.mapScreen)
                 yield break;
+            Plugin.BodyCam?.UpdateCurrentTarget();
+        }
+
+        [HarmonyPostfix]
+        [HarmonyPatch(nameof(ManualCameraRenderer.SwitchScreenOn))]
+        static void SwitchScreenOnPostfix()
+        {
+            Plugin.Instance.Logger.LogInfo("Screen power switch");
             Plugin.BodyCam?.UpdateCurrentTarget();
         }
     }

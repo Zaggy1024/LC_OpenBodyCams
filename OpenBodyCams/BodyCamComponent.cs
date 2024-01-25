@@ -1,8 +1,10 @@
 using System;
 using System.Collections;
 using System.Linq;
+using System.Reflection;
 
 using GameNetcodeStuff;
+using HarmonyLib;
 using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.HighDefinition;
@@ -22,6 +24,8 @@ namespace OpenBodyCams
         public static readonly Vector3 BODY_CAM_OFFSET = new Vector3(0.07f, 0, 0.15f);
         public static readonly Vector3 CAMERA_CONTAINER_OFFSET = new Vector3(0.07f, 0, 0.125f);
 
+        public static readonly FieldInfo f_ManualCameraRenderer_isScreenOn = AccessTools.Field(typeof(ManualCameraRenderer), "isScreenOn");
+
         private static Material fogShaderMaterial;
         private static GameObject nightVisionPrefab;
 
@@ -30,9 +34,12 @@ namespace OpenBodyCams
         public Light nightVisionLight;
 
         private ManualCameraRenderer mapRenderer;
+        private bool mapScreenOn = true;
 
         private MeshRenderer monitorMesh;
-        private Material monitorMaterial;
+        private int monitorMaterialIndex;
+        private Material monitorOnMaterial;
+        private Material monitorOffMaterial;
 
         private GameObject[] localPlayerMoreCompanyCosmetics = new GameObject[0];
         private PlayerModelState localPlayerModelState;
@@ -62,7 +69,11 @@ namespace OpenBodyCams
             RenderPipelineManager.endCameraRendering += EndCameraRendering;
 
             monitorMesh = GetComponent<MeshRenderer>();
-            monitorMaterial = monitorMesh.materials.First(material => material.mainTexture.name == "shipScreen2") ?? throw new Exception("Failed to get the ship screen material.");
+            monitorMaterialIndex = Array.FindIndex(monitorMesh.sharedMaterials, material => material.mainTexture.name == "shipScreen2");
+            if (monitorMaterialIndex == -1)
+                throw new Exception("Failed to get the ship screen material.");
+            monitorOnMaterial = monitorMesh.sharedMaterials[monitorMaterialIndex];
+            monitorOffMaterial = PatchStartOfRound.blackScreenMaterial;
 
             var aPlayerScript = StartOfRound.Instance.allPlayerScripts[0];
 
@@ -128,7 +139,7 @@ namespace OpenBodyCams
         {
             camera.targetTexture = new RenderTexture(Plugin.HorizontalResolution.Value, Plugin.HorizontalResolution.Value * 3 / 4, 32);
             camera.fieldOfView = Plugin.FieldOfView.Value;
-            monitorMaterial.mainTexture = camera.targetTexture;
+            monitorOnMaterial.mainTexture = camera.targetTexture;
 
             camera.farClipPlane = Plugin.RenderDistance.Value;
 
@@ -180,14 +191,36 @@ namespace OpenBodyCams
             return new GameObject[0];
         }
 
+        private static void SetMaterial(MeshRenderer renderer, int index, Material material)
+        {
+            var materials = renderer.sharedMaterials;
+            materials[index] = material;
+            renderer.sharedMaterials = materials;
+        }
+
+        public void SetScreenPowered(bool powered)
+        {
+            if (powered)
+            {
+                SetMaterial(monitorMesh, monitorMaterialIndex, monitorOnMaterial);
+                return;
+            }
+
+            SetMaterial(monitorMesh, monitorMaterialIndex, monitorOffMaterial);
+        }
+
         public void UpdateCurrentTarget()
         {
+            mapScreenOn = (bool)f_ManualCameraRenderer_isScreenOn.GetValue(mapRenderer);
+            SetScreenPowered(mapScreenOn);
+
             UpdateCurrentTargetInternal();
             if (currentActualTarget == null)
             {
                 cameraObject.transform.SetParent(null, false);
                 cameraObject.transform.localPosition = Vector3.zero;
                 cameraObject.transform.localRotation = Quaternion.identity;
+                SetScreenPowered(false);
             }
         }
 
@@ -421,7 +454,7 @@ namespace OpenBodyCams
                 return;
             if (spectatedPlayer.spectatedPlayerScript != null)
                 spectatedPlayer = spectatedPlayer.spectatedPlayerScript;
-            bool enable = monitorMesh.isVisible && spectatedPlayer.isInHangarShipRoom && currentActualTarget != null;
+            bool enable = monitorMesh.isVisible && spectatedPlayer.isInHangarShipRoom && mapScreenOn && currentActualTarget != null;
 
             if (!enable)
             {
