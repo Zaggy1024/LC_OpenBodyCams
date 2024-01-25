@@ -6,12 +6,15 @@ The camera view will display only the first person hands and disable the third p
 # Features
 - Selectable camera perspective between the head and body.
 - Camera view is designed to render identically for the local player as well other players in the game.
-- MoreCompany cosmetics hidden on the first person view, so installing MoreCompany alongside this mod will cause no issues. Your cosmetics will also appear on the camera when viewing yourself from someone else's perspective.
+- MoreCompany and AdvancedCompany cosmetics support, see the [Compatibility](#compatibility).
 - All enemies, terrain, etc. that is visible to the player will be visible in the camera view.
 - The same green flash animation used when switching targets on the radar is displayed by the camera view.
 - Performance:
   - The camera is attached to the player model in the engine rather than copying the transform from it.
   - Camera setup logic is done ahead of time based on game events whenever possible.
+
+# Compatibility
+MoreCompany and AdvancedCompany cosmetics are both supported. They will be hidden when viewing other players in the body cam, and your cosmetics will be visible on the camera when you are viewing another player looking at you.
 
 # Configuration
 - Camera mode: The attachment point of the camera. The head and the body are selectable.

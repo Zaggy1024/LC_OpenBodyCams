@@ -1,3 +1,6 @@
+## Version 1.0.10
+- Added support for AdvancedCompany cosmetics. They should now be hidden on the body cam when viewing other players.
+
 ## Version 1.0.9
 - Made the bodycam monitor turn off when the radar map is powered down by the button or a lightning strike.
 
