@@ -3,6 +3,7 @@ using BepInEx.Configuration;
 using BepInEx.Logging;
 using HarmonyLib;
 
+using OpenBodyCams.Compatibility;
 using OpenBodyCams.Patches;
 
 namespace OpenBodyCams
@@ -68,8 +69,7 @@ namespace OpenBodyCams
 
             DisableInternalShipCamera = Config.Bind("Misc", "DisableInternalShipCamera", false, "Whether to disable the internal ship camera displayed above the bodycam monitor.");
 
-            if (EnableMoreCompanyCosmeticsCompatibility.Value)
-                MoreCompanyCompatibilityPatch.ApplyPatches(harmony);
+            CosmeticsCompatibility.Initialize(harmony);
         }
     }
 }
