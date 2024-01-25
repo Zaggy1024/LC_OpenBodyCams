@@ -16,6 +16,7 @@ namespace OpenBodyCams
         {
             None = 0,
             MoreCompany = 1,
+            AdvancedCompany = 2,
         }
 
         private static CompatibilityMode compatibilityMode = CompatibilityMode.None;
@@ -27,6 +28,12 @@ namespace OpenBodyCams
                 compatibilityMode |= CompatibilityMode.MoreCompany;
                 Plugin.Instance.Logger.LogInfo("MoreCompany compatibility mode is enabled.");
             }
+
+            if (Plugin.EnableAdvancedCompanyCosmeticsCompatibility.Value && AdvancedCompanyCompatibility.Initialize())
+            {
+                compatibilityMode |= CompatibilityMode.AdvancedCompany;
+                Plugin.Instance.Logger.LogInfo("AdvancedCompany compatibility mode is enabled.");
+            }
         }
 
         public static GameObject[] CollectCosmetics(PlayerControllerB player)
@@ -36,6 +43,8 @@ namespace OpenBodyCams
             var result = Enumerable.Empty<GameObject>();
             if (compatibilityMode.HasFlag(CompatibilityMode.MoreCompany))
                 result = result.Concat(MoreCompanyCompatibility.CollectCosmetics(player));
+            if (compatibilityMode.HasFlag(CompatibilityMode.AdvancedCompany))
+                result = result.Concat(AdvancedCompanyCompatibility.CollectCosmetics(player));
             return result.ToArray();
         }
     }

@@ -34,8 +34,10 @@ namespace OpenBodyCams
         public const float NightVisionRangeBase = 12;
         public static ConfigEntry<float> NightVisionBrightness;
 
-        public static ConfigEntry<bool> DisableInternalShipCamera;
         public static ConfigEntry<bool> EnableMoreCompanyCosmeticsCompatibility;
+        public static ConfigEntry<bool> EnableAdvancedCompanyCosmeticsCompatibility;
+
+        public static ConfigEntry<bool> DisableInternalShipCamera;
 
         public new ManualLogSource Logger => base.Logger;
 
@@ -66,6 +68,7 @@ namespace OpenBodyCams
             NightVisionBrightness.SettingChanged += (s, e) => BodyCam.UpdateSettings();
 
             EnableMoreCompanyCosmeticsCompatibility = Config.Bind("Compatibility", "EnableMoreCompanyCosmeticsCompatibility", true, "If this is enabled, a patch will be applied to MoreCompany to spawn cosmetics for the local player, and all cosmetics will be shown and hidden based on the camera's perspective.");
+            EnableAdvancedCompanyCosmeticsCompatibility = Config.Bind("Compatibility", "EnableAdvancedCompanyCosmeticsCompatibility", true, "When this is enabled and AdvancedCompany is installed, all cosmetics will be shown and hidden based on the camera's perspective.");
 
             DisableInternalShipCamera = Config.Bind("Misc", "DisableInternalShipCamera", false, "Whether to disable the internal ship camera displayed above the bodycam monitor.");
 

@@ -216,7 +216,9 @@ namespace OpenBodyCams
                 return;
 
             currentPlayerCosmetics = CosmeticsCompatibility.CollectCosmetics(currentPlayer);
+            currentPlayerModelState.cosmeticsLayers = new int[currentPlayerCosmetics.Length];
             localPlayerCosmetics = CosmeticsCompatibility.CollectCosmetics(StartOfRound.Instance.localPlayerController);
+            localPlayerModelState.cosmeticsLayers = new int[localPlayerCosmetics.Length];
 
             Vector3 offset = Vector3.zero;
 
@@ -323,8 +325,13 @@ namespace OpenBodyCams
             if (cosmetics.Length > 0)
             {
                 if (cosmetics[0] == null)
+                {
                     cosmetics = CosmeticsCompatibility.CollectCosmetics(player);
-                state.cosmeticsLayer = cosmetics[0].layer;
+                    state.cosmeticsLayers = new int[cosmetics.Length];
+                }
+
+                for (int i = 0; i < cosmetics.Length; i++)
+                    state.cosmeticsLayers[i] = cosmetics[i].layer;
             }
 
             // Modify
@@ -377,8 +384,8 @@ namespace OpenBodyCams
             player.thisPlayerModelArms.enabled = state.armsEnabled;
             player.thisPlayerModelArms.gameObject.layer = state.armsLayer;
 
-            foreach (var cosmetic in cosmetics)
-                cosmetic.layer = state.cosmeticsLayer;
+            for (int i = 0; i < cosmetics.Length; i++)
+                cosmetics[i].layer = state.cosmeticsLayers[i];
 
             if (player.currentlyHeldObjectServer != null)
             {
@@ -471,7 +478,7 @@ namespace OpenBodyCams
         public int bodyLayer;
         public bool armsEnabled;
         public int armsLayer;
-        public int cosmeticsLayer;
+        public int[] cosmeticsLayers;
         public Vector3 heldItemPosition;
         public Quaternion heldItemRotation;
     }
