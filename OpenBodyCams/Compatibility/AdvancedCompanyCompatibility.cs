@@ -15,16 +15,27 @@ namespace OpenBodyCams.Compatibility
 
         public static bool Initialize()
         {
-            t_Cosmetics = AccessTools.AllTypes().FirstOrDefault(t => t.FullName == "AdvancedCompany.Lib.Cosmetics");
-            if (t_Cosmetics is null)
+            Assembly advancedCompanyAssembly;
+            try
+            {
+                advancedCompanyAssembly = Assembly.Load("AdvancedCompany");
+            }
+            catch
             {
                 Plugin.Instance.Logger.LogInfo("AdvancedCompany is not present or the version is unsupported.");
+                return false;
+            }
+
+            t_Cosmetics = advancedCompanyAssembly.GetType("AdvancedCompany.Lib.Cosmetics");
+            if (t_Cosmetics is null)
+            {
+                Plugin.Instance.Logger.LogInfo("AdvancedCompany is installed, but Lib.Cosmetics is not found.");
                 return false;
             }
             m_Cosmetics_GetSpawnedCosmetics = t_Cosmetics.GetMethod("GetSpawnedCosmetics", BindingFlags.Public | BindingFlags.Static, null, new Type[] { typeof(PlayerControllerB) }, null);
             if (m_Cosmetics_GetSpawnedCosmetics is null)
             {
-                Plugin.Instance.Logger.LogInfo("AdvancedCompany is installed, but Cosmetics.GetSpawnedCosmetics is not found.");
+                Plugin.Instance.Logger.LogInfo("AdvancedCompany is installed, but Lib.Cosmetics.GetSpawnedCosmetics is not found.");
                 return false;
             }
 

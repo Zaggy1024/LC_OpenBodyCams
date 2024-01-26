@@ -24,7 +24,18 @@ namespace OpenBodyCams.Compatibility
 
         public static bool ApplyPatches(Harmony harmony)
         {
-            t_ClientReceiveMessagePatch = AccessTools.AllTypes().FirstOrDefault(t => t.FullName == "MoreCompany.ClientReceiveMessagePatch");
+            Assembly moreCompanyAssembly;
+            try
+            {
+                moreCompanyAssembly = Assembly.Load("MoreCompany");
+            }
+            catch
+            {
+                Plugin.Instance.Logger.LogInfo("MoreCompany is not present or the version is unsupported.");
+                return false;
+            }
+
+            t_ClientReceiveMessagePatch = moreCompanyAssembly.GetType("MoreCompany.ClientReceiveMessagePatch");
             if (t_ClientReceiveMessagePatch is null)
             {
                 Plugin.Instance.Logger.LogInfo($"MoreCompany is not installed, or its version is incompatible with {Plugin.MOD_NAME}'s patch.");
@@ -32,7 +43,6 @@ namespace OpenBodyCams.Compatibility
             }
             m_ClientReceiveMessagePatch_HandleDataMessage = t_ClientReceiveMessagePatch.GetMethod("HandleDataMessage", BindingFlags.NonPublic | BindingFlags.Static, null, new Type[] { typeof(string) }, null);
 
-            var moreCompanyAssembly = t_ClientReceiveMessagePatch.Assembly;
             t_CosmeticApplication = moreCompanyAssembly.GetType("MoreCompany.Cosmetics.CosmeticApplication");
             if (t_ClientReceiveMessagePatch is null)
             {
