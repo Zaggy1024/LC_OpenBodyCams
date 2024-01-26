@@ -1,5 +1,9 @@
+## Version 1.0.14
+- Fixed a bug that caused error spam when MoreCompany compatibility was being used.
+- Forced the radar map to keep rendering when interacting with the terminal while the DisableInternalShipCamera option is enabled.
+
 ## Version 1.0.13
-- Support the GeneralImprovements UseBetterMonitors option with a config option to select the monitor number to display the body cam on.
+- Supported the GeneralImprovements UseBetterMonitors option with a config option to select the monitor number to display the body cam on.
 
 ## Version 1.0.12
 - Stopped placing the body cam on the monitor by the door.
