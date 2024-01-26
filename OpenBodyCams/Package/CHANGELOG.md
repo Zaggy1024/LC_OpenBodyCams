@@ -1,3 +1,6 @@
+## Version 1.0.13
+- Support the GeneralImprovements UseBetterMonitors option with a config option to select the monitor number to display the body cam on.
+
 ## Version 1.0.12
 - Stopped placing the body cam on the monitor by the door.
 - Reduced the emissivity of the bodycam monitor.
