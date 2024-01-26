@@ -34,11 +34,17 @@
     <Reference Include="0Harmony">
       <HintPath>..\..\..\..\AppData\Roaming\r2modmanPlus-local\LethalCompany\cache\BepInEx-BepInExPack\5.4.2100\BepInExPack\BepInEx\core\0Harmony.dll</HintPath>
     </Reference>
+    <Reference Include="AdvancedCompany">
+      <HintPath>libs\AdvancedCompany.dll</HintPath>
+    </Reference>
     <Reference Include="Assembly-CSharp">
       <HintPath>F:\Platforms\Steam\steamapps\common\Lethal Company\Lethal Company_Data\Managed\Assembly-CSharp.dll</HintPath>
     </Reference>
     <Reference Include="BepInEx">
       <HintPath>..\..\..\..\AppData\Roaming\r2modmanPlus-local\LethalCompany\cache\BepInEx-BepInExPack\5.4.2100\BepInExPack\BepInEx\core\BepInEx.dll</HintPath>
+    </Reference>
+    <Reference Include="MoreCompany">
+      <HintPath>libs\MoreCompany.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />

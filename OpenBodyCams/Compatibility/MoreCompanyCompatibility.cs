@@ -1,13 +1,15 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
+using System.Runtime.CompilerServices;
 
 using GameNetcodeStuff;
 using HarmonyLib;
 using UnityEngine;
+using MoreCompany;
+using MoreCompany.Cosmetics;
 
 using OpenBodyCams.Patches;
 
@@ -15,45 +17,17 @@ namespace OpenBodyCams.Compatibility
 {
     public static class MoreCompanyCompatibility
     {
-        static Type t_ClientReceiveMessagePatch;
-        static MethodInfo m_ClientReceiveMessagePatch_HandleDataMessage;
-
-        static Type t_CosmeticApplication;
         static MethodInfo m_CosmeticApplication_ClearCosmetics;
-        static FieldInfo f_CosmeticApplication_spawnedCosmetics;
 
-        public static bool ApplyPatches(Harmony harmony)
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        public static bool Initialize(Harmony harmony)
         {
-            Assembly moreCompanyAssembly;
-            try
-            {
-                moreCompanyAssembly = Assembly.Load("MoreCompany");
-            }
-            catch
-            {
-                Plugin.Instance.Logger.LogInfo("MoreCompany is not present or the version is unsupported.");
-                return false;
-            }
+            var m_ClientReceiveMessagePatch_HandleDataMessage = typeof(ClientReceiveMessagePatch).GetMethod("HandleDataMessage", BindingFlags.NonPublic | BindingFlags.Static, null, new Type[] { typeof(string) }, null);
 
-            t_ClientReceiveMessagePatch = moreCompanyAssembly.GetType("MoreCompany.ClientReceiveMessagePatch");
-            if (t_ClientReceiveMessagePatch is null)
+            m_CosmeticApplication_ClearCosmetics = typeof(CosmeticApplication).GetMethod(nameof(CosmeticApplication.ClearCosmetics), new Type[0]);
+            if (m_CosmeticApplication_ClearCosmetics is null)
             {
-                Plugin.Instance.Logger.LogInfo($"MoreCompany is not installed, or its version is incompatible with {Plugin.MOD_NAME}'s patch.");
-                return false;
-            }
-            m_ClientReceiveMessagePatch_HandleDataMessage = t_ClientReceiveMessagePatch.GetMethod("HandleDataMessage", BindingFlags.NonPublic | BindingFlags.Static, null, new Type[] { typeof(string) }, null);
-
-            t_CosmeticApplication = moreCompanyAssembly.GetType("MoreCompany.Cosmetics.CosmeticApplication");
-            if (t_ClientReceiveMessagePatch is null)
-            {
-                Plugin.Instance.Logger.LogInfo($"MoreCompany is installed, but `MoreCompany.Cosmetics.CosmeticApplication` was not found.");
-                return false;
-            }
-            m_CosmeticApplication_ClearCosmetics = t_CosmeticApplication.GetMethod("ClearCosmetics", new Type[0]);
-            f_CosmeticApplication_spawnedCosmetics = t_CosmeticApplication.GetField("spawnedCosmetics");
-            if (m_CosmeticApplication_ClearCosmetics is null || f_CosmeticApplication_spawnedCosmetics is null)
-            {
-                Plugin.Instance.Logger.LogInfo($"MoreCompany is installed, but `CosmeticApplication` members were not found.");
+                Plugin.Instance.Logger.LogInfo($"MoreCompany is installed, but `CosmeticApplication.ClearCosmetics()` was not found.");
                 return false;
             }
 
@@ -87,11 +61,19 @@ namespace OpenBodyCams.Compatibility
             instructionsList.RemoveAt(clearCosmetics.End - 1);
             instructionsList.InsertRange(clearCosmetics.End - 1, new CodeInstruction[]
             {
-                new CodeInstruction(OpCodes.Ldfld, f_CosmeticApplication_spawnedCosmetics),
-                CodeInstruction.Call(typeof(MoreCompanyCompatibility), "SetUpLocalMoreCompanyCosmetics"),
+                CodeInstruction.Call(typeof(MoreCompanyCompatibility), nameof(SetUpLocalMoreCompanyCosmetics)),
             });
 
             return instructionsList;
+        }
+
+        static void SetUpLocalMoreCompanyCosmetics(CosmeticApplication cosmeticApplication)
+        {
+            foreach (var cosmetic in cosmeticApplication.spawnedCosmetics)
+            {
+                foreach (var child in cosmetic.GetComponentsInChildren<Transform>())
+                    child.gameObject.layer = BodyCamComponent.ENEMIES_NOT_RENDERED_LAYER;
+            }
         }
 
         public static void ClientReceiveMessagePatch_HandleDataMessagePostfix()
@@ -99,23 +81,13 @@ namespace OpenBodyCams.Compatibility
             Plugin.BodyCam?.UpdateCurrentTarget();
         }
 
-        public static void SetUpLocalMoreCompanyCosmetics(IList cosmetics)
-        {
-            foreach (var cosmetic in cosmetics.Cast<Component>())
-            {
-                foreach (var child in cosmetic.GetComponentsInChildren<Transform>())
-                    child.gameObject.layer = BodyCamComponent.ENEMIES_NOT_RENDERED_LAYER;
-            }
-        }
-
+        [MethodImpl(MethodImplOptions.NoInlining)]
         public static GameObject[] CollectCosmetics(PlayerControllerB player)
         {
-            if (player.GetComponentInChildren(t_CosmeticApplication) is Behaviour cosmeticApplication)
+            if (player.GetComponentInChildren<CosmeticApplication>() is CosmeticApplication cosmeticApplication)
             {
                 Plugin.Instance.Logger.LogInfo($"Getting MoreCompany cosmetic models for {player.playerUsername}");
-                var cosmeticsList = (IList)f_CosmeticApplication_spawnedCosmetics.GetValue(cosmeticApplication);
-                var result = cosmeticsList.Cast<Component>().SelectMany(cosmetic => cosmetic.GetComponentsInChildren<Transform>()).Select(cosmeticObject => cosmeticObject.gameObject).ToArray();
-                return result;
+                return cosmeticApplication.spawnedCosmetics.SelectMany(cosmetic => cosmetic.GetComponentsInChildren<Transform>()).Select(cosmeticObject => cosmeticObject.gameObject).ToArray();
             }
 
             return new GameObject[0];

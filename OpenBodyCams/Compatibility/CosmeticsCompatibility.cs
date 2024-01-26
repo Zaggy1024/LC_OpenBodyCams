@@ -6,6 +6,7 @@ using HarmonyLib;
 using UnityEngine;
 
 using OpenBodyCams.Compatibility;
+using BepInEx.Bootstrap;
 
 namespace OpenBodyCams
 {
@@ -23,16 +24,21 @@ namespace OpenBodyCams
 
         public static void Initialize(Harmony harmony)
         {
-            if (Plugin.EnableMoreCompanyCosmeticsCompatibility.Value && MoreCompanyCompatibility.ApplyPatches(harmony))
-            {
-                compatibilityMode |= CompatibilityMode.MoreCompany;
-                Plugin.Instance.Logger.LogInfo("MoreCompany compatibility mode is enabled.");
-            }
+            var hasAdvancedCompany = Chainloader.PluginInfos.ContainsKey("com.potatoepet.AdvancedCompany");
 
-            if (Plugin.EnableAdvancedCompanyCosmeticsCompatibility.Value && AdvancedCompanyCompatibility.Initialize())
+            if (Plugin.EnableAdvancedCompanyCosmeticsCompatibility.Value && hasAdvancedCompany)
             {
                 compatibilityMode |= CompatibilityMode.AdvancedCompany;
                 Plugin.Instance.Logger.LogInfo("AdvancedCompany compatibility mode is enabled.");
+            }
+
+            if (Plugin.EnableMoreCompanyCosmeticsCompatibility.Value && !hasAdvancedCompany && Chainloader.PluginInfos.ContainsKey("me.swipez.melonloader.morecompany"))
+            {
+                if (MoreCompanyCompatibility.Initialize(harmony))
+                {
+                    compatibilityMode |= CompatibilityMode.MoreCompany;
+                    Plugin.Instance.Logger.LogInfo("MoreCompany compatibility mode is enabled.");
+                }
             }
         }
 
