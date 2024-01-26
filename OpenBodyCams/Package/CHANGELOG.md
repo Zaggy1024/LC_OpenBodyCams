@@ -1,3 +1,6 @@
+## Version 1.0.11
+- Added an option to turn the body cam screen off, which can be used in-game if performance issues are encountered.
+
 ## Version 1.0.10
 - Added support for AdvancedCompany cosmetics. They should now be hidden on the body cam when viewing other players.
 
