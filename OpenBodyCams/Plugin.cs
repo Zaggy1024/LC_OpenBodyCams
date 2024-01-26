@@ -3,7 +3,6 @@ using BepInEx.Configuration;
 using BepInEx.Logging;
 using HarmonyLib;
 
-using OpenBodyCams.Compatibility;
 using OpenBodyCams.Patches;
 
 namespace OpenBodyCams
