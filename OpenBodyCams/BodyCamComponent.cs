@@ -36,7 +36,7 @@ namespace OpenBodyCams
         private bool mapScreenOn = true;
         private bool enableCamera = true;
 
-        private MeshRenderer monitorMesh;
+        private MeshRenderer monitorRenderer;
         private int monitorMaterialIndex;
         private Material monitorOnMaterial;
         private Material monitorOffMaterial;
@@ -68,8 +68,8 @@ namespace OpenBodyCams
             RenderPipelineManager.beginCameraRendering += BeginCameraRendering;
             RenderPipelineManager.endCameraRendering += EndCameraRendering;
 
-            monitorMesh = GetComponent<MeshRenderer>();
-            monitorMaterialIndex = Array.FindIndex(monitorMesh.sharedMaterials, material => material.mainTexture.name == "shipScreen2");
+            monitorRenderer = GetComponent<MeshRenderer>();
+            monitorMaterialIndex = Array.FindIndex(monitorRenderer.sharedMaterials, material => material.mainTexture.name == "shipScreen2");
             if (monitorMaterialIndex == -1)
                 throw new Exception("Failed to get the ship screen material.");
 
@@ -77,7 +77,7 @@ namespace OpenBodyCams
             monitorOnMaterial.name = "BodyCamMaterial";
             monitorOnMaterial.SetColor("_EmissiveColor", new Vector4(0.05f, 0.13f, 0.05f, 0));
             monitorOnMaterial.SetFloat("_AlbedoAffectEmissive", 1);
-            SetMaterial(monitorMesh, monitorMaterialIndex, monitorOnMaterial);
+            SetMaterial(monitorRenderer, monitorMaterialIndex, monitorOnMaterial);
 
             monitorOffMaterial = PatchStartOfRound.blackScreenMaterial;
 
@@ -189,11 +189,11 @@ namespace OpenBodyCams
         {
             if (powered)
             {
-                SetMaterial(monitorMesh, monitorMaterialIndex, monitorOnMaterial);
+                SetMaterial(monitorRenderer, monitorMaterialIndex, monitorOnMaterial);
                 return;
             }
 
-            SetMaterial(monitorMesh, monitorMaterialIndex, monitorOffMaterial);
+            SetMaterial(monitorRenderer, monitorMaterialIndex, monitorOffMaterial);
         }
 
         private bool ShouldRenderCamera()
@@ -456,7 +456,7 @@ namespace OpenBodyCams
                 return;
             if (spectatedPlayer.spectatedPlayerScript != null)
                 spectatedPlayer = spectatedPlayer.spectatedPlayerScript;
-            bool enable = monitorMesh.isVisible && spectatedPlayer.isInHangarShipRoom && currentActualTarget != null && ShouldRenderCamera();
+            bool enable = monitorRenderer.isVisible && spectatedPlayer.isInHangarShipRoom && currentActualTarget != null && ShouldRenderCamera();
 
             if (!enable)
             {
