@@ -1,3 +1,7 @@
+## Version 1.0.12
+- Stopped placing the body cam on the monitor by the door.
+- Reduced the emissivity of the bodycam monitor.
+
 ## Version 1.0.11
 - Added an option to turn the body cam screen off, which can be used in-game if performance issues are encountered.
 
