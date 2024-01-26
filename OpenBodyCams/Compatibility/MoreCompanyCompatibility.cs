@@ -96,7 +96,7 @@ namespace OpenBodyCams.Compatibility
 
         public static void ClientReceiveMessagePatch_HandleDataMessagePostfix()
         {
-            Plugin.BodyCam.UpdateCurrentTarget();
+            Plugin.BodyCam?.UpdateCurrentTarget();
         }
 
         public static void SetUpLocalMoreCompanyCosmetics(IList cosmetics)
