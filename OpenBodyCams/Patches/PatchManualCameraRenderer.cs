@@ -26,7 +26,6 @@ namespace OpenBodyCams.Patches
         [HarmonyPatch(nameof(ManualCameraRenderer.SwitchScreenOn))]
         static void SwitchScreenOnPostfix()
         {
-            Plugin.Instance.Logger.LogInfo("Screen power switch");
             Plugin.BodyCam?.UpdateCurrentTarget();
         }
     }
