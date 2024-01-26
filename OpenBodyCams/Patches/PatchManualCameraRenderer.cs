@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 
 using HarmonyLib;
+using UnityEngine;
 
 namespace OpenBodyCams.Patches
 {
@@ -27,6 +28,19 @@ namespace OpenBodyCams.Patches
         static void SwitchScreenOnPostfix()
         {
             Plugin.BodyCam?.UpdateCurrentTarget();
+        }
+
+        [HarmonyPostfix]
+        [HarmonyPatch("MeetsCameraEnabledConditions")]
+        static void StartPostfix(ManualCameraRenderer __instance, ref bool __result)
+        {
+            if ((object)__instance != StartOfRound.Instance.mapScreen)
+                return;
+            if (Object.FindObjectOfType<Terminal>().GetComponent<ManualCameraRenderer>() != null)
+                return;
+
+            if (StartOfRound.Instance.localPlayerController.inTerminalMenu)
+                __result = true;
         }
     }
 }
