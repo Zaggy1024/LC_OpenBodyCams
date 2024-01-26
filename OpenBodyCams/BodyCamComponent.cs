@@ -72,7 +72,13 @@ namespace OpenBodyCams
             monitorMaterialIndex = Array.FindIndex(monitorMesh.sharedMaterials, material => material.mainTexture.name == "shipScreen2");
             if (monitorMaterialIndex == -1)
                 throw new Exception("Failed to get the ship screen material.");
-            monitorOnMaterial = monitorMesh.sharedMaterials[monitorMaterialIndex];
+
+            monitorOnMaterial = new Material(Shader.Find("HDRP/Unlit"));
+            monitorOnMaterial.name = "BodyCamMaterial";
+            monitorOnMaterial.SetColor("_EmissiveColor", new Vector4(0.05f, 0.13f, 0.05f, 0));
+            monitorOnMaterial.SetFloat("_AlbedoAffectEmissive", 1);
+            SetMaterial(monitorMesh, monitorMaterialIndex, monitorOnMaterial);
+
             monitorOffMaterial = PatchStartOfRound.blackScreenMaterial;
 
             var aPlayerScript = StartOfRound.Instance.allPlayerScripts[0];
@@ -92,6 +98,13 @@ namespace OpenBodyCams
             mapLight.cullingMask = 1 << mapLight.gameObject.layer;
 
             EnsureCameraExists();
+        }
+
+        private static void SetMaterial(MeshRenderer renderer, int index, Material material)
+        {
+            var materials = renderer.sharedMaterials;
+            materials[index] = material;
+            renderer.sharedMaterials = materials;
         }
 
         public void EnsureCameraExists()
@@ -170,13 +183,6 @@ namespace OpenBodyCams
         private static void SetCosmeticHidden(GameObject cosmetic, bool hidden)
         {
             cosmetic.layer = hidden ? ENEMIES_NOT_RENDERED_LAYER : DEFAULT_LAYER;
-        }
-
-        private static void SetMaterial(MeshRenderer renderer, int index, Material material)
-        {
-            var materials = renderer.sharedMaterials;
-            materials[index] = material;
-            renderer.sharedMaterials = materials;
         }
 
         public void SetScreenPowered(bool powered)
