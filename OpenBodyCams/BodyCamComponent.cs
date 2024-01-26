@@ -32,14 +32,14 @@ namespace OpenBodyCams
         public Camera camera;
         public Light nightVisionLight;
 
+        public MeshRenderer monitorRenderer;
+        public int monitorMaterialIndex;
+        public Material monitorOnMaterial;
+        public Material monitorOffMaterial;
+
         private ManualCameraRenderer mapRenderer;
         private bool mapScreenOn = true;
         private bool enableCamera = true;
-
-        private MeshRenderer monitorRenderer;
-        private int monitorMaterialIndex;
-        private Material monitorOnMaterial;
-        private Material monitorOffMaterial;
 
         private GameObject[] localPlayerCosmetics = new GameObject[0];
         private PlayerModelState localPlayerModelState;
@@ -67,11 +67,6 @@ namespace OpenBodyCams
 
             RenderPipelineManager.beginCameraRendering += BeginCameraRendering;
             RenderPipelineManager.endCameraRendering += EndCameraRendering;
-
-            monitorRenderer = GetComponent<MeshRenderer>();
-            monitorMaterialIndex = Array.FindIndex(monitorRenderer.sharedMaterials, material => material.mainTexture.name == "shipScreen2");
-            if (monitorMaterialIndex == -1)
-                throw new Exception("Failed to get the ship screen material.");
 
             monitorOnMaterial = new Material(Shader.Find("HDRP/Unlit"));
             monitorOnMaterial.name = "BodyCamMaterial";

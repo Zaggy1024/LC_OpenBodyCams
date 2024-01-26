@@ -36,6 +36,7 @@ namespace OpenBodyCams
 
         public static ConfigEntry<bool> EnableMoreCompanyCosmeticsCompatibility;
         public static ConfigEntry<bool> EnableAdvancedCompanyCosmeticsCompatibility;
+        public static ConfigEntry<int> GeneralImprovementsBetterMonitorIndex;
 
         public static ConfigEntry<bool> DisableInternalShipCamera;
 
@@ -71,6 +72,7 @@ namespace OpenBodyCams
 
             EnableMoreCompanyCosmeticsCompatibility = Config.Bind("Compatibility", "EnableMoreCompanyCosmeticsCompatibility", true, "If this is enabled, a patch will be applied to MoreCompany to spawn cosmetics for the local player, and all cosmetics will be shown and hidden based on the camera's perspective.");
             EnableAdvancedCompanyCosmeticsCompatibility = Config.Bind("Compatibility", "EnableAdvancedCompanyCosmeticsCompatibility", true, "When this is enabled and AdvancedCompany is installed, all cosmetics will be shown and hidden based on the camera's perspective.");
+            GeneralImprovementsBetterMonitorIndex = Config.Bind("Compatibility", "GeneralImprovementsBetterMonitorIndex", 0, new ConfigDescription("Choose which of GeneralImprovements' extended monitor set to display the body cam on. A value of 0 will place it on the large monitor on the right, 1-14 goes left to right, top to bottom, skipping the large center monitor.", new AcceptableValueRange<int>(0, 14)));
 
             DisableInternalShipCamera = Config.Bind("Misc", "DisableInternalShipCamera", false, "Whether to disable the internal ship camera displayed above the bodycam monitor.");
 

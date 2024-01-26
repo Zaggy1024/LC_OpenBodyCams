@@ -74,6 +74,7 @@
     <Compile Include="BodyCamComponent.cs" />
     <Compile Include="Compatibility\AdvancedCompanyCompatibility.cs" />
     <Compile Include="Compatibility\CosmeticsCompatibility.cs" />
+    <Compile Include="Compatibility\GeneralImprovementsCompatibility.cs" />
     <Compile Include="Compatibility\MoreCompanyCompatibility.cs" />
     <Compile Include="Patches\Common.cs" />
     <Compile Include="Patches\PatchManualCameraRenderer.cs" />

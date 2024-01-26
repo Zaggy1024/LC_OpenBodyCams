@@ -3,6 +3,8 @@ using System;
 using UnityEngine;
 using HarmonyLib;
 
+using OpenBodyCams.Compatibility;
+
 namespace OpenBodyCams.Patches
 {
     [HarmonyPatch(typeof(StartOfRound))]
@@ -11,28 +13,14 @@ namespace OpenBodyCams.Patches
         public static Material blackScreenMaterial;
 
         [HarmonyPostfix]
-        [HarmonyPatch("Awake")]
-        static void AwakePostfix()
+        [HarmonyPatch("Start")]
+        [HarmonyPriority(Priority.VeryHigh)]
+        static void StartPostfix()
         {
             blackScreenMaterial = StartOfRound.Instance.mapScreen.offScreenMat;
 
-            InitializeBodyCam();
-
             if (Plugin.DisableInternalShipCamera.Value)
                 DisableShipCamera();
-        }
-
-        static void InitializeBodyCam()
-        {
-            var bottomMonitors = GameObject.Find("Environment/HangarShip/ShipModels2b/MonitorWall/Cube.001");
-            if (bottomMonitors == null)
-            {
-                Plugin.Instance.Logger.LogError("Could not find the bottom monitors' game object.");
-                return;
-            }
-
-            if (bottomMonitors.GetComponent<BodyCamComponent>() == null)
-                bottomMonitors.AddComponent<BodyCamComponent>();
         }
 
         static void DisableShipCamera()
