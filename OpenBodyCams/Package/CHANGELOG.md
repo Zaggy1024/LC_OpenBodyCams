@@ -1,3 +1,6 @@
+## Version 1.0.17
+- Fixed body cams being unable to display on the GeneralImprovements large monitors with UseBetterMonitors enabled.
+
 ## Version 1.0.16
 - Fixed a reduction in performance that began in version 1.0.14 with the fix for the DisableInternalShipCamera bug.
 
