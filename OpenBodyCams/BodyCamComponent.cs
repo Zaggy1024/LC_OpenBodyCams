@@ -107,6 +107,8 @@ namespace OpenBodyCams
             if (cameraObject != null)
                 return;
 
+            Plugin.Instance.Logger.LogInfo("Camera has been destroyed, recreating it.");
+
             cameraObject = new GameObject("BodyCam");
             camera = cameraObject.AddComponent<Camera>();
             camera.nearClipPlane = 0.05f;
