@@ -1,3 +1,6 @@
+## Version 1.0.15
+- Updated GeneralImprovements compatibility to work with version 1.1.1. This updated compatibility will not work with any previous versions of GeneralImprovements.
+
 ## Version 1.0.14
 - Fixed a bug that caused error spam when MoreCompany compatibility was being used.
 - Forced the radar map to keep rendering when interacting with the terminal while the DisableInternalShipCamera option is enabled.
