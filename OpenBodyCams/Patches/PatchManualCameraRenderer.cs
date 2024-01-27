@@ -43,7 +43,7 @@ namespace OpenBodyCams.Patches
                 if (Plugin.TwoRadarCamsPresent)
                     return;
 
-                if (Plugin.TerminalScript.terminalUIScreen.enabled)
+                if (Plugin.TerminalScript.terminalUIScreen.isActiveAndEnabled)
                     __result = true;
             }
         }
