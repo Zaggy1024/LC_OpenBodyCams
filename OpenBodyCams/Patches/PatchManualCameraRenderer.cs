@@ -1,7 +1,8 @@
 ﻿using System.Collections;
 
 using HarmonyLib;
-using UnityEngine;
+
+using OpenBodyCams.Compatibility;
 
 namespace OpenBodyCams.Patches
 {
@@ -34,13 +35,15 @@ namespace OpenBodyCams.Patches
         [HarmonyPatch("MeetsCameraEnabledConditions")]
         static void MeetsCameraEnabledConditionsPostfix(ManualCameraRenderer __instance, ref bool __result)
         {
+            if (__result)
+                return;
+
             if ((object)__instance == StartOfRound.Instance.mapScreen)
             {
-                var terminal = Object.FindObjectOfType<Terminal>();
-                if (terminal.GetComponent<ManualCameraRenderer>() != null)
+                if (Plugin.TwoRadarCamsPresent)
                     return;
 
-                if (terminal.terminalUIScreen.enabled)
+                if (Plugin.TerminalScript.terminalUIScreen.enabled)
                     __result = true;
             }
         }

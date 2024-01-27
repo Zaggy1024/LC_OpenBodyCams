@@ -2,6 +2,7 @@ using BepInEx;
 using BepInEx.Configuration;
 using BepInEx.Logging;
 using HarmonyLib;
+using UnityEngine;
 
 using OpenBodyCams.Patches;
 
@@ -44,6 +45,9 @@ namespace OpenBodyCams
 
         public static BodyCamComponent BodyCam;
 
+        public static Terminal TerminalScript;
+        public static bool TwoRadarCamsPresent = false;
+
         void Awake()
         {
             Instance = this;
@@ -77,6 +81,12 @@ namespace OpenBodyCams
             DisableInternalShipCamera = Config.Bind("Misc", "DisableInternalShipCamera", false, "Whether to disable the internal ship camera displayed above the bodycam monitor.");
 
             CosmeticsCompatibility.Initialize(harmony);
+        }
+
+        public static void OnLocalPlayerConnected()
+        {
+            TerminalScript = FindObjectOfType<Terminal>();
+            TwoRadarCamsPresent = TerminalScript.GetComponent<ManualCameraRenderer>() != null;
         }
     }
 }
