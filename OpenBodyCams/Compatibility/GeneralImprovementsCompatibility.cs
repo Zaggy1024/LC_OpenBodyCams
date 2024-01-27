@@ -33,9 +33,9 @@ namespace OpenBodyCams.Compatibility
                 case 11:
                     return "Monitors/TopGroupR/Screen12";
                 case 12:
-                    return "BigMonitors/BigLeft/LScreen";
+                    return "Monitors/BigLeft/LScreen";
                 case 13:
-                    return "BigMonitors/BigRight/RScreen";
+                    return "Monitors/BigRight/RScreen";
             }
 
             return null;
