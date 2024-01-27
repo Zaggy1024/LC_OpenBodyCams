@@ -51,6 +51,8 @@ namespace OpenBodyCams
                 result = result.Concat(MoreCompanyCompatibility.CollectCosmetics(player));
             if (compatibilityMode.HasFlag(CompatibilityMode.AdvancedCompany))
                 result = result.Concat(AdvancedCompanyCompatibility.CollectCosmetics(player));
+            var resultArray = result.ToArray();
+            Plugin.Instance.Logger.LogInfo($"Collected {resultArray.Length} cosmetics objects for {player.playerUsername}.");
             return result.ToArray();
         }
     }
