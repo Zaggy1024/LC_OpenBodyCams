@@ -1,4 +1,4 @@
-﻿using GameNetcodeStuff;
+using GameNetcodeStuff;
 using HarmonyLib;
 using UnityEngine;
 
@@ -15,7 +15,6 @@ namespace OpenBodyCams.Patches
         [HarmonyPriority(Priority.VeryLow)]
         static void ConnectClientToPlayerObjectFinalizer(PlayerControllerB __instance)
         {
-            Plugin.Instance.Logger.LogInfo("ConnectClientToPlayerObject");
             InitializeBodyCam();
         }
 
