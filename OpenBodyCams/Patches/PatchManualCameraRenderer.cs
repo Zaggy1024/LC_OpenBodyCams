@@ -32,15 +32,17 @@ namespace OpenBodyCams.Patches
 
         [HarmonyPostfix]
         [HarmonyPatch("MeetsCameraEnabledConditions")]
-        static void StartPostfix(ManualCameraRenderer __instance, ref bool __result)
+        static void MeetsCameraEnabledConditionsPostfix(ManualCameraRenderer __instance, ref bool __result)
         {
-            if ((object)__instance != StartOfRound.Instance.mapScreen)
-                return;
-            if (Object.FindObjectOfType<Terminal>().GetComponent<ManualCameraRenderer>() != null)
-                return;
+            if ((object)__instance == StartOfRound.Instance.mapScreen)
+            {
+                var terminal = Object.FindObjectOfType<Terminal>();
+                if (terminal.GetComponent<ManualCameraRenderer>() != null)
+                    return;
 
-            if (StartOfRound.Instance.localPlayerController.inTerminalMenu)
-                __result = true;
+                if (terminal.terminalUIScreen.enabled)
+                    __result = true;
+            }
         }
     }
 }
