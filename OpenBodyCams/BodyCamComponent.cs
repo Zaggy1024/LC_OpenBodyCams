@@ -70,7 +70,6 @@ namespace OpenBodyCams
 
             monitorOnMaterial = new Material(Shader.Find("HDRP/Unlit"));
             monitorOnMaterial.name = "BodyCamMaterial";
-            monitorOnMaterial.SetColor("_EmissiveColor", new Vector4(0.05f, 0.13f, 0.05f, 0));
             monitorOnMaterial.SetFloat("_AlbedoAffectEmissive", 1);
             SetMaterial(monitorRenderer, monitorMaterialIndex, monitorOnMaterial);
 
@@ -145,11 +144,33 @@ namespace OpenBodyCams
             Destroy(fogShaderPlane.GetComponent<MeshCollider>());
         }
 
+        private static Color getEmissiveColor()
+        {
+            Color ParseColor(string str)
+            {
+                var components = str.Split(new char[] { ',', ' ' }, StringSplitOptions.RemoveEmptyEntries).Select(x => float.Parse(x.Trim())).ToArray();
+                if (components.Length < 0 || components.Length > 4)
+                    throw new ArgumentException("Too many color components");
+                return new Color(components[0], components[1], components[2], components.Length == 4 ? components[3] : 0);
+            }
+            try
+            {
+                return ParseColor(Plugin.MonitorEmissiveColor.Value);
+            }
+            catch (Exception e)
+            {
+                Plugin.Instance.Logger.LogWarning($"Failed to parse emissive color: {e}");
+                return ParseColor((string)Plugin.MonitorEmissiveColor.DefaultValue);
+            }
+        }
+
         public void UpdateSettings()
         {
             camera.targetTexture = new RenderTexture(Plugin.HorizontalResolution.Value, Plugin.HorizontalResolution.Value * 3 / 4, 32);
             camera.fieldOfView = Plugin.FieldOfView.Value;
+
             monitorOnMaterial.mainTexture = camera.targetTexture;
+            monitorOnMaterial.SetColor("_EmissiveColor", getEmissiveColor());
 
             camera.farClipPlane = Plugin.RenderDistance.Value;
 
