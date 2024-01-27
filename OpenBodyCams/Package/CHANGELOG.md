@@ -1,3 +1,6 @@
+## Version 1.0.16
+- Fixed a reduction in performance that began in version 1.0.14 with the fix for the DisableInternalShipCamera bug.
+
 ## Version 1.0.15
 - Updated GeneralImprovements compatibility to work with version 1.1.1. This updated compatibility will not work with any previous versions of GeneralImprovements.
 
