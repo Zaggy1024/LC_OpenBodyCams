@@ -1,3 +1,6 @@
+## Version 1.0.18
+- Fixed the radar map not disabling correctly when it was not visible, or while the player is outside the ship.
+
 ## Version 1.0.17
 - Fixed body cams being unable to display on the GeneralImprovements large monitors with UseBetterMonitors enabled.
 
