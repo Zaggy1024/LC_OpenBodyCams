@@ -40,6 +40,8 @@ namespace OpenBodyCams
         private ManualCameraRenderer mapRenderer;
         private bool mapScreenOn = true;
         private bool enableCamera = true;
+        private bool disableCameraWhileTargetIsOnShip = false;
+        private bool wasDisabledForTarget = false;
 
         private GameObject[] localPlayerCosmetics = new GameObject[0];
         private PlayerModelState localPlayerModelState;
@@ -188,6 +190,7 @@ namespace OpenBodyCams
             nightVisionLight.intensity = Plugin.NightVisionIntensityBase * Plugin.NightVisionBrightness.Value;
             nightVisionLight.range = Plugin.NightVisionRangeBase * Plugin.NightVisionBrightness.Value;
 
+            disableCameraWhileTargetIsOnShip = Plugin.DisableCameraWhileTargetIsOnShip.Value;
             enableCamera = Plugin.EnableCamera.Value;
 
             UpdateCurrentTarget();
@@ -219,6 +222,11 @@ namespace OpenBodyCams
             return mapScreenOn && enableCamera;
         }
 
+        private bool ShouldDisableForCurrentPlayer()
+        {
+            return disableCameraWhileTargetIsOnShip && currentPlayer?.isInHangarShipRoom == true;
+        }
+
         public void UpdateCurrentTarget()
         {
             currentPlayer = null;
@@ -232,7 +240,7 @@ namespace OpenBodyCams
             if (shouldRender)
                 UpdateCurrentTargetInternal();
 
-            if (currentActualTarget == null)
+            if (currentActualTarget == null || ShouldDisableForCurrentPlayer())
             {
                 cameraObject.transform.SetParent(null, false);
                 cameraObject.transform.localPosition = Vector3.zero;
@@ -475,6 +483,17 @@ namespace OpenBodyCams
             if (spectatedPlayer.spectatedPlayerScript != null)
                 spectatedPlayer = spectatedPlayer.spectatedPlayerScript;
             bool enable = monitorRenderer.isVisible && spectatedPlayer.isInHangarShipRoom && currentActualTarget != null && ShouldRenderCamera();
+
+            if (enable)
+            {
+                var disable = ShouldDisableForCurrentPlayer();
+                enable = !disable;
+                if (disable != wasDisabledForTarget)
+                {
+                    UpdateCurrentTarget();
+                    wasDisabledForTarget = disable;
+                }
+            }
 
             if (!enable)
             {

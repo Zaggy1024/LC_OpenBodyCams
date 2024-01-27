@@ -34,6 +34,7 @@ namespace OpenBodyCams
         public const float NightVisionRangeBase = 12;
         public static ConfigEntry<float> NightVisionBrightness;
         public static ConfigEntry<string> MonitorEmissiveColor;
+        public static ConfigEntry<bool> DisableCameraWhileTargetIsOnShip;
         public static ConfigEntry<bool> EnableCamera;
 
         public static ConfigEntry<bool> EnableMoreCompanyCosmeticsCompatibility;
@@ -66,6 +67,7 @@ namespace OpenBodyCams
             Framerate = Config.Bind("Camera", "Framerate", 0f, "The number of frames to render per second. A value of 0 will render at the game's framerate and results in best performance. Higher framerates will negatively affect performance, values between 0 and 30 are recommended.");
             NightVisionBrightness = Config.Bind("Camera", "NightVisionBrightness", 1f, "A multiplier for the intensity of the area light used to brighten dark areas. A value of 1 is identical to the player's actual vision.");
             MonitorEmissiveColor = Config.Bind("Camera", "MonitorEmissiveColor", "0.05, 0.13, 0.05", "Adjust the color that is emitted from the body cam monitor.");
+            DisableCameraWhileTargetIsOnShip = Config.Bind("Camera", "DisableCameraWhileTargetIsOnShip", false, "With this option enabled, the camera will stop rendering when the target is onboard the ship to reduce the performance hit of rendering a large number of items on the ship twice.");
             EnableCamera = Config.Bind("Camera", "EnableCamera", true, "Enables/disables rendering of the body cam, and can be enabled/disabled during a game with LethalConfig.");
 
             CameraMode.SettingChanged += (s, e) => BodyCam.UpdateSettings();
@@ -75,6 +77,7 @@ namespace OpenBodyCams
             Framerate.SettingChanged += (s, e) => BodyCam.UpdateSettings();
             NightVisionBrightness.SettingChanged += (s, e) => BodyCam.UpdateSettings();
             MonitorEmissiveColor.SettingChanged += (s, e) => BodyCam.UpdateSettings();
+            DisableCameraWhileTargetIsOnShip.SettingChanged += (s, e) => BodyCam.UpdateSettings();
             EnableCamera.SettingChanged += (s, e) => BodyCam.UpdateSettings();
 
             EnableMoreCompanyCosmeticsCompatibility = Config.Bind("Compatibility", "EnableMoreCompanyCosmeticsCompatibility", true, "If this is enabled, a patch will be applied to MoreCompany to spawn cosmetics for the local player, and all cosmetics will be shown and hidden based on the camera's perspective.");
