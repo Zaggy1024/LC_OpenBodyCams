@@ -66,7 +66,7 @@ namespace OpenBodyCams
             Framerate = Config.Bind("Camera", "Framerate", 0f, "The number of frames to render per second. A value of 0 will render at the game's framerate and results in best performance. Higher framerates will negatively affect performance, values between 0 and 30 are recommended.");
             NightVisionBrightness = Config.Bind("Camera", "NightVisionBrightness", 1f, "A multiplier for the intensity of the area light used to brighten dark areas. A value of 1 is identical to the player's actual vision.");
             MonitorEmissiveColor = Config.Bind("Camera", "MonitorEmissiveColor", "0.05, 0.13, 0.05", "Adjust the color that is emitted from the body cam monitor.");
-            EnableCamera = Config.Bind("Camera", "EnableCamera", true, "Disables rendering of the body cam, and can be enabled/disabled during a game with LethalConfig.");
+            EnableCamera = Config.Bind("Camera", "EnableCamera", true, "Enables/disables rendering of the body cam, and can be enabled/disabled during a game with LethalConfig.");
 
             CameraMode.SettingChanged += (s, e) => BodyCam.UpdateSettings();
             HorizontalResolution.SettingChanged += (s, e) => BodyCam.UpdateSettings();
