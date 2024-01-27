@@ -9,33 +9,33 @@ namespace OpenBodyCams.Compatibility
             switch (id)
             {
                 case 0:
-                    return "Monitors/StructureL/Screen1";
+                    return "Monitors/TopGroupL/Screen1";
                 case 1:
-                    return "Monitors/StructureL/Screen2";
+                    return "Monitors/TopGroupL/Screen2";
                 case 2:
-                    return "Monitors/StructureM/Screen3";
+                    return "Monitors/TopGroupM/Screen3";
                 case 3:
-                    return "Monitors/StructureM/Screen4";
+                    return "Monitors/TopGroupM/Screen4";
                 case 4:
-                    return "Monitors/StructureR/Screen5";
+                    return "Monitors/TopGroupR/Screen5";
                 case 5:
-                    return "Monitors/StructureR/Screen6";
+                    return "Monitors/TopGroupR/Screen6";
                 case 6:
-                    return "Monitors/StructureL/Screen7";
+                    return "Monitors/TopGroupL/Screen7";
                 case 7:
-                    return "Monitors/StructureL/Screen8";
+                    return "Monitors/TopGroupL/Screen8";
                 case 8:
-                    return "Monitors/StructureM/Screen9";
+                    return "Monitors/TopGroupM/Screen9";
                 case 9:
-                    return "Monitors/StructureM/Screen10";
+                    return "Monitors/TopGroupM/Screen10";
                 case 10:
-                    return "Monitors/StructureR/Screen11";
+                    return "Monitors/TopGroupR/Screen11";
                 case 11:
-                    return "Monitors/StructureR/Screen12";
+                    return "Monitors/TopGroupR/Screen12";
                 case 12:
-                    return "BigMonitors/Left/LScreen";
+                    return "BigMonitors/BigLeft/LScreen";
                 case 13:
-                    return "BigMonitors/Right/RScreen";
+                    return "BigMonitors/BigRight/RScreen";
             }
 
             return null;
