@@ -47,20 +47,11 @@ namespace OpenBodyCams.Patches
                 return;
             }
 
-            var shipCamera = shipCameraObject.GetComponent<Camera>();
-            if (shipCamera == null)
-            {
-                Plugin.Instance.Logger.LogError("Ship camera does not contain a camera component.");
-                return;
-            }
-
-            shipCameraRenderer.enabled = false;
+            shipCameraObject.SetActive(false);
 
             var newMaterials = shipCameraRenderer.mesh.sharedMaterials;
             newMaterials[shipScreenMaterialIndex] = blackScreenMaterial;
             shipCameraRenderer.mesh.sharedMaterials = newMaterials;
-
-            shipCamera.enabled = false;
         }
 
         [HarmonyPostfix]
