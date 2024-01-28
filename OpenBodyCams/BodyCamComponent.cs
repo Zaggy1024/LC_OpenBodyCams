@@ -145,6 +145,9 @@ namespace OpenBodyCams
             fogShaderPlane.transform.localRotation = Quaternion.Euler(270, 0, 0);
             fogShaderPlane.layer = BODY_CAM_ONLY_LAYER;
             Destroy(fogShaderPlane.GetComponent<MeshCollider>());
+
+            // Cloning the transition while it is playing seems to freeze it, so play the animation here to let it reset.
+            StartTargetTransition();
         }
 
         private static Color getEmissiveColor()
