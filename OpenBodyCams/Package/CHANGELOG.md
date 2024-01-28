@@ -1,3 +1,9 @@
+## Version 1.0.19
+- Added an option to adjust the emissive color of the body cam screen.
+- Added an option for the panning speed for cameras when attached to a radar booster. When set to 0, the camera will be stationary and face in the direction the player was looking when placing the radar booster.
+- Implemented an optional fix for dropped item rotation being desynced between the player dropping the item and other players. This will affect all items in the game. Without this fix, radar boosters will not face in the direction that they were dropped by the player that had been holding them.
+- Allowed the camera to be disabled when the player being viewed enters the ship to avoid rendering the items on board twice.
+
 ## Version 1.0.18
 - Fixed the radar map not disabling correctly when it was not visible, or while the player is outside the ship.
 
