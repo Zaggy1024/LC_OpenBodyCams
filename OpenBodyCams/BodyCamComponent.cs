@@ -18,7 +18,6 @@ namespace OpenBodyCams
         public const int ENEMIES_LAYER = 19;
         public const int ENEMIES_NOT_RENDERED_LAYER = 23;
         public const int BODY_CAM_ONLY_LAYER = 31;
-        public const float PAN_SPEED = 40.0f;
 
         public static readonly Vector3 BODY_CAM_OFFSET = new Vector3(0.07f, 0, 0.15f);
         public static readonly Vector3 CAMERA_CONTAINER_OFFSET = new Vector3(0.07f, 0, 0.125f);
@@ -56,8 +55,10 @@ namespace OpenBodyCams
         private float elapsedSinceLastFrame = 0;
         private float timePerFrame = 0;
 
+        private const float radarBoosterInitialPan = 270;
+        private float radarBoosterPanSpeed;
         private bool panCamera = false;
-        private float panAngle = 0;
+        private float panAngle = radarBoosterInitialPan;
 
         private Animator greenFlashAnimator;
 
@@ -189,6 +190,8 @@ namespace OpenBodyCams
 
             nightVisionLight.intensity = Plugin.NightVisionIntensityBase * Plugin.NightVisionBrightness.Value;
             nightVisionLight.range = Plugin.NightVisionRangeBase * Plugin.NightVisionBrightness.Value;
+
+            radarBoosterPanSpeed = Plugin.RadarBoosterPanRPM.Value * 360 / 60;
 
             disableCameraWhileTargetIsOnShip = Plugin.DisableCameraWhileTargetIsOnShip.Value;
             enableCamera = Plugin.EnableCamera.Value;
@@ -501,7 +504,10 @@ namespace OpenBodyCams
                 return;
             }
 
-            panAngle += Time.deltaTime * PAN_SPEED;
+            if (radarBoosterPanSpeed != 0)
+                panAngle += Time.deltaTime * radarBoosterPanSpeed;
+            else
+                panAngle = radarBoosterInitialPan;
             if (panCamera)
                 cameraObject.transform.localRotation = Quaternion.Euler(0, panAngle, 0);
 
