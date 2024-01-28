@@ -177,6 +177,7 @@ namespace OpenBodyCams
         public void UpdateSettings()
         {
             camera.targetTexture = new RenderTexture(Plugin.HorizontalResolution.Value, Plugin.HorizontalResolution.Value * 3 / 4, 32);
+            camera.targetTexture.filterMode = Plugin.MonitorTextureFiltering.Value;
             camera.fieldOfView = Plugin.FieldOfView.Value;
 
             monitorOnMaterial.mainTexture = camera.targetTexture;
