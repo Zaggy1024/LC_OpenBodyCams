@@ -27,6 +27,7 @@ GeneralImprovements' extended monitors set is supported through a config option 
 - `RenderDistance`: The far clip plane of the camera.
 - `Framerate`: The number of frames to render per second. The default setting renders at the game's framerate and has the least impact on performance.
 - `NightVisionBrightness`: A multiplier for the brightness and range of the night vision light. A value of 1 matches the vision of the player being viewed.
+- `EnableCamera`: When this is enabled, the screen will be powered off. This can be changed in-game with LethalConfig or any similar mod.
 
 ## Miscellaneous
 - `DisableInternalShipCamera`: Disables the camera at the front of the ship facing towards the center. This may improve performance inside the ship slightly.
