@@ -1,3 +1,6 @@
+## Version 1.0.20
+- Fixed parsing of the emissive color option in locales that use `,` as their decimal separator.
+
 ## Version 1.0.19
 - Added an option to adjust the emissive color of the body cam screen.
 - Added an option for the panning speed for cameras when attached to a radar booster. When set to 0, the camera will be stationary and face in the direction the player was looking when placing the radar booster.
