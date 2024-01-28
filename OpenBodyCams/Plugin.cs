@@ -1,8 +1,9 @@
+using System;
+
 using BepInEx;
 using BepInEx.Configuration;
 using BepInEx.Logging;
 using HarmonyLib;
-using UnityEngine;
 
 using OpenBodyCams.Patches;
 
@@ -93,6 +94,13 @@ namespace OpenBodyCams
         {
             TerminalScript = FindObjectOfType<Terminal>();
             TwoRadarCamsPresent = TerminalScript.GetComponent<ManualCameraRenderer>() != null;
+
+            // Prevent the radar from targeting a nonexistent player at the start of a round:
+            if (!TwoRadarCamsPresent && StartOfRound.Instance.IsServer)
+            {
+                var mainMap = StartOfRound.Instance.mapScreen;
+                mainMap.SwitchRadarTargetAndSync(Math.Min(mainMap.targetTransformIndex, mainMap.radarTargets.Count - 1));
+            }
         }
     }
 }

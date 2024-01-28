@@ -1,8 +1,7 @@
-﻿using System.Collections;
+using System;
+using System.Collections;
 
 using HarmonyLib;
-
-using OpenBodyCams.Compatibility;
 
 namespace OpenBodyCams.Patches
 {
@@ -11,7 +10,7 @@ namespace OpenBodyCams.Patches
     {
         [HarmonyPostfix]
         [HarmonyPatch("updateMapTarget")]
-        static IEnumerator updateMapTargetPostfix(IEnumerator result, ManualCameraRenderer __instance, int __0)
+        static IEnumerator updateMapTargetPostfix(IEnumerator result, ManualCameraRenderer __instance)
         {
             if (__instance == StartOfRound.Instance.mapScreen)
                 Plugin.BodyCam?.StartTargetTransition();
@@ -46,6 +45,20 @@ namespace OpenBodyCams.Patches
                 if (Plugin.TerminalScript.terminalUIScreen.isActiveAndEnabled)
                     __result = true;
             }
+        }
+
+        [HarmonyPostfix]
+        [HarmonyPatch(nameof(ManualCameraRenderer.RemoveTargetFromRadar))]
+        static void RemoveTargetFromRadarPostfix(ManualCameraRenderer __instance)
+        {
+            if (Plugin.TwoRadarCamsPresent)
+                return;
+            // RemoveTargetFromRadar is invoked by RadarBoosterItem, but it invokes it as if it was called from an RPC handler,
+            // which causes the target switch to not check if the target index is valid. This means that the radar target index
+            // can point to a player object that hasn't been taken control of, so the body cam shows an out-of-bounds area instead.
+            var player = __instance.targetedPlayer;
+            if (player != null && !player.isPlayerControlled && !player.isPlayerDead && player.redirectToEnemy == null)
+                __instance.SwitchRadarTargetAndSync(Math.Min(__instance.targetTransformIndex, __instance.radarTargets.Count));
         }
     }
 }
