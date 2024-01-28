@@ -44,6 +44,7 @@ namespace OpenBodyCams
         public static ConfigEntry<int> GeneralImprovementsBetterMonitorIndex;
 
         public static ConfigEntry<bool> DisableInternalShipCamera;
+        public static ConfigEntry<bool> FixDroppedItemRotation;
 
         public new ManualLogSource Logger => base.Logger;
 
@@ -89,8 +90,11 @@ namespace OpenBodyCams
             GeneralImprovementsBetterMonitorIndex = Config.Bind("Compatibility", "GeneralImprovementsBetterMonitorIndex", 0, new ConfigDescription("Choose which of GeneralImprovements' extended monitor set to display the body cam on. A value of 0 will place it on the large monitor on the right, 1-14 goes left to right, top to bottom, skipping the large center monitor.", new AcceptableValueRange<int>(0, 14)));
 
             DisableInternalShipCamera = Config.Bind("Misc", "DisableInternalShipCamera", false, "Whether to disable the internal ship camera displayed above the bodycam monitor.");
+            FixDroppedItemRotation = Config.Bind("Misc", "FixDroppedItemRotation", true, "If enabled, the mod will patch a bug that causes the rotation of dropped items to be desynced between clients.");
 
             CosmeticsCompatibility.Initialize(harmony);
+
+            harmony.PatchAll(typeof(PatchFixItemDropping));
         }
 
         public static void OnLocalPlayerConnected()
