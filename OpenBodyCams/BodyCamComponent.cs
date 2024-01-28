@@ -1,4 +1,5 @@
 using System;
+using System.Globalization;
 using System.Linq;
 using System.Reflection;
 
@@ -154,7 +155,10 @@ namespace OpenBodyCams
         {
             Color ParseColor(string str)
             {
-                var components = str.Split(new char[] { ',', ' ' }, StringSplitOptions.RemoveEmptyEntries).Select(x => float.Parse(x.Trim())).ToArray();
+                var components = str
+                    .Split(new char[] { ',', ' ' }, StringSplitOptions.RemoveEmptyEntries)
+                    .Select(x => float.Parse(x.Trim(), CultureInfo.InvariantCulture))
+                    .ToArray();
                 if (components.Length < 0 || components.Length > 4)
                     throw new ArgumentException("Too many color components");
                 return new Color(components[0], components[1], components[2], components.Length == 4 ? components[3] : 0);
