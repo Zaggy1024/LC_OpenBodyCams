@@ -1,3 +1,6 @@
+## Version 1.0.23
+- Fixed the external camera staying frozen when looking at the screen by the door controls.
+
 ## Version 1.0.22
 - Added handling of AdvancedCompany equipment to the compatibility feature, preventing equipped items from obstructing the body cam.
 
