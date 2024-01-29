@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 
 using HarmonyLib;
+using UnityEngine;
 
 namespace OpenBodyCams.Patches
 {
@@ -34,16 +35,42 @@ namespace OpenBodyCams.Patches
         [HarmonyPatch("MeetsCameraEnabledConditions")]
         static void MeetsCameraEnabledConditionsPostfix(ManualCameraRenderer __instance, ref bool __result)
         {
-            if (__result)
-                return;
-
             if ((object)__instance == StartOfRound.Instance.mapScreen)
             {
+                if (__result)
+                    return;
+
                 if (Plugin.TwoRadarCamsPresent)
                     return;
 
                 if (Plugin.TerminalScript.terminalUIScreen.isActiveAndEnabled)
                     __result = true;
+            }
+            else if ((object)__instance == PatchStartOfRound.ShipCameraRenderer)
+            {
+                if (!__result)
+                    return;
+
+                var meshBounds = __instance.mesh.bounds;
+                var isVisible = false;
+
+                foreach (var camera in Camera.allCameras)
+                {
+                    if ((object)camera == __instance.cam)
+                        continue;
+                    if (!camera.isActiveAndEnabled)
+                        continue;
+                    if ((camera.cullingMask & (1 << __instance.mesh.gameObject.layer)) == 0)
+                        continue;
+
+                    if (GeometryUtility.TestPlanesAABB(GeometryUtility.CalculateFrustumPlanes(camera), meshBounds))
+                    {
+                        isVisible = true;
+                        break;
+                    }
+                }
+
+                __result = isVisible;
             }
         }
 

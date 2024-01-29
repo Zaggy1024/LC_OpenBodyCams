@@ -12,6 +12,8 @@ namespace OpenBodyCams.Patches
     {
         public static Material blackScreenMaterial;
 
+        public static ManualCameraRenderer ShipCameraRenderer;
+
         [HarmonyPostfix]
         [HarmonyPatch("Start")]
         [HarmonyPriority(Priority.VeryHigh)]
@@ -19,11 +21,10 @@ namespace OpenBodyCams.Patches
         {
             blackScreenMaterial = StartOfRound.Instance.mapScreen.offScreenMat;
 
-            if (Plugin.DisableInternalShipCamera.Value)
-                DisableShipCamera();
+            GetAndMaybeDisableShipCamera();
         }
 
-        static void DisableShipCamera()
+        static void GetAndMaybeDisableShipCamera()
         {
             var shipCameraObject = GameObject.Find("Environment/HangarShip/Cameras/ShipCamera");
             if (shipCameraObject == null)
@@ -32,14 +33,17 @@ namespace OpenBodyCams.Patches
                 return;
             }
 
-            var shipCameraRenderer = shipCameraObject.GetComponent<ManualCameraRenderer>();
-            if (shipCameraRenderer?.mesh == null)
+            ShipCameraRenderer = shipCameraObject.GetComponent<ManualCameraRenderer>();
+            if (ShipCameraRenderer?.mesh == null)
             {
                 Plugin.Instance.Logger.LogError("Internal ship camera does not have a camera renderer.");
                 return;
             }
 
-            var shipScreenMaterialIndex = Array.FindIndex(shipCameraRenderer.mesh.sharedMaterials, material => material.name.StartsWith("ShipScreen1Mat"));
+            if (!Plugin.DisableInternalShipCamera.Value)
+                return;
+
+            var shipScreenMaterialIndex = Array.FindIndex(ShipCameraRenderer.mesh.sharedMaterials, material => material.name.StartsWith("ShipScreen1Mat"));
 
             if (blackScreenMaterial == null || shipScreenMaterialIndex == -1)
             {
@@ -49,9 +53,9 @@ namespace OpenBodyCams.Patches
 
             shipCameraObject.SetActive(false);
 
-            var newMaterials = shipCameraRenderer.mesh.sharedMaterials;
+            var newMaterials = ShipCameraRenderer.mesh.sharedMaterials;
             newMaterials[shipScreenMaterialIndex] = blackScreenMaterial;
-            shipCameraRenderer.mesh.sharedMaterials = newMaterials;
+            ShipCameraRenderer.mesh.sharedMaterials = newMaterials;
         }
 
         [HarmonyPostfix]
