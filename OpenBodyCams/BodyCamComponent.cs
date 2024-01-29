@@ -9,8 +9,6 @@ using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.HighDefinition;
 
-using OpenBodyCams.Patches;
-
 namespace OpenBodyCams
 {
     public class BodyCamComponent : MonoBehaviour
@@ -77,7 +75,7 @@ namespace OpenBodyCams
             monitorOnMaterial.SetFloat("_AlbedoAffectEmissive", 1);
             SetMaterial(monitorRenderer, monitorMaterialIndex, monitorOnMaterial);
 
-            monitorOffMaterial = PatchStartOfRound.blackScreenMaterial;
+            monitorOffMaterial = ShipObjects.blackScreenMaterial;
 
             var aPlayerScript = StartOfRound.Instance.allPlayerScripts[0];
 

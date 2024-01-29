@@ -52,9 +52,6 @@ namespace OpenBodyCams
 
         public static BodyCamComponent BodyCam;
 
-        public static Terminal TerminalScript;
-        public static bool TwoRadarCamsPresent = false;
-
         void Awake()
         {
             Instance = this;
@@ -99,19 +96,6 @@ namespace OpenBodyCams
             CosmeticsCompatibility.Initialize(harmony);
 
             harmony.PatchAll(typeof(PatchFixItemDropping));
-        }
-
-        public static void OnLocalPlayerConnected()
-        {
-            TerminalScript = FindObjectOfType<Terminal>();
-            TwoRadarCamsPresent = TerminalScript.GetComponent<ManualCameraRenderer>() != null;
-
-            // Prevent the radar from targeting a nonexistent player at the start of a round:
-            if (!TwoRadarCamsPresent && StartOfRound.Instance.IsServer)
-            {
-                var mainMap = StartOfRound.Instance.mapScreen;
-                mainMap.SwitchRadarTargetAndSync(Math.Min(mainMap.targetTransformIndex, mainMap.radarTargets.Count - 1));
-            }
         }
     }
 }

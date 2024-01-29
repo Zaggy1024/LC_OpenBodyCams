@@ -40,13 +40,13 @@ namespace OpenBodyCams.Patches
                 if (__result)
                     return;
 
-                if (Plugin.TwoRadarCamsPresent)
+                if (ShipObjects.TwoRadarCamsPresent)
                     return;
 
-                if (Plugin.TerminalScript.terminalUIScreen.isActiveAndEnabled)
+                if (ShipObjects.TerminalScript.terminalUIScreen.isActiveAndEnabled)
                     __result = true;
             }
-            else if ((object)__instance == PatchStartOfRound.ShipCameraRenderer)
+            else if ((object)__instance == ShipObjects.ShipCameraRenderer)
             {
                 if (!__result)
                     return;
@@ -78,7 +78,7 @@ namespace OpenBodyCams.Patches
         [HarmonyPatch(nameof(ManualCameraRenderer.RemoveTargetFromRadar))]
         static void RemoveTargetFromRadarPostfix(ManualCameraRenderer __instance)
         {
-            if (Plugin.TwoRadarCamsPresent)
+            if (ShipObjects.TwoRadarCamsPresent)
                 return;
             // RemoveTargetFromRadar is invoked by RadarBoosterItem, but it invokes it as if it was called from an RPC handler,
             // which causes the target switch to not check if the target index is valid. This means that the radar target index

@@ -15,47 +15,7 @@ namespace OpenBodyCams.Patches
         [HarmonyPriority(Priority.VeryLow)]
         static void ConnectClientToPlayerObjectFinalizer(PlayerControllerB __instance)
         {
-            Plugin.OnLocalPlayerConnected();
-
-            InitializeBodyCam();
-        }
-
-        static void InitializeBodyCam()
-        {
-            var bottomMonitors = GameObject.Find("Environment/HangarShip/ShipModels2b/MonitorWall/Cube.001");
-            if (bottomMonitors == null)
-            {
-                Plugin.Instance.Logger.LogError("Could not find the bottom monitors' game object.");
-                return;
-            }
-
-            if (bottomMonitors.GetComponent<BodyCamComponent>() == null)
-            {
-                var bodyCam = bottomMonitors.AddComponent<BodyCamComponent>();
-
-                var renderer = bottomMonitors.GetComponent<MeshRenderer>();
-                var materialIndex = 2;
-
-                // GeneralImprovements BetterMonitors enabled:
-                int monitorID = Plugin.GeneralImprovementsBetterMonitorIndex.Value - 1;
-                if (monitorID < 0)
-                    monitorID = 13;
-                if (GeneralImprovementsCompatibility.GetMonitorForID(monitorID) is MeshRenderer giMonitorRenderer)
-                {
-                    renderer = giMonitorRenderer;
-                    materialIndex = 0;
-                }
-
-                if (renderer == null)
-                {
-                    Plugin.Instance.Logger.LogError("Failed to find the monitor renderer.");
-                    return;
-                }
-
-                bodyCam.monitorRenderer = renderer;
-                bodyCam.monitorMaterialIndex = materialIndex; ;
-                bodyCam.enabled = true;
-            }
+            ShipObjects.LateInitialization();
         }
 
         [HarmonyPostfix]
