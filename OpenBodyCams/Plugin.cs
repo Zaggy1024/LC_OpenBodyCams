@@ -39,9 +39,10 @@ namespace OpenBodyCams
         public static ConfigEntry<bool> DisableCameraWhileTargetIsOnShip;
         public static ConfigEntry<bool> EnableCamera;
 
+        public static ConfigEntry<int> GeneralImprovementsBetterMonitorIndex;
         public static ConfigEntry<bool> EnableMoreCompanyCosmeticsCompatibility;
         public static ConfigEntry<bool> EnableAdvancedCompanyCosmeticsCompatibility;
-        public static ConfigEntry<int> GeneralImprovementsBetterMonitorIndex;
+        public static ConfigEntry<bool> EnableModelReplacementAPICompatibility;
 
         public static ConfigEntry<bool> DisableInternalShipCamera;
         public static ConfigEntry<bool> FixDroppedItemRotation;
@@ -84,9 +85,10 @@ namespace OpenBodyCams
             DisableCameraWhileTargetIsOnShip.SettingChanged += (s, e) => BodyCam.UpdateSettings();
             EnableCamera.SettingChanged += (s, e) => BodyCam.UpdateSettings();
 
+            GeneralImprovementsBetterMonitorIndex = Config.Bind("Compatibility", "GeneralImprovementsBetterMonitorIndex", 0, new ConfigDescription("Choose which of GeneralImprovements' extended monitor set to display the body cam on. A value of 0 will place it on the large monitor on the right, 1-14 goes left to right, top to bottom, skipping the large center monitor.", new AcceptableValueRange<int>(0, 14)));
             EnableMoreCompanyCosmeticsCompatibility = Config.Bind("Compatibility", "EnableMoreCompanyCosmeticsCompatibility", true, "If this is enabled, a patch will be applied to MoreCompany to spawn cosmetics for the local player, and all cosmetics will be shown and hidden based on the camera's perspective.");
             EnableAdvancedCompanyCosmeticsCompatibility = Config.Bind("Compatibility", "EnableAdvancedCompanyCosmeticsCompatibility", true, "When this is enabled and AdvancedCompany is installed, all cosmetics will be shown and hidden based on the camera's perspective.");
-            GeneralImprovementsBetterMonitorIndex = Config.Bind("Compatibility", "GeneralImprovementsBetterMonitorIndex", 0, new ConfigDescription("Choose which of GeneralImprovements' extended monitor set to display the body cam on. A value of 0 will place it on the large monitor on the right, 1-14 goes left to right, top to bottom, skipping the large center monitor.", new AcceptableValueRange<int>(0, 14)));
+            EnableModelReplacementAPICompatibility = Config.Bind("Compatibility", "EnableModelReplacementAPICompatibility", true, "When enabled, this will get the third person model replacement and hide/show it based on the camera's perspective.");
 
             DisableInternalShipCamera = Config.Bind("Misc", "DisableInternalShipCamera", false, "Whether to disable the internal ship camera displayed above the bodycam monitor.");
             FixDroppedItemRotation = Config.Bind("Misc", "FixDroppedItemRotation", true, "If enabled, the mod will patch a bug that causes the rotation of dropped items to be desynced between clients.");

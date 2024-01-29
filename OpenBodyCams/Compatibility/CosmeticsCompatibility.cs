@@ -1,12 +1,12 @@
 using System;
 using System.Linq;
 
+using BepInEx.Bootstrap;
 using GameNetcodeStuff;
 using HarmonyLib;
 using UnityEngine;
 
 using OpenBodyCams.Compatibility;
-using BepInEx.Bootstrap;
 
 namespace OpenBodyCams
 {
@@ -18,6 +18,7 @@ namespace OpenBodyCams
             None = 0,
             MoreCompany = 1,
             AdvancedCompany = 2,
+            ModelReplacementAPI = 4,
         }
 
         private static CompatibilityMode compatibilityMode = CompatibilityMode.None;
@@ -47,6 +48,12 @@ namespace OpenBodyCams
                     Plugin.Instance.Logger.LogInfo("MoreCompany compatibility mode is enabled.");
                 }
             }
+
+            if (Plugin.EnableModelReplacementAPICompatibility.Value && Chainloader.PluginInfos.ContainsKey("meow.ModelReplacementAPI"))
+            {
+                compatibilityMode |= CompatibilityMode.ModelReplacementAPI;
+                Plugin.Instance.Logger.LogInfo("ModelReplacementAPI compatibility mode is enabled.");
+            }
         }
 
         public static GameObject[] CollectCosmetics(PlayerControllerB player)
@@ -58,6 +65,8 @@ namespace OpenBodyCams
                 result = result.Concat(MoreCompanyCompatibility.CollectCosmetics(player));
             if (compatibilityMode.HasFlag(CompatibilityMode.AdvancedCompany))
                 result = result.Concat(AdvancedCompanyCompatibility.CollectCosmetics(player));
+            if (compatibilityMode.HasFlag(CompatibilityMode.ModelReplacementAPI))
+                result = result.Concat(ModelReplacementAPICompatibility.CollectCosmetics(player));
             var resultArray = result.ToArray();
             Plugin.Instance.Logger.LogInfo($"Collected {resultArray.Length} cosmetics objects for {player.playerUsername}.");
             return result.ToArray();
