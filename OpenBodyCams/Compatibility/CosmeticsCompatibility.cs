@@ -28,8 +28,15 @@ namespace OpenBodyCams
 
             if (Plugin.EnableAdvancedCompanyCosmeticsCompatibility.Value && hasAdvancedCompany)
             {
-                compatibilityMode |= CompatibilityMode.AdvancedCompany;
-                Plugin.Instance.Logger.LogInfo("AdvancedCompany compatibility mode is enabled.");
+                if (AdvancedCompanyCompatibility.Initialize(harmony))
+                {
+                    compatibilityMode |= CompatibilityMode.AdvancedCompany;
+                    Plugin.Instance.Logger.LogInfo("AdvancedCompany compatibility mode is enabled.");
+                }
+                else
+                {
+                    Plugin.Instance.Logger.LogWarning("AdvancedCompany is installed, but the compatibility feature failed to initialize.");
+                }
             }
 
             if (Plugin.EnableMoreCompanyCosmeticsCompatibility.Value && !hasAdvancedCompany && Chainloader.PluginInfos.ContainsKey("me.swipez.melonloader.morecompany"))
