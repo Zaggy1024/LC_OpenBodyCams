@@ -14,7 +14,7 @@ The camera view will display only the first person hands and disable the third p
   - Camera setup logic is done ahead of time based on game events whenever possible.
 
 # Compatibility
-MoreCompany and AdvancedCompany cosmetics are both supported. They will be hidden when viewing other players in the body cam, and your cosmetics will be visible on the camera when you are viewing another player looking at you.
+MoreCompany cosmetics and AdvancedCompany cosmetics/equipment are supported. They will be hidden when viewing other players in the body cam, and your cosmetics will be visible on the camera when you are viewing another player looking at you.
 
 GeneralImprovements' extended monitors set is supported through a config option to select the monitor number to use for the body cam. The body cam will override any selection in the GeneralImprovements config.
 

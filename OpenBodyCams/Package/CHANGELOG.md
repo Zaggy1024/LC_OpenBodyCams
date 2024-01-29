@@ -1,3 +1,6 @@
+## Version 1.0.22
+- Added handling of AdvancedCompany equipment to the compatibility feature, preventing equipped items from obstructing the body cam.
+
 ## Version 1.0.21
 - Fixed all cameras in the ship staying enabled when looking away from the front of the ship with DisableInternalShipCamera off. The internal camera is disabled if its screen is not visible to any camera but its own, which occurs when it is not visible to the player.
 
