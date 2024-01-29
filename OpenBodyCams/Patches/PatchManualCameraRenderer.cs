@@ -1,8 +1,8 @@
 using System;
 using System.Collections;
 
+using GameNetcodeStuff;
 using HarmonyLib;
-using UnityEngine;
 
 namespace OpenBodyCams.Patches
 {
@@ -33,7 +33,7 @@ namespace OpenBodyCams.Patches
 
         [HarmonyPostfix]
         [HarmonyPatch("MeetsCameraEnabledConditions")]
-        static void MeetsCameraEnabledConditionsPostfix(ManualCameraRenderer __instance, ref bool __result)
+        static void MeetsCameraEnabledConditionsPostfix(ManualCameraRenderer __instance, ref bool __result, PlayerControllerB player)
         {
             if ((object)__instance == StartOfRound.Instance.mapScreen)
             {
@@ -52,6 +52,17 @@ namespace OpenBodyCams.Patches
                     return;
 
                 __result = Utilities.IsRendererVisibleToAnyCameraExcept(__instance.mesh, __instance.cam);
+            }
+            else if ((object)__instance == ShipObjects.ExternalCameraRenderer)
+            {
+                if (!ShipObjects.DoorScreenUsesExternalCamera)
+                    return;
+                if (__result)
+                    return;
+                if (!player.isInHangarShipRoom && StartOfRound.Instance.shipDoorsEnabled)
+                    return;
+
+                __result = Utilities.IsRendererVisibleToAnyCameraExcept(ShipObjects.DoorScreenRenderer, __instance.cam, true);
             }
         }
 

@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 
 using UnityEngine;
 
@@ -15,9 +16,16 @@ namespace OpenBodyCams
         public static Terminal TerminalScript;
         public static bool TwoRadarCamsPresent = false;
 
+        public static ManualCameraRenderer ExternalCameraRenderer;
+        public static MeshRenderer DoorScreenRenderer;
+        public static bool DoorScreenUsesExternalCamera = false;
+
         public static void EarlyInitialization()
         {
             blackScreenMaterial = StartOfRound.Instance.mapScreen.offScreenMat;
+
+            ExternalCameraRenderer = GameObject.Find("Environment/HangarShip/Cameras/FrontDoorSecurityCam/SecurityCamera")?.GetComponent<ManualCameraRenderer>();
+            DoorScreenRenderer = GameObject.Find("Environment/HangarShip/ShipModels2b/MonitorWall/SingleScreen")?.GetComponent<MeshRenderer>();
 
             GetAndMaybeDisableShipCamera();
         }
@@ -60,6 +68,8 @@ namespace OpenBodyCams
         {
             TerminalScript = UnityEngine.Object.FindObjectOfType<Terminal>();
             TwoRadarCamsPresent = TerminalScript.GetComponent<ManualCameraRenderer>() != null;
+
+            DoorScreenUsesExternalCamera = DoorScreenRenderer.sharedMaterials.Any(mat => mat.mainTexture == ExternalCameraRenderer.cam.targetTexture);
 
             InitializeBodyCam();
 
