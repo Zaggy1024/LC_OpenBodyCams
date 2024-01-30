@@ -1,8 +1,12 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
+using System.Reflection.Emit;
 
 using GameNetcodeStuff;
 using HarmonyLib;
+using Unity.Netcode;
 
 namespace OpenBodyCams.Patches
 {
@@ -66,18 +70,41 @@ namespace OpenBodyCams.Patches
             }
         }
 
-        [HarmonyPostfix]
+        [HarmonyTranspiler]
         [HarmonyPatch(nameof(ManualCameraRenderer.RemoveTargetFromRadar))]
-        static void RemoveTargetFromRadarPostfix(ManualCameraRenderer __instance)
+        static IEnumerable<CodeInstruction> RemoveTargetFromRadarTranspiler(IEnumerable<CodeInstruction> instructions, ILGenerator generator)
         {
             if (ShipObjects.TwoRadarCamsPresent)
-                return;
-            // RemoveTargetFromRadar is invoked by RadarBoosterItem, but it invokes it as if it was called from an RPC handler,
-            // which causes the target switch to not check if the target index is valid. This means that the radar target index
-            // can point to a player object that hasn't been taken control of, so the body cam shows an out-of-bounds area instead.
-            var player = __instance.targetedPlayer;
-            if (player != null && !player.isPlayerControlled && !player.isPlayerDead && player.redirectToEnemy == null)
-                __instance.SwitchRadarTargetAndSync(Math.Min(__instance.targetTransformIndex, __instance.radarTargets.Count));
+                return instructions;
+
+            // RemoveTargetFromRadar is invoked by RadarBoosterItem, which in turn invokes updateMapTarget it as if it was called from
+            // an RPC handler, so it skips checking if the target index is valid. This means that the radar target index can point to a
+            // player object that hasn't been taken control of, so the body cam target is invalid.
+
+            // We fix this by only setting the target on the owner and allow that to sync the correct target.
+            var m_ManualCameraRenderer_SwitchRadarTargetForward = typeof(ManualCameraRenderer).GetMethod(nameof(ManualCameraRenderer.SwitchRadarTargetForward), new Type[] { typeof(bool) });
+
+            var m_NetworkBehaviour_IsOwner = typeof(NetworkBehaviour).GetMethod("get_IsOwner");
+
+            var instructionsList = instructions.ToList();
+
+            var switchRadarTargetForward = instructionsList.FindIndexOfSequence(new Predicate<CodeInstruction>[]
+            {
+                insn => insn.IsLdarg(0),
+                insn => insn.LoadsConstant(0),
+                insn => insn.Calls(m_ManualCameraRenderer_SwitchRadarTargetForward),
+            });
+            instructionsList[switchRadarTargetForward.Start + 1] = new CodeInstruction(OpCodes.Ldc_I4_1);
+            var notOwnerLabel = generator.DefineLabel();
+            instructionsList[switchRadarTargetForward.End].labels.Add(notOwnerLabel);
+            instructionsList.InsertRange(switchRadarTargetForward.Start, new CodeInstruction[]
+            {
+                new CodeInstruction(OpCodes.Ldarg_0),
+                new CodeInstruction(OpCodes.Call, m_NetworkBehaviour_IsOwner),
+                new CodeInstruction(OpCodes.Brfalse_S, notOwnerLabel),
+            });
+
+            return instructionsList;
         }
     }
 }
