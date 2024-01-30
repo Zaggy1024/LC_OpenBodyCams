@@ -77,7 +77,7 @@ namespace OpenBodyCams
             DisableCameraWhileTargetIsOnShip = Config.Bind("Camera", "DisableCameraWhileTargetIsOnShip", false, "With this option enabled, the camera will stop rendering when the target is onboard the ship to reduce the performance hit of rendering a large number of items on the ship twice.");
             EnableCamera = Config.Bind("Camera", "EnableCamera", true, "Enables/disables rendering of the body cam, and can be enabled/disabled during a game with LethalConfig.");
 
-            CameraMode.SettingChanged += (s, e) => BodyCamComponent.UpdateAllCameraSettings();
+            CameraMode.SettingChanged += (s, e) => BodyCamComponent.UpdateAllTargetStatuses();
             HorizontalResolution.SettingChanged += (s, e) => BodyCamComponent.UpdateAllCameraSettings();
             FieldOfView.SettingChanged += (s, e) => BodyCamComponent.UpdateAllCameraSettings();
             RenderDistance.SettingChanged += (s, e) => BodyCamComponent.UpdateAllCameraSettings();
