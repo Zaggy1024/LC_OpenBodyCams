@@ -87,6 +87,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="API\BodyCam.cs" />
     <Compile Include="BodyCamComponent.cs" />
     <Compile Include="Compatibility\AdvancedCompanyCompatibility.cs" />
     <Compile Include="Compatibility\CosmeticsCompatibility.cs" />

@@ -42,3 +42,13 @@ Third-person model replacements by ModelReplacementAPI or LethalVRM are supporte
 As mentioned above, using no framerate limit results in the best performance. Forcing the camera to render at certain intervals outside of the render pipeline seems to cause a lot of overhead, so setting the framerate limit to anything above 30fps may cause a severe dip in the game's framerate.
 
 An optional fix is included for items' rotations being desynced between the player dropping them and all other clients, which is caused by an ignored rotation parameter in the function handling dropped items. This is included to allow the radar boosters to face in a consistent direction for all clients in a game. The patch is designed to fail gracefully and allow the mod to still run, in case any other mods apply the same fix, but if problems arise, it can be disabled with the `FixDroppedItemRotation` config option.
+
+# Developers
+If you wish to create a body cam separate from the default one included with this mod, you can simply add OpenBodyCams as a dependency and use `OpenBodyCams.API.BodyCam.CreateBodyCam()`:
+
+```cs
+var doorScreen = GameObject.Find("Environment/HangarShip/ShipModels2b/MonitorWall/SingleScreen");
+BodyCam.CreateBodyCam(doorScreen, doorScreen.GetComponent<MeshRenderer>(), 1, StartOfRound.Instance.mapScreen);
+```
+
+The `ManualCameraRenderer` argument must be a map renderer where its `cam` field is the same reference as its `mapCamera` field. However, the argument may be null, in which case the body cam's target may be controlled directly.
