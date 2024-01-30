@@ -1,3 +1,7 @@
+## Version 1.0.24
+- Added support for ModelReplacementAPI's third person model replacements.
+- Added support for LethalVRM's third person model replacements.
+
 ## Version 1.0.23
 - Fixed the external camera staying frozen when looking at the screen by the door controls.
 
