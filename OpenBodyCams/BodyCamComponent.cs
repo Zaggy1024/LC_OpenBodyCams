@@ -15,7 +15,6 @@ namespace OpenBodyCams
         public const int DEFAULT_LAYER = 0;
         public const int ENEMIES_LAYER = 19;
         public const int ENEMIES_NOT_RENDERED_LAYER = 23;
-        public const int BODY_CAM_ONLY_LAYER = 31;
 
         private const float RADAR_BOOSTER_INITIAL_PAN = 270;
 
@@ -62,7 +61,10 @@ namespace OpenBodyCams
         private bool panCamera = false;
         private float panAngle = RADAR_BOOSTER_INITIAL_PAN;
 
+        private MeshRenderer greenFlashRenderer;
         private Animator greenFlashAnimator;
+
+        private MeshRenderer fogShaderPlaneRenderer;
 
         public static void InitializeStatic()
         {
@@ -170,8 +172,7 @@ namespace OpenBodyCams
             monitorOffMaterial = ShipObjects.blackScreenMaterial;
 
             var nightVisionLight = nightVisionPrefab.GetComponent<Light>();
-            nightVisionLight.enabled = true;
-            nightVisionLight.cullingMask = 1 << BODY_CAM_ONLY_LAYER;
+            nightVisionLight.enabled = false;
 
             // By default, the map's night vision light renders on all layers, so let's change that so we don't see it on the body cam.
             var mapLight = StartOfRound.Instance.mapScreen.mapCameraLight;
@@ -204,7 +205,7 @@ namespace OpenBodyCams
             cameraObject = new GameObject("BodyCam");
             camera = cameraObject.AddComponent<Camera>();
             camera.nearClipPlane = 0.05f;
-            camera.cullingMask = unchecked((int)0b1010_0001_0011_1011_0001_0111_0101_1011);
+            camera.cullingMask = 0b0010_0001_0011_1011_0001_0111_0101_1011;
             var cameraData = cameraObject.AddComponent<HDAdditionalCameraData>();
             cameraData.volumeLayerMask = 1;
 
@@ -222,19 +223,21 @@ namespace OpenBodyCams
             var greenFlashObject = Instantiate(StartOfRound.Instance.mapScreen.mapCameraAnimator.gameObject);
             greenFlashObject.transform.SetParent(greenFlashParent.transform, false);
             greenFlashObject.transform.localPosition = new Vector3(0, 0, 0.1f);
-            greenFlashObject.layer = BODY_CAM_ONLY_LAYER;
+            greenFlashObject.layer = DEFAULT_LAYER;
+            greenFlashRenderer = greenFlashObject.GetComponent<MeshRenderer>();
+            greenFlashRenderer.forceRenderingOff = true;
             greenFlashAnimator = greenFlashObject.GetComponent<Animator>() ?? throw new Exception("Green flash object copied from the map screen has no Animator.");
 
             var fogShaderPlane = GameObject.CreatePrimitive(PrimitiveType.Plane);
+            Destroy(fogShaderPlane.GetComponent<MeshCollider>());
             fogShaderPlane.transform.SetParent(cameraObject.transform, false);
-            var fogShaderPlaneMesh = fogShaderPlane.GetComponent<MeshRenderer>();
-            fogShaderPlaneMesh.sharedMaterial = fogShaderMaterial;
-            fogShaderPlaneMesh.shadowCastingMode = ShadowCastingMode.Off;
-            fogShaderPlaneMesh.receiveShadows = false;
             fogShaderPlane.transform.localPosition = new Vector3(0, 0, 0.5f);
             fogShaderPlane.transform.localRotation = Quaternion.Euler(270, 0, 0);
-            fogShaderPlane.layer = BODY_CAM_ONLY_LAYER;
-            Destroy(fogShaderPlane.GetComponent<MeshCollider>());
+            fogShaderPlaneRenderer = fogShaderPlane.GetComponent<MeshRenderer>();
+            fogShaderPlaneRenderer.sharedMaterial = fogShaderMaterial;
+            fogShaderPlaneRenderer.shadowCastingMode = ShadowCastingMode.Off;
+            fogShaderPlaneRenderer.receiveShadows = false;
+            fogShaderPlaneRenderer.forceRenderingOff = true;
 
             // Cloning the transition while it is playing seems to freeze it, so play the animation here to let it reset.
             StartTargetTransition();
@@ -547,6 +550,10 @@ namespace OpenBodyCams
             foreach (var mesh in currentlyViewedMeshes)
                 mesh.forceRenderingOff = true;
 
+            nightVisionLight.enabled = true;
+            greenFlashRenderer.forceRenderingOff = false;
+            fogShaderPlaneRenderer.forceRenderingOff = false;
+
             var localPlayer = StartOfRound.Instance.localPlayerController;
 
             SaveStateAndApplyPerspective(currentPlayer, ref currentPlayerCosmetics, ref currentPlayerModelState, Perspective.FirstPerson);
@@ -566,6 +573,10 @@ namespace OpenBodyCams
                 return;
             foreach (var mesh in currentlyViewedMeshes)
                 mesh.forceRenderingOff = false;
+
+            nightVisionLight.enabled = false;
+            greenFlashRenderer.forceRenderingOff = true;
+            fogShaderPlaneRenderer.forceRenderingOff = true;
 
             var localPlayer = StartOfRound.Instance.localPlayerController;
 
