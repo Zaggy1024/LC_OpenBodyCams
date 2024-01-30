@@ -602,7 +602,7 @@ namespace OpenBodyCams
             }
 
             if (radarBoosterPanSpeed != 0)
-                panAngle = (Time.deltaTime * radarBoosterPanSpeed) % 360;
+                panAngle = (panAngle + (Time.deltaTime * radarBoosterPanSpeed)) % 360;
             else
                 panAngle = RADAR_BOOSTER_INITIAL_PAN;
             if (panCamera)
