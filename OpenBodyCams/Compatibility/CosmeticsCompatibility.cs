@@ -25,7 +25,7 @@ namespace OpenBodyCams
 
         public static void Initialize(Harmony harmony)
         {
-            var hasAdvancedCompany = Chainloader.PluginInfos.ContainsKey("com.potatoepet.AdvancedCompany");
+            var hasAdvancedCompany = Chainloader.PluginInfos.ContainsKey(ModGUIDs.AdvancedCompany);
 
             if (Plugin.EnableAdvancedCompanyCosmeticsCompatibility.Value && hasAdvancedCompany)
             {
@@ -40,7 +40,7 @@ namespace OpenBodyCams
                 }
             }
 
-            if (Plugin.EnableMoreCompanyCosmeticsCompatibility.Value && !hasAdvancedCompany && Chainloader.PluginInfos.ContainsKey("me.swipez.melonloader.morecompany"))
+            if (Plugin.EnableMoreCompanyCosmeticsCompatibility.Value && !hasAdvancedCompany && Chainloader.PluginInfos.ContainsKey(ModGUIDs.MoreCompany))
             {
                 if (MoreCompanyCompatibility.Initialize(harmony))
                 {
@@ -53,7 +53,7 @@ namespace OpenBodyCams
                 }
             }
 
-            if (Plugin.EnableModelReplacementAPICompatibility.Value && Chainloader.PluginInfos.ContainsKey("meow.ModelReplacementAPI"))
+            if (Plugin.EnableModelReplacementAPICompatibility.Value && Chainloader.PluginInfos.ContainsKey(ModGUIDs.ModelReplacementAPI))
             {
                 compatibilityMode |= CompatibilityMode.ModelReplacementAPI;
                 Plugin.Instance.Logger.LogInfo("ModelReplacementAPI compatibility mode is enabled.");
