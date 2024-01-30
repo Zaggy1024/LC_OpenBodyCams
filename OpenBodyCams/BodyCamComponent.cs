@@ -35,7 +35,7 @@ namespace OpenBodyCams
         public Camera camera;
         public Light nightVisionLight;
 
-        public MeshRenderer monitorRenderer;
+        public Renderer monitorRenderer;
         public int monitorMaterialIndex;
         public Material monitorOnMaterial;
         public Material monitorOffMaterial;
