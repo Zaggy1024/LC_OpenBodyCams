@@ -19,6 +19,7 @@ namespace OpenBodyCams
     [BepInDependency(ModGUIDs.AdvancedCompany, BepInDependency.DependencyFlags.SoftDependency)]
     [BepInDependency(ModGUIDs.MoreCompany, BepInDependency.DependencyFlags.SoftDependency)]
     [BepInDependency(ModGUIDs.ModelReplacementAPI, BepInDependency.DependencyFlags.SoftDependency)]
+    [BepInDependency(ModGUIDs.LethalVRM, BepInDependency.DependencyFlags.SoftDependency)]
     public class Plugin : BaseUnityPlugin
     {
         public const string MOD_NAME = "OpenBodyCams";
@@ -47,6 +48,7 @@ namespace OpenBodyCams
         public static ConfigEntry<bool> EnableMoreCompanyCosmeticsCompatibility;
         public static ConfigEntry<bool> EnableAdvancedCompanyCosmeticsCompatibility;
         public static ConfigEntry<bool> EnableModelReplacementAPICompatibility;
+        public static ConfigEntry<bool> EnableLethalVRMCompatibility;
 
         public static ConfigEntry<bool> DisableInternalShipCamera;
         public static ConfigEntry<bool> FixDroppedItemRotation;
@@ -93,6 +95,7 @@ namespace OpenBodyCams
             EnableMoreCompanyCosmeticsCompatibility = Config.Bind("Compatibility", "EnableMoreCompanyCosmeticsCompatibility", true, "If this is enabled, a patch will be applied to MoreCompany to spawn cosmetics for the local player, and all cosmetics will be shown and hidden based on the camera's perspective.");
             EnableAdvancedCompanyCosmeticsCompatibility = Config.Bind("Compatibility", "EnableAdvancedCompanyCosmeticsCompatibility", true, "When this is enabled and AdvancedCompany is installed, all cosmetics will be shown and hidden based on the camera's perspective.");
             EnableModelReplacementAPICompatibility = Config.Bind("Compatibility", "EnableModelReplacementAPICompatibility", true, "When enabled, this will get the third person model replacement and hide/show it based on the camera's perspective.");
+            EnableLethalVRMCompatibility = Config.Bind("Compatibility", "EnableLethalVRMCompatibility", true, "When enabled, any VRM model will be hidden/shown based on the camera's perspective.");
 
             DisableInternalShipCamera = Config.Bind("Misc", "DisableInternalShipCamera", false, "Whether to disable the internal ship camera displayed above the bodycam monitor.");
             FixDroppedItemRotation = Config.Bind("Misc", "FixDroppedItemRotation", true, "If enabled, the mod will patch a bug that causes the rotation of dropped items to be desynced between clients.");

@@ -19,6 +19,7 @@ namespace OpenBodyCams
             MoreCompany = 1,
             AdvancedCompany = 2,
             ModelReplacementAPI = 4,
+            LethalVRM = 8,
         }
 
         private static CompatibilityMode compatibilityMode = CompatibilityMode.None;
@@ -58,6 +59,19 @@ namespace OpenBodyCams
                 compatibilityMode |= CompatibilityMode.ModelReplacementAPI;
                 Plugin.Instance.Logger.LogInfo("ModelReplacementAPI compatibility mode is enabled.");
             }
+
+            if (Plugin.EnableLethalVRMCompatibility.Value && Chainloader.PluginInfos.ContainsKey(ModGUIDs.LethalVRM))
+            {
+                if (LethalVRMCompatibility.Initialize(harmony))
+                {
+                    compatibilityMode |= CompatibilityMode.LethalVRM;
+                    Plugin.Instance.Logger.LogInfo("LethalVRM compatibility mode is enabled.");
+                }
+                else
+                {
+                    Plugin.Instance.Logger.LogWarning("LethalVRM is installed, but the compatibility feature failed to initialize.");
+                }
+            }
         }
 
         public static GameObject[] CollectCosmetics(PlayerControllerB player)
@@ -71,6 +85,8 @@ namespace OpenBodyCams
                 result = result.Concat(AdvancedCompanyCompatibility.CollectCosmetics(player));
             if (compatibilityMode.HasFlag(CompatibilityMode.ModelReplacementAPI))
                 result = result.Concat(ModelReplacementAPICompatibility.CollectCosmetics(player));
+            if (compatibilityMode.HasFlag(CompatibilityMode.LethalVRM))
+                result = result.Concat(LethalVRMCompatibility.CollectCosmetics(player));
             var resultArray = result.ToArray();
             Plugin.Instance.Logger.LogInfo($"Collected {resultArray.Length} cosmetics objects for {player.playerUsername}.");
             return result.ToArray();
