@@ -55,8 +55,6 @@ namespace OpenBodyCams
 
         public new ManualLogSource Logger => base.Logger;
 
-        public static BodyCamComponent BodyCam;
-
         void Awake()
         {
             Instance = this;
@@ -79,17 +77,17 @@ namespace OpenBodyCams
             DisableCameraWhileTargetIsOnShip = Config.Bind("Camera", "DisableCameraWhileTargetIsOnShip", false, "With this option enabled, the camera will stop rendering when the target is onboard the ship to reduce the performance hit of rendering a large number of items on the ship twice.");
             EnableCamera = Config.Bind("Camera", "EnableCamera", true, "Enables/disables rendering of the body cam, and can be enabled/disabled during a game with LethalConfig.");
 
-            CameraMode.SettingChanged += (s, e) => BodyCam.UpdateSettings();
-            HorizontalResolution.SettingChanged += (s, e) => BodyCam.UpdateSettings();
-            FieldOfView.SettingChanged += (s, e) => BodyCam.UpdateSettings();
-            RenderDistance.SettingChanged += (s, e) => BodyCam.UpdateSettings();
-            Framerate.SettingChanged += (s, e) => BodyCam.UpdateSettings();
-            NightVisionBrightness.SettingChanged += (s, e) => BodyCam.UpdateSettings();
-            MonitorEmissiveColor.SettingChanged += (s, e) => BodyCam.UpdateSettings();
-            MonitorTextureFiltering.SettingChanged += (s, e) => BodyCam.UpdateSettings();
-            RadarBoosterPanRPM.SettingChanged += (s, e) => BodyCam.UpdateSettings();
-            DisableCameraWhileTargetIsOnShip.SettingChanged += (s, e) => BodyCam.UpdateSettings();
-            EnableCamera.SettingChanged += (s, e) => BodyCam.UpdateSettings();
+            CameraMode.SettingChanged += (s, e) => BodyCamComponent.UpdateAllCameraSettings();
+            HorizontalResolution.SettingChanged += (s, e) => BodyCamComponent.UpdateAllCameraSettings();
+            FieldOfView.SettingChanged += (s, e) => BodyCamComponent.UpdateAllCameraSettings();
+            RenderDistance.SettingChanged += (s, e) => BodyCamComponent.UpdateAllCameraSettings();
+            Framerate.SettingChanged += (s, e) => BodyCamComponent.UpdateAllCameraSettings();
+            NightVisionBrightness.SettingChanged += (s, e) => BodyCamComponent.UpdateAllCameraSettings();
+            MonitorEmissiveColor.SettingChanged += (s, e) => BodyCamComponent.UpdateAllCameraSettings();
+            MonitorTextureFiltering.SettingChanged += (s, e) => BodyCamComponent.UpdateAllCameraSettings();
+            RadarBoosterPanRPM.SettingChanged += (s, e) => BodyCamComponent.UpdateAllCameraSettings();
+            DisableCameraWhileTargetIsOnShip.SettingChanged += (s, e) => BodyCamComponent.UpdateAllCameraSettings();
+            EnableCamera.SettingChanged += (s, e) => BodyCamComponent.UpdateAllCameraSettings();
 
             GeneralImprovementsBetterMonitorIndex = Config.Bind("Compatibility", "GeneralImprovementsBetterMonitorIndex", 0, new ConfigDescription("Choose which of GeneralImprovements' extended monitor set to display the body cam on. A value of 0 will place it on the large monitor on the right, 1-14 goes left to right, top to bottom, skipping the large center monitor.", new AcceptableValueRange<int>(0, 14)));
             EnableMoreCompanyCosmeticsCompatibility = Config.Bind("Compatibility", "EnableMoreCompanyCosmeticsCompatibility", true, "If this is enabled, a patch will be applied to MoreCompany to spawn cosmetics for the local player, and all cosmetics will be shown and hidden based on the camera's perspective.");
@@ -103,6 +101,8 @@ namespace OpenBodyCams
             CosmeticsCompatibility.Initialize(harmony);
 
             harmony.PatchAll(typeof(PatchFixItemDropping));
+
+            BodyCamComponent.InitializeStatic();
         }
     }
 }

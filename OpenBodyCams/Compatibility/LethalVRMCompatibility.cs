@@ -70,10 +70,9 @@ namespace OpenBodyCams.Compatibility
         {
             var instructionsList = instructions.ToList();
 
-            var updateTargetMethod = typeof(BodyCamComponent).GetMethod(nameof(BodyCamComponent.UpdateCurrentTarget));
+            var updateTargetMethod = typeof(BodyCamComponent).GetMethod(nameof(BodyCamComponent.UpdateAllTargetStatuses));
             instructionsList.InsertRange(instructionsList.Count() - 2, new CodeInstruction[]
             {
-                new CodeInstruction(OpCodes.Ldsfld, typeof(Plugin).GetField(nameof(Plugin.BodyCam))),
                 new CodeInstruction(OpCodes.Call, updateTargetMethod),
             });
 

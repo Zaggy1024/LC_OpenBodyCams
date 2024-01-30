@@ -28,6 +28,8 @@ namespace OpenBodyCams
             DoorScreenRenderer = GameObject.Find("Environment/HangarShip/ShipModels2b/MonitorWall/SingleScreen")?.GetComponent<MeshRenderer>();
 
             GetAndMaybeDisableShipCamera();
+
+            BodyCamComponent.InitializeAtStartOfGame();
         }
 
         static void GetAndMaybeDisableShipCamera()
@@ -94,6 +96,8 @@ namespace OpenBodyCams
             {
                 var bodyCam = bottomMonitors.AddComponent<BodyCamComponent>();
 
+                bottomMonitors.AddComponent<SyncBodyCamToRadarMap>();
+
                 var renderer = bottomMonitors.GetComponent<MeshRenderer>();
                 var materialIndex = 2;
 
@@ -114,8 +118,7 @@ namespace OpenBodyCams
                 }
 
                 bodyCam.monitorRenderer = renderer;
-                bodyCam.monitorMaterialIndex = materialIndex; ;
-                bodyCam.enabled = true;
+                bodyCam.monitorMaterialIndex = materialIndex;
             }
         }
     }

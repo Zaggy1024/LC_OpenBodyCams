@@ -1,10 +1,9 @@
 using System;
+using System.Data;
 using System.Globalization;
 using System.Linq;
-using System.Reflection;
 
 using GameNetcodeStuff;
-using HarmonyLib;
 using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.HighDefinition;
@@ -18,13 +17,20 @@ namespace OpenBodyCams
         public const int ENEMIES_NOT_RENDERED_LAYER = 23;
         public const int BODY_CAM_ONLY_LAYER = 31;
 
+        private const float RADAR_BOOSTER_INITIAL_PAN = 270;
+
         public static readonly Vector3 BODY_CAM_OFFSET = new Vector3(0.07f, 0, 0.15f);
         public static readonly Vector3 CAMERA_CONTAINER_OFFSET = new Vector3(0.07f, 0, 0.125f);
 
-        public static readonly FieldInfo f_ManualCameraRenderer_isScreenOn = AccessTools.Field(typeof(ManualCameraRenderer), "isScreenOn");
+        public static BodyCamComponent[] AllBodyCams = new BodyCamComponent[0];
 
         private static Material fogShaderMaterial;
         private static GameObject nightVisionPrefab;
+
+        private static bool disableCameraWhileTargetIsOnShip = false;
+        private static Color screenEmissiveColor;
+
+        private static float radarBoosterPanSpeed;
 
         public GameObject cameraObject;
         public Camera camera;
@@ -35,11 +41,11 @@ namespace OpenBodyCams
         public Material monitorOnMaterial;
         public Material monitorOffMaterial;
 
-        private ManualCameraRenderer mapRenderer;
         private bool mapScreenOn = true;
         private bool enableCamera = true;
-        private bool disableCameraWhileTargetIsOnShip = false;
-        private bool wasDisabledForTarget = false;
+        private bool wasBlanked = false;
+
+        private bool hasSetUpCamera = false;
 
         private GameObject[] localPlayerCosmetics = new GameObject[0];
         private PlayerModelState localPlayerModelState;
@@ -54,29 +60,19 @@ namespace OpenBodyCams
         private float elapsedSinceLastFrame = 0;
         private float timePerFrame = 0;
 
-        private const float radarBoosterInitialPan = 270;
-        private float radarBoosterPanSpeed;
         private bool panCamera = false;
-        private float panAngle = radarBoosterInitialPan;
+        private float panAngle = RADAR_BOOSTER_INITIAL_PAN;
 
         private Animator greenFlashAnimator;
 
-        public void Start()
+        public static void InitializeStatic()
         {
-            Plugin.BodyCam = this;
+            RenderPipelineManager.beginCameraRendering += BeginAnyCameraRendering;
+            RenderPipelineManager.endCameraRendering += EndAnyCameraRendering;
+        }
 
-            mapRenderer = GetComponentsInChildren<ManualCameraRenderer>().First(renderer => renderer.cam == renderer.mapCamera);
-
-            RenderPipelineManager.beginCameraRendering += BeginCameraRendering;
-            RenderPipelineManager.endCameraRendering += EndCameraRendering;
-
-            monitorOnMaterial = new Material(Shader.Find("HDRP/Unlit"));
-            monitorOnMaterial.name = "BodyCamMaterial";
-            monitorOnMaterial.SetFloat("_AlbedoAffectEmissive", 1);
-            SetMaterial(monitorRenderer, monitorMaterialIndex, monitorOnMaterial);
-
-            monitorOffMaterial = ShipObjects.blackScreenMaterial;
-
+        public static void InitializeAtStartOfGame()
+        {
             var aPlayerScript = StartOfRound.Instance.allPlayerScripts[0];
 
             fogShaderMaterial = aPlayerScript.localVisor.transform.Find("ScavengerHelmet/Plane").GetComponent<MeshRenderer>().sharedMaterial;
@@ -85,6 +81,96 @@ namespace OpenBodyCams
             nightVisionPrefab.name = "NightVision";
             nightVisionPrefab.transform.localPosition = Vector3.zero;
             nightVisionPrefab.SetActive(false);
+
+            UpdateAllCameraSettings();
+
+        }
+
+        public static void UpdateAllCameraSettings()
+        {
+            UpdateStaticSettings();
+
+            foreach (var bodyCam in AllBodyCams)
+                bodyCam.UpdateSettings();
+        }
+
+        private static Color GetEmissiveColor()
+        {
+            Color ParseColor(string str)
+            {
+                var components = str
+                    .Split(new char[] { ',', ' ' }, StringSplitOptions.RemoveEmptyEntries)
+                    .Select(x => float.Parse(x.Trim(), CultureInfo.InvariantCulture))
+                    .ToArray();
+                if (components.Length < 0 || components.Length > 4)
+                    throw new ArgumentException("Too many color components");
+                return new Color(components[0], components[1], components[2], components.Length == 4 ? components[3] : 0);
+            }
+            try
+            {
+                return ParseColor(Plugin.MonitorEmissiveColor.Value);
+            }
+            catch (Exception e)
+            {
+                Plugin.Instance.Logger.LogWarning($"Failed to parse emissive color: {e}");
+                return ParseColor((string)Plugin.MonitorEmissiveColor.DefaultValue);
+            }
+        }
+
+        public static void UpdateStaticSettings()
+        {
+            screenEmissiveColor = GetEmissiveColor();
+            disableCameraWhileTargetIsOnShip = Plugin.DisableCameraWhileTargetIsOnShip.Value;
+
+            radarBoosterPanSpeed = Plugin.RadarBoosterPanRPM.Value * 360 / 60;
+        }
+
+        public static void UpdateAllTargetStatuses()
+        {
+            foreach (var bodyCam in AllBodyCams)
+                bodyCam.UpdateTargetStatus();
+        }
+
+        static void BeginAnyCameraRendering(ScriptableRenderContext context, Camera camera)
+        {
+            // HDRP does not end one camera's rendering before beginning another's.
+            // Reset the camera perspective if any other camera is beginning rendering.
+            // This appears to still allow the perspective change to take effect properly.
+            foreach (var bodyCam in AllBodyCams)
+                bodyCam.ResetCameraRendering();
+
+            foreach (var bodyCam in AllBodyCams)
+            {
+                if ((object)bodyCam.camera == camera)
+                {
+                    bodyCam.BeginCameraRendering();
+                    return;
+                }
+            }
+        }
+
+        static void EndAnyCameraRendering(ScriptableRenderContext context, Camera camera)
+        {
+            foreach (var bodyCam in AllBodyCams)
+            {
+                if ((object)bodyCam.camera == camera)
+                {
+                    bodyCam.ResetCameraRendering();
+                    return;
+                }
+            }
+        }
+
+        void Awake()
+        {
+            AllBodyCams = AllBodyCams.Append(this).ToArray();
+
+            monitorOnMaterial = new Material(Shader.Find("HDRP/Unlit"));
+            monitorOnMaterial.name = "BodyCamMaterial";
+            monitorOnMaterial.SetFloat("_AlbedoAffectEmissive", 1);
+
+            monitorOffMaterial = ShipObjects.blackScreenMaterial;
+
             var nightVisionLight = nightVisionPrefab.GetComponent<Light>();
             nightVisionLight.enabled = true;
             nightVisionLight.cullingMask = 1 << BODY_CAM_ONLY_LAYER;
@@ -94,6 +180,13 @@ namespace OpenBodyCams
             mapLight.cullingMask = 1 << mapLight.gameObject.layer;
 
             EnsureCameraExists();
+
+            SyncBodyCamToRadarMap.UpdateBodyCamTarget(this);
+        }
+
+        void Start()
+        {
+            SetMaterial(monitorRenderer, monitorMaterialIndex, monitorOnMaterial);
         }
 
         private static void SetMaterial(MeshRenderer renderer, int index, Material material)
@@ -149,29 +242,6 @@ namespace OpenBodyCams
             StartTargetTransition();
         }
 
-        private static Color getEmissiveColor()
-        {
-            Color ParseColor(string str)
-            {
-                var components = str
-                    .Split(new char[] { ',', ' ' }, StringSplitOptions.RemoveEmptyEntries)
-                    .Select(x => float.Parse(x.Trim(), CultureInfo.InvariantCulture))
-                    .ToArray();
-                if (components.Length < 0 || components.Length > 4)
-                    throw new ArgumentException("Too many color components");
-                return new Color(components[0], components[1], components[2], components.Length == 4 ? components[3] : 0);
-            }
-            try
-            {
-                return ParseColor(Plugin.MonitorEmissiveColor.Value);
-            }
-            catch (Exception e)
-            {
-                Plugin.Instance.Logger.LogWarning($"Failed to parse emissive color: {e}");
-                return ParseColor((string)Plugin.MonitorEmissiveColor.DefaultValue);
-            }
-        }
-
         public void UpdateSettings()
         {
             camera.targetTexture = new RenderTexture(Plugin.HorizontalResolution.Value, Plugin.HorizontalResolution.Value * 3 / 4, 32);
@@ -179,7 +249,7 @@ namespace OpenBodyCams
             camera.fieldOfView = Plugin.FieldOfView.Value;
 
             monitorOnMaterial.mainTexture = camera.targetTexture;
-            monitorOnMaterial.SetColor("_EmissiveColor", getEmissiveColor());
+            monitorOnMaterial.SetColor("_EmissiveColor", screenEmissiveColor);
 
             camera.farClipPlane = Plugin.RenderDistance.Value;
 
@@ -197,12 +267,7 @@ namespace OpenBodyCams
             nightVisionLight.intensity = Plugin.NightVisionIntensityBase * Plugin.NightVisionBrightness.Value;
             nightVisionLight.range = Plugin.NightVisionRangeBase * Plugin.NightVisionBrightness.Value;
 
-            radarBoosterPanSpeed = Plugin.RadarBoosterPanRPM.Value * 360 / 60;
-
-            disableCameraWhileTargetIsOnShip = Plugin.DisableCameraWhileTargetIsOnShip.Value;
             enableCamera = Plugin.EnableCamera.Value;
-
-            UpdateCurrentTarget();
         }
 
         public void StartTargetTransition()
@@ -226,60 +291,136 @@ namespace OpenBodyCams
             SetMaterial(monitorRenderer, monitorMaterialIndex, monitorOffMaterial);
         }
 
-        private bool ShouldRenderCamera()
+        public void SetScreenBlanked(bool blanked)
         {
-            return mapScreenOn && enableCamera;
+            if (blanked != wasBlanked)
+                monitorOnMaterial.color = blanked ? Color.black : Color.white;
+            wasBlanked = blanked;
         }
 
-        private bool ShouldDisableForCurrentPlayer()
+        private bool ShouldRenderCamera()
         {
+            return mapScreenOn;
+        }
+
+        private bool ShouldHideOutput()
+        {
+            if (!enableCamera)
+                return true;
+            if (currentActualTarget == null)
+                return true;
+            if (currentPlayer != null && !currentPlayer.isPlayerControlled && !currentPlayer.isPlayerDead && currentPlayer.redirectToEnemy == null)
+                return true;
+
             return disableCameraWhileTargetIsOnShip && currentPlayer?.isInHangarShipRoom == true;
         }
 
-        public void UpdateCurrentTarget()
+        private static Renderer[] CollectModelsToHide(Transform parent)
+        {
+            return parent.GetComponentsInChildren<Renderer>().Where(r => r.gameObject.layer == DEFAULT_LAYER || r.gameObject.layer == ENEMIES_LAYER).ToArray();
+        }
+
+        public void SetTargetToNone()
         {
             currentPlayer = null;
             currentActualTarget = null;
             currentlyViewedMeshes = new Renderer[0];
-
-            mapScreenOn = (bool)f_ManualCameraRenderer_isScreenOn.GetValue(mapRenderer);
-            var shouldRender = ShouldRenderCamera();
-            SetScreenPowered(shouldRender);
-
-            if (shouldRender)
-                UpdateCurrentTargetInternal();
-
-            if (currentActualTarget == null || ShouldDisableForCurrentPlayer())
-            {
-                cameraObject.transform.SetParent(null, false);
-                cameraObject.transform.localPosition = Vector3.zero;
-                cameraObject.transform.localRotation = Quaternion.identity;
-                SetScreenPowered(false);
-            }
+            cameraObject.transform.SetParent(null, false);
+            cameraObject.transform.localPosition = Vector3.zero;
+            cameraObject.transform.localRotation = Quaternion.identity;
         }
 
-        private void UpdateCurrentTargetInternal()
+        public void UpdateTargetStatus()
         {
-            EnsureCameraExists();
+            SetTargetToPlayer(currentPlayer);
+        }
 
-            // Ensure that we have a reference to null if the targeted player is being destroyed.
-            currentPlayer = mapRenderer.targetedPlayer;
-            currentActualTarget = mapRenderer.radarTargets[mapRenderer.targetTransformIndex].transform;
-
-            if (currentActualTarget == null)
+        public void SetTargetToPlayer(PlayerControllerB player)
+        {
+            if (player == null)
+            {
+                SetTargetToNone();
                 return;
+            }
 
-            currentPlayerCosmetics = CosmeticsCompatibility.CollectCosmetics(currentPlayer);
-            currentPlayerModelState.cosmeticsLayers = new int[currentPlayerCosmetics.Length];
-            localPlayerCosmetics = CosmeticsCompatibility.CollectCosmetics(StartOfRound.Instance.localPlayerController);
-            localPlayerModelState.cosmeticsLayers = new int[localPlayerCosmetics.Length];
+            currentPlayer = player;
+            UpdateModelReferences();
 
+            panCamera = false;
             Vector3 offset = Vector3.zero;
 
-            Renderer[] CollectModelsToHide(Transform parent)
+            if (!currentPlayer.isPlayerDead)
             {
-                return parent.GetComponentsInChildren<Renderer>().Where(r => r.gameObject.layer == DEFAULT_LAYER || r.gameObject.layer == ENEMIES_LAYER).ToArray();
+                if (Plugin.CameraMode.Value == CameraModeOptions.Head)
+                {
+                    currentActualTarget = currentPlayer.gameplayCamera.transform;
+                    offset = CAMERA_CONTAINER_OFFSET;
+                }
+                else
+                {
+                    currentActualTarget = currentPlayer.playerGlobalHead.transform.parent;
+                    offset = BODY_CAM_OFFSET;
+                }
+
+                currentlyViewedMeshes = new Renderer[0];
             }
+            else if (currentPlayer.redirectToEnemy != null)
+            {
+                if (currentPlayer.redirectToEnemy is MaskedPlayerEnemy masked)
+                {
+                    if (Plugin.CameraMode.Value == CameraModeOptions.Head)
+                    {
+                        currentActualTarget = masked.headTiltTarget;
+                        offset = CAMERA_CONTAINER_OFFSET;
+                    }
+                    else
+                    {
+                        currentActualTarget = masked.animationContainer.Find("metarig/spine/spine.001/spine.002/spine.003");
+                        offset = BODY_CAM_OFFSET;
+                    }
+                }
+                else
+                {
+                    currentActualTarget = currentPlayer.redirectToEnemy.eye;
+                }
+
+                currentlyViewedMeshes = CollectModelsToHide(currentPlayer.redirectToEnemy.transform);
+            }
+            else if (currentPlayer.deadBody != null)
+            {
+                if (Plugin.CameraMode.Value == CameraModeOptions.Head)
+                {
+                    currentActualTarget = currentPlayer.deadBody.transform.Find("spine.001/spine.002/spine.003/spine.004/spine.004_end");
+                    offset = CAMERA_CONTAINER_OFFSET - new Vector3(0, 0.15f, 0);
+                }
+                else
+                {
+                    currentActualTarget = currentPlayer.deadBody.transform.Find("spine.001/spine.002/spine.003");
+                    offset = BODY_CAM_OFFSET;
+                }
+                currentlyViewedMeshes = CollectModelsToHide(currentPlayer.deadBody.transform);
+            }
+            else
+            {
+                SetTargetToNone();
+                return;
+            }
+
+            cameraObject.transform.SetParent(currentActualTarget.transform, false);
+            cameraObject.transform.localPosition = offset;
+            cameraObject.transform.localRotation = Quaternion.identity;
+
+            SetScreenPowered(true);
+        }
+
+        public void SetTargetToTransform(Transform transform)
+        {
+            currentPlayer = null;
+            currentActualTarget = transform;
+            UpdateModelReferences();
+
+            panCamera = false;
+            Vector3 offset = Vector3.zero;
 
             if (currentActualTarget.GetComponent<RadarBoosterItem>() != null)
             {
@@ -287,69 +428,20 @@ namespace OpenBodyCams
                 offset = new Vector3(0, 1.5f, 0);
                 panCamera = true;
             }
-            else if (currentPlayer is object)
-            {
-                if (currentPlayer.isPlayerDead)
-                {
-                    if (currentPlayer.redirectToEnemy != null)
-                    {
-                        if (currentPlayer.redirectToEnemy is MaskedPlayerEnemy masked)
-                        {
-                            if (Plugin.CameraMode.Value == CameraModeOptions.Head)
-                            {
-                                currentActualTarget = masked.headTiltTarget;
-                                offset = CAMERA_CONTAINER_OFFSET;
-                            }
-                            else
-                            {
-                                currentActualTarget = masked.animationContainer.Find("metarig/spine/spine.001/spine.002/spine.003");
-                                offset = BODY_CAM_OFFSET;
-                            }
-                        }
-                        else
-                        {
-                            currentActualTarget = currentPlayer.redirectToEnemy.eye;
-                        }
-
-                        currentlyViewedMeshes = CollectModelsToHide(currentPlayer.redirectToEnemy.transform);
-                    }
-                    else if (currentPlayer.deadBody != null)
-                    {
-                        if (Plugin.CameraMode.Value == CameraModeOptions.Head)
-                        {
-                            currentActualTarget = currentPlayer.deadBody.transform.Find("spine.001/spine.002/spine.003/spine.004/spine.004_end");
-                            offset = CAMERA_CONTAINER_OFFSET - new Vector3(0, 0.15f, 0);
-                        }
-                        else
-                        {
-                            currentActualTarget = currentPlayer.deadBody.transform.Find("spine.001/spine.002/spine.003");
-                            offset = BODY_CAM_OFFSET;
-                        }
-                        currentlyViewedMeshes = CollectModelsToHide(currentPlayer.deadBody.transform);
-                    }
-                }
-                else
-                {
-                    if (Plugin.CameraMode.Value == CameraModeOptions.Head)
-                    {
-                        currentActualTarget = currentPlayer.gameplayCamera.transform;
-                        offset = CAMERA_CONTAINER_OFFSET;
-                    }
-                    else
-                    {
-                        currentActualTarget = currentPlayer.playerGlobalHead.transform.parent;
-                        offset = BODY_CAM_OFFSET;
-                    }
-                }
-                panCamera = false;
-            }
-
-            if (currentActualTarget == null)
-                return;
 
             cameraObject.transform.SetParent(currentActualTarget.transform, false);
             cameraObject.transform.localPosition = offset;
             cameraObject.transform.localRotation = Quaternion.identity;
+
+            SetScreenPowered(true);
+        }
+
+        private void UpdateModelReferences()
+        {
+            currentPlayerCosmetics = CosmeticsCompatibility.CollectCosmetics(currentPlayer);
+            currentPlayerModelState.cosmeticsLayers = new int[currentPlayerCosmetics.Length];
+            localPlayerCosmetics = CosmeticsCompatibility.CollectCosmetics(StartOfRound.Instance.localPlayerController);
+            localPlayerModelState.cosmeticsLayers = new int[localPlayerCosmetics.Length];
         }
 
         private enum Perspective
@@ -448,11 +540,8 @@ namespace OpenBodyCams
             }
         }
 
-        private void BeginCameraRendering(ScriptableRenderContext context, Camera renderedCamera)
+        private void BeginCameraRendering()
         {
-            if ((object)renderedCamera != camera)
-                return;
-
             if (currentlyViewedMeshes.Length > 0 && currentlyViewedMeshes[0] == null)
                 return;
             foreach (var mesh in currentlyViewedMeshes)
@@ -463,12 +552,15 @@ namespace OpenBodyCams
             SaveStateAndApplyPerspective(currentPlayer, ref currentPlayerCosmetics, ref currentPlayerModelState, Perspective.FirstPerson);
             if ((object)currentPlayer != localPlayer)
                 SaveStateAndApplyPerspective(localPlayer, ref localPlayerCosmetics, ref localPlayerModelState, Perspective.ThirdPerson);
+
+            hasSetUpCamera = true;
         }
 
-        private void EndCameraRendering(ScriptableRenderContext context, Camera renderedCamera)
+        private void ResetCameraRendering()
         {
-            if ((object)renderedCamera != camera)
+            if (!hasSetUpCamera)
                 return;
+            hasSetUpCamera = false;
 
             if (currentlyViewedMeshes.Length > 0 && currentlyViewedMeshes[0] == null)
                 return;
@@ -491,29 +583,29 @@ namespace OpenBodyCams
                 return;
             if (spectatedPlayer.spectatedPlayerScript != null)
                 spectatedPlayer = spectatedPlayer.spectatedPlayerScript;
-            bool enable = monitorRenderer.isVisible && spectatedPlayer.isInHangarShipRoom && currentActualTarget != null && ShouldRenderCamera();
+            bool enableCamera = monitorRenderer.isVisible && spectatedPlayer.isInHangarShipRoom && ShouldRenderCamera();
 
-            if (enable)
+            if (enableCamera)
             {
-                var disable = ShouldDisableForCurrentPlayer();
-                enable = !disable;
-                if (disable != wasDisabledForTarget)
+                var disable = ShouldHideOutput();
+                enableCamera = !disable;
+                if (disable != wasBlanked)
                 {
-                    UpdateCurrentTarget();
-                    wasDisabledForTarget = disable;
+                    SetScreenBlanked(disable);
+                    wasBlanked = disable;
                 }
             }
 
-            if (!enable)
+            if (!enableCamera)
             {
                 camera.enabled = false;
                 return;
             }
 
             if (radarBoosterPanSpeed != 0)
-                panAngle += Time.deltaTime * radarBoosterPanSpeed;
+                panAngle = (Time.deltaTime * radarBoosterPanSpeed) % 360;
             else
-                panAngle = radarBoosterInitialPan;
+                panAngle = RADAR_BOOSTER_INITIAL_PAN;
             if (panCamera)
                 cameraObject.transform.localRotation = Quaternion.Euler(0, panAngle, 0);
 
@@ -534,9 +626,7 @@ namespace OpenBodyCams
 
         public void OnDestroy()
         {
-            RenderPipelineManager.beginCameraRendering -= BeginCameraRendering;
-            RenderPipelineManager.endCameraRendering -= EndCameraRendering;
-            Plugin.BodyCam = null;
+            AllBodyCams = AllBodyCams.Where(bodyCam => (object)bodyCam != this).ToArray();
         }
     }
 

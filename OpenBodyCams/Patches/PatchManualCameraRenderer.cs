@@ -18,21 +18,24 @@ namespace OpenBodyCams.Patches
         static IEnumerator updateMapTargetPostfix(IEnumerator result, ManualCameraRenderer __instance)
         {
             if (__instance == StartOfRound.Instance.mapScreen)
-                Plugin.BodyCam?.StartTargetTransition();
+                SyncBodyCamToRadarMap.StartTargetTransitionForMap(__instance);
 
             while (result.MoveNext())
                 yield return result.Current;
 
             if (__instance != StartOfRound.Instance.mapScreen)
                 yield break;
-            Plugin.BodyCam?.UpdateCurrentTarget();
+
+            SyncBodyCamToRadarMap.UpdateBodyCamTargetForMap(__instance);
         }
 
         [HarmonyPostfix]
         [HarmonyPatch(nameof(ManualCameraRenderer.SwitchScreenOn))]
-        static void SwitchScreenOnPostfix()
+        static void SwitchScreenOnPostfix(ManualCameraRenderer __instance)
         {
-            Plugin.BodyCam?.UpdateCurrentTarget();
+            if ((object)__instance.cam != __instance.mapCamera)
+                return;
+            SyncBodyCamToRadarMap.UpdateBodyCamTargetForMap(__instance);
         }
 
         [HarmonyPostfix]

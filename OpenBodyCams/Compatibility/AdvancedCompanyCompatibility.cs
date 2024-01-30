@@ -103,7 +103,7 @@ namespace OpenBodyCams.Compatibility
 
         static void OnEquipmentChange()
         {
-            Plugin.BodyCam.UpdateCurrentTarget();
+            BodyCamComponent.UpdateAllTargetStatuses();
         }
     }
 }

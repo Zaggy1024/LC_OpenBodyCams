@@ -78,7 +78,7 @@ namespace OpenBodyCams.Compatibility
 
         public static void ClientReceiveMessagePatch_HandleDataMessagePostfix()
         {
-            Plugin.BodyCam?.UpdateCurrentTarget();
+            BodyCamComponent.UpdateAllTargetStatuses();
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
