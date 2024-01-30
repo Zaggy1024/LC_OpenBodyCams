@@ -51,4 +51,8 @@ var doorScreen = GameObject.Find("Environment/HangarShip/ShipModels2b/MonitorWal
 BodyCam.CreateBodyCam(doorScreen, doorScreen.GetComponent<MeshRenderer>(), 1, StartOfRound.Instance.mapScreen);
 ```
 
+The body cam component will be attached to the provided `GameObject`, and use the provided `Renderer` to check whether the display it is on is being rendered.
+
+The `displayMaterialIndex` argument indicates which of the shared materials on the renderer should be replaced by the body cam's render texture. The texture that is in that index originally will be stored by the body cam, and when `SetScreenPowered(false)` is called, it will replace the body cam's output on the display. The body cam's output can then be brought back with a `SetScreenPowered(true)` call.
+
 The `ManualCameraRenderer` argument must be a map renderer where its `cam` field is the same reference as its `mapCamera` field. However, the argument may be null, in which case the body cam's target may be controlled directly.
