@@ -83,7 +83,6 @@ namespace OpenBodyCams
             nightVisionPrefab.SetActive(false);
 
             UpdateAllCameraSettings();
-
         }
 
         public static void UpdateAllCameraSettings()
