@@ -11,12 +11,15 @@ namespace OpenBodyCams
 {
     public class SyncBodyCamToRadarMap : MonoBehaviour
     {
-        public static SyncBodyCamToRadarMap[] AllSynchronizedCams = new SyncBodyCamToRadarMap[0];
+        private static SyncBodyCamToRadarMap[] AllSynchronizedCams = new SyncBodyCamToRadarMap[0];
+        public static SyncBodyCamToRadarMap[] GetAllSynchronizedCams() { return AllSynchronizedCams; }
 
         public static readonly FieldInfo f_ManualCameraRenderer_isScreenOn = AccessTools.Field(typeof(ManualCameraRenderer), "isScreenOn");
 
-        public ManualCameraRenderer MapRenderer;
-        public BodyCamComponent BodyCam;
+        internal ManualCameraRenderer MapRenderer;
+        public ManualCameraRenderer GetMapRenderer() { return MapRenderer; }
+        internal BodyCamComponent BodyCam;
+        public BodyCamComponent GetBodyCam() { return BodyCam; }
 
         private static void DoForMap(ManualCameraRenderer mapRenderer, Action<SyncBodyCamToRadarMap> action)
         {
