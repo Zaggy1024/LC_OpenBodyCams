@@ -1,8 +1,5 @@
 ﻿using GameNetcodeStuff;
 using HarmonyLib;
-using UnityEngine;
-
-using OpenBodyCams.Compatibility;
 
 namespace OpenBodyCams.Patches
 {
