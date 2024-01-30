@@ -72,6 +72,8 @@ namespace OpenBodyCams
                 BodyCam.SetTargetToPlayer(MapRenderer.targetedPlayer);
             else
                 BodyCam.SetTargetToTransform(MapRenderer.radarTargets[MapRenderer.targetTransformIndex].transform);
+
+            BodyCam.SetScreenPowered((bool)f_ManualCameraRenderer_isScreenOn.GetValue(MapRenderer));
         }
 
         public void StartTargetTransition()

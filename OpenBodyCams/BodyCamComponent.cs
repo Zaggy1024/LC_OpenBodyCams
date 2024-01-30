@@ -41,7 +41,6 @@ namespace OpenBodyCams
         public Material monitorOnMaterial;
         public Material monitorOffMaterial;
 
-        private bool mapScreenOn = true;
         private bool enableCamera = true;
         private bool wasBlanked = false;
 
@@ -283,6 +282,8 @@ namespace OpenBodyCams
         {
             if (powered)
             {
+                if (monitorRenderer.sharedMaterials[monitorMaterialIndex] == monitorOffMaterial)
+                    StartTargetTransition();
                 SetMaterial(monitorRenderer, monitorMaterialIndex, monitorOnMaterial);
                 return;
             }
@@ -295,11 +296,6 @@ namespace OpenBodyCams
             if (blanked != wasBlanked)
                 monitorOnMaterial.color = blanked ? Color.black : Color.white;
             wasBlanked = blanked;
-        }
-
-        private bool ShouldRenderCamera()
-        {
-            return mapScreenOn;
         }
 
         private bool ShouldHideOutput()
@@ -411,8 +407,6 @@ namespace OpenBodyCams
             cameraObject.transform.SetParent(currentActualTarget.transform, false);
             cameraObject.transform.localPosition = offset;
             cameraObject.transform.localRotation = Quaternion.identity;
-
-            SetScreenPowered(true);
         }
 
         public void SetTargetToTransform(Transform transform)
@@ -440,8 +434,6 @@ namespace OpenBodyCams
             cameraObject.transform.SetParent(currentActualTarget.transform, false);
             cameraObject.transform.localPosition = offset;
             cameraObject.transform.localRotation = Quaternion.identity;
-
-            SetScreenPowered(true);
         }
 
         private void UpdateModelReferences()
@@ -591,7 +583,9 @@ namespace OpenBodyCams
                 return;
             if (spectatedPlayer.spectatedPlayerScript != null)
                 spectatedPlayer = spectatedPlayer.spectatedPlayerScript;
-            bool enableCamera = monitorRenderer.isVisible && spectatedPlayer.isInHangarShipRoom && ShouldRenderCamera();
+            bool enableCamera = monitorRenderer.isVisible
+                && spectatedPlayer.isInHangarShipRoom
+                && (object)monitorRenderer.sharedMaterials[monitorMaterialIndex] == monitorOnMaterial;
 
             if (enableCamera)
             {
