@@ -47,6 +47,10 @@ namespace OpenBodyCams
                     compatibilityMode |= CompatibilityMode.MoreCompany;
                     Plugin.Instance.Logger.LogInfo("MoreCompany compatibility mode is enabled.");
                 }
+                else
+                {
+                    Plugin.Instance.Logger.LogWarning("MoreCompany is installed, but the compatibility feature failed to initialize.");
+                }
             }
 
             if (Plugin.EnableModelReplacementAPICompatibility.Value && Chainloader.PluginInfos.ContainsKey("meow.ModelReplacementAPI"))
