@@ -18,10 +18,11 @@ namespace OpenBodyCams
 
         private const float RADAR_BOOSTER_INITIAL_PAN = 270;
 
-        public static readonly Vector3 BODY_CAM_OFFSET = new Vector3(0.07f, 0, 0.15f);
-        public static readonly Vector3 CAMERA_CONTAINER_OFFSET = new Vector3(0.07f, 0, 0.125f);
+        private static readonly Vector3 BODY_CAM_OFFSET = new Vector3(0.07f, 0, 0.15f);
+        private static readonly Vector3 CAMERA_CONTAINER_OFFSET = new Vector3(0.07f, 0, 0.125f);
 
-        public static BodyCamComponent[] AllBodyCams = new BodyCamComponent[0];
+        private static BodyCamComponent[] AllBodyCams = new BodyCamComponent[0];
+        public static BodyCamComponent[] GetAllBodyCams() { return AllBodyCams; }
 
         private static Material fogShaderMaterial;
         private static GameObject nightVisionPrefab;
@@ -31,14 +32,14 @@ namespace OpenBodyCams
 
         private static float radarBoosterPanSpeed;
 
-        public GameObject cameraObject;
-        public Camera camera;
-        public Light nightVisionLight;
+        internal GameObject CameraObject;
+        internal Camera Camera;
+        public Camera GetCamera() { return Camera; }
 
-        public Renderer monitorRenderer;
-        public int monitorMaterialIndex;
-        public Material monitorOnMaterial;
-        public Material monitorOffMaterial;
+        internal Renderer MonitorRenderer;
+        internal int MonitorMaterialIndex;
+        internal Material MonitorOnMaterial;
+        internal Material MonitorOffMaterial;
 
         private bool enableCamera = true;
         private bool wasBlanked = false;
@@ -61,6 +62,7 @@ namespace OpenBodyCams
         private bool panCamera = false;
         private float panAngle = RADAR_BOOSTER_INITIAL_PAN;
 
+        private Light nightVisionLight;
         private MeshRenderer greenFlashRenderer;
         private Animator greenFlashAnimator;
 
@@ -141,7 +143,7 @@ namespace OpenBodyCams
 
             foreach (var bodyCam in AllBodyCams)
             {
-                if ((object)bodyCam.camera == camera)
+                if ((object)bodyCam.Camera == camera)
                 {
                     bodyCam.BeginCameraRendering();
                     return;
@@ -153,7 +155,7 @@ namespace OpenBodyCams
         {
             foreach (var bodyCam in AllBodyCams)
             {
-                if ((object)bodyCam.camera == camera)
+                if ((object)bodyCam.Camera == camera)
                 {
                     bodyCam.ResetCameraRendering();
                     return;
@@ -165,11 +167,11 @@ namespace OpenBodyCams
         {
             AllBodyCams = AllBodyCams.Append(this).ToArray();
 
-            monitorOnMaterial = new Material(Shader.Find("HDRP/Unlit"));
-            monitorOnMaterial.name = "BodyCamMaterial";
-            monitorOnMaterial.SetFloat("_AlbedoAffectEmissive", 1);
+            MonitorOnMaterial = new Material(Shader.Find("HDRP/Unlit"));
+            MonitorOnMaterial.name = "BodyCamMaterial";
+            MonitorOnMaterial.SetFloat("_AlbedoAffectEmissive", 1);
 
-            monitorOffMaterial = ShipObjects.blackScreenMaterial;
+            MonitorOffMaterial = ShipObjects.blackScreenMaterial;
 
             var nightVisionLight = nightVisionPrefab.GetComponent<Light>();
             nightVisionLight.enabled = false;
@@ -185,10 +187,10 @@ namespace OpenBodyCams
 
         void Start()
         {
-            SetMaterial(monitorRenderer, monitorMaterialIndex, monitorOnMaterial);
+            SetMaterial(MonitorRenderer, MonitorMaterialIndex, MonitorOnMaterial);
         }
 
-        private static void SetMaterial(MeshRenderer renderer, int index, Material material)
+        private static void SetMaterial(Renderer renderer, int index, Material material)
         {
             var materials = renderer.sharedMaterials;
             materials[index] = material;
@@ -197,27 +199,27 @@ namespace OpenBodyCams
 
         public void EnsureCameraExists()
         {
-            if (cameraObject != null)
+            if (CameraObject != null)
                 return;
 
             Plugin.Instance.Logger.LogInfo("Camera has been destroyed, recreating it.");
 
-            cameraObject = new GameObject("BodyCam");
-            camera = cameraObject.AddComponent<Camera>();
-            camera.nearClipPlane = 0.05f;
-            camera.cullingMask = 0b0010_0001_0011_1011_0001_0111_0101_1011;
-            var cameraData = cameraObject.AddComponent<HDAdditionalCameraData>();
+            CameraObject = new GameObject("BodyCam");
+            Camera = CameraObject.AddComponent<Camera>();
+            Camera.nearClipPlane = 0.05f;
+            Camera.cullingMask = 0b0010_0001_0011_1011_0001_0111_0101_1011;
+            var cameraData = CameraObject.AddComponent<HDAdditionalCameraData>();
             cameraData.volumeLayerMask = 1;
 
             var nightVision = Instantiate(nightVisionPrefab);
-            nightVision.transform.SetParent(cameraObject.transform, false);
+            nightVision.transform.SetParent(CameraObject.transform, false);
             nightVision.SetActive(true);
             nightVisionLight = nightVision.GetComponent<Light>();
 
             UpdateSettings();
 
             var greenFlashParent = new GameObject("CameraGreenTransitionScaler");
-            greenFlashParent.transform.SetParent(cameraObject.transform, false);
+            greenFlashParent.transform.SetParent(CameraObject.transform, false);
             greenFlashParent.transform.localScale = new Vector3(1, 0.004f, 1);
 
             var greenFlashObject = Instantiate(StartOfRound.Instance.mapScreen.mapCameraAnimator.gameObject);
@@ -230,7 +232,7 @@ namespace OpenBodyCams
 
             var fogShaderPlane = GameObject.CreatePrimitive(PrimitiveType.Plane);
             Destroy(fogShaderPlane.GetComponent<MeshCollider>());
-            fogShaderPlane.transform.SetParent(cameraObject.transform, false);
+            fogShaderPlane.transform.SetParent(CameraObject.transform, false);
             fogShaderPlane.transform.localPosition = new Vector3(0, 0, 0.5f);
             fogShaderPlane.transform.localRotation = Quaternion.Euler(270, 0, 0);
             fogShaderPlaneRenderer = fogShaderPlane.GetComponent<MeshRenderer>();
@@ -245,24 +247,24 @@ namespace OpenBodyCams
 
         public void UpdateSettings()
         {
-            camera.targetTexture = new RenderTexture(Plugin.HorizontalResolution.Value, Plugin.HorizontalResolution.Value * 3 / 4, 32);
-            camera.targetTexture.filterMode = Plugin.MonitorTextureFiltering.Value;
-            camera.fieldOfView = Plugin.FieldOfView.Value;
+            Camera.targetTexture = new RenderTexture(Plugin.HorizontalResolution.Value, Plugin.HorizontalResolution.Value * 3 / 4, 32);
+            Camera.targetTexture.filterMode = Plugin.MonitorTextureFiltering.Value;
+            Camera.fieldOfView = Plugin.FieldOfView.Value;
 
-            monitorOnMaterial.mainTexture = camera.targetTexture;
-            monitorOnMaterial.SetColor("_EmissiveColor", screenEmissiveColor);
+            MonitorOnMaterial.mainTexture = Camera.targetTexture;
+            MonitorOnMaterial.SetColor("_EmissiveColor", screenEmissiveColor);
 
-            camera.farClipPlane = Plugin.RenderDistance.Value;
+            Camera.farClipPlane = Plugin.RenderDistance.Value;
 
             if (Plugin.Framerate.Value != 0)
             {
                 timePerFrame = 1.0f / Plugin.Framerate.Value;
-                camera.enabled = false;
+                Camera.enabled = false;
             }
             else
             {
                 timePerFrame = 0;
-                camera.enabled = false;
+                Camera.enabled = false;
             }
 
             nightVisionLight.intensity = Plugin.NightVisionIntensityBase * Plugin.NightVisionBrightness.Value;
@@ -285,19 +287,19 @@ namespace OpenBodyCams
         {
             if (powered)
             {
-                if (monitorRenderer.sharedMaterials[monitorMaterialIndex] == monitorOffMaterial)
+                if (MonitorRenderer.sharedMaterials[MonitorMaterialIndex] == MonitorOffMaterial)
                     StartTargetTransition();
-                SetMaterial(monitorRenderer, monitorMaterialIndex, monitorOnMaterial);
+                SetMaterial(MonitorRenderer, MonitorMaterialIndex, MonitorOnMaterial);
                 return;
             }
 
-            SetMaterial(monitorRenderer, monitorMaterialIndex, monitorOffMaterial);
+            SetMaterial(MonitorRenderer, MonitorMaterialIndex, MonitorOffMaterial);
         }
 
         public void SetScreenBlanked(bool blanked)
         {
             if (blanked != wasBlanked)
-                monitorOnMaterial.color = blanked ? Color.black : Color.white;
+                MonitorOnMaterial.color = blanked ? Color.black : Color.white;
             wasBlanked = blanked;
         }
 
@@ -323,9 +325,9 @@ namespace OpenBodyCams
             currentPlayer = null;
             currentActualTarget = null;
             currentlyViewedMeshes = new Renderer[0];
-            cameraObject.transform.SetParent(null, false);
-            cameraObject.transform.localPosition = Vector3.zero;
-            cameraObject.transform.localRotation = Quaternion.identity;
+            CameraObject.transform.SetParent(null, false);
+            CameraObject.transform.localPosition = Vector3.zero;
+            CameraObject.transform.localRotation = Quaternion.identity;
         }
 
         public void UpdateTargetStatus()
@@ -407,9 +409,9 @@ namespace OpenBodyCams
                 return;
             }
 
-            cameraObject.transform.SetParent(currentActualTarget.transform, false);
-            cameraObject.transform.localPosition = offset;
-            cameraObject.transform.localRotation = Quaternion.identity;
+            CameraObject.transform.SetParent(currentActualTarget.transform, false);
+            CameraObject.transform.localPosition = offset;
+            CameraObject.transform.localRotation = Quaternion.identity;
         }
 
         public void SetTargetToTransform(Transform transform)
@@ -434,9 +436,9 @@ namespace OpenBodyCams
                 panCamera = true;
             }
 
-            cameraObject.transform.SetParent(currentActualTarget.transform, false);
-            cameraObject.transform.localPosition = offset;
-            cameraObject.transform.localRotation = Quaternion.identity;
+            CameraObject.transform.SetParent(currentActualTarget.transform, false);
+            CameraObject.transform.localPosition = offset;
+            CameraObject.transform.localRotation = Quaternion.identity;
         }
 
         private void UpdateModelReferences()
@@ -594,9 +596,9 @@ namespace OpenBodyCams
                 return;
             if (spectatedPlayer.spectatedPlayerScript != null)
                 spectatedPlayer = spectatedPlayer.spectatedPlayerScript;
-            bool enableCamera = monitorRenderer.isVisible
+            bool enableCamera = MonitorRenderer.isVisible
                 && spectatedPlayer.isInHangarShipRoom
-                && (object)monitorRenderer.sharedMaterials[monitorMaterialIndex] == monitorOnMaterial;
+                && (object)MonitorRenderer.sharedMaterials[MonitorMaterialIndex] == MonitorOnMaterial;
 
             if (enableCamera)
             {
@@ -611,7 +613,7 @@ namespace OpenBodyCams
 
             if (!enableCamera)
             {
-                camera.enabled = false;
+                Camera.enabled = false;
                 return;
             }
 
@@ -620,20 +622,20 @@ namespace OpenBodyCams
             else
                 panAngle = RADAR_BOOSTER_INITIAL_PAN;
             if (panCamera)
-                cameraObject.transform.localRotation = Quaternion.Euler(0, panAngle, 0);
+                CameraObject.transform.localRotation = Quaternion.Euler(0, panAngle, 0);
 
             if (timePerFrame > 0)
             {
                 elapsedSinceLastFrame += Time.deltaTime;
                 if (elapsedSinceLastFrame >= timePerFrame)
                 {
-                    camera.Render();
+                    Camera.Render();
                     elapsedSinceLastFrame %= timePerFrame;
                 }
             }
             else
             {
-                camera.enabled = true;
+                Camera.enabled = true;
             }
         }
 

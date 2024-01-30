@@ -117,8 +117,8 @@ namespace OpenBodyCams
                     return;
                 }
 
-                bodyCam.monitorRenderer = renderer;
-                bodyCam.monitorMaterialIndex = materialIndex;
+                bodyCam.MonitorRenderer = renderer;
+                bodyCam.MonitorMaterialIndex = materialIndex;
             }
         }
     }
