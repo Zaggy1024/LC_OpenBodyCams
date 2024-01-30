@@ -331,7 +331,10 @@ namespace OpenBodyCams
 
         public void UpdateTargetStatus()
         {
-            SetTargetToPlayer(currentPlayer);
+            if (currentPlayer != null)
+                SetTargetToPlayer(currentPlayer);
+            else
+                SetTargetToTransform(currentActualTarget);
         }
 
         public void SetTargetToPlayer(PlayerControllerB player)
@@ -414,6 +417,12 @@ namespace OpenBodyCams
 
         public void SetTargetToTransform(Transform transform)
         {
+            if (transform == null || transform.gameObject == null)
+            {
+                SetTargetToNone();
+                return;
+            }
+
             currentPlayer = null;
             currentActualTarget = transform;
             UpdateModelReferences();
