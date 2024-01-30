@@ -68,13 +68,13 @@ namespace OpenBodyCams
 
         private MeshRenderer fogShaderPlaneRenderer;
 
-        public static void InitializeStatic()
+        internal static void InitializeStatic()
         {
             RenderPipelineManager.beginCameraRendering += BeginAnyCameraRendering;
             RenderPipelineManager.endCameraRendering += EndAnyCameraRendering;
         }
 
-        public static void InitializeAtStartOfGame()
+        internal static void InitializeAtStartOfGame()
         {
             var aPlayerScript = StartOfRound.Instance.allPlayerScripts[0];
 
@@ -119,7 +119,7 @@ namespace OpenBodyCams
             }
         }
 
-        public static void UpdateStaticSettings()
+        internal static void UpdateStaticSettings()
         {
             screenEmissiveColor = GetEmissiveColor();
             disableCameraWhileTargetIsOnShip = Plugin.DisableCameraWhileTargetIsOnShip.Value;
@@ -296,7 +296,7 @@ namespace OpenBodyCams
             SetMaterial(MonitorRenderer, MonitorMaterialIndex, MonitorOffMaterial);
         }
 
-        public void SetScreenBlanked(bool blanked)
+        private void SetScreenBlanked(bool blanked)
         {
             if (blanked != wasBlanked)
                 MonitorOnMaterial.color = blanked ? Color.black : Color.white;
@@ -587,7 +587,7 @@ namespace OpenBodyCams
                 RestoreState(localPlayer, localPlayerCosmetics, localPlayerModelState);
         }
 
-        public void Update()
+        void Update()
         {
             EnsureCameraExists();
 
@@ -639,7 +639,7 @@ namespace OpenBodyCams
             }
         }
 
-        public void OnDestroy()
+        void OnDestroy()
         {
             AllBodyCams = AllBodyCams.Where(bodyCam => (object)bodyCam != this).ToArray();
         }
