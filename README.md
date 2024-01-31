@@ -6,7 +6,7 @@ The camera view will display only the first person hands and disable the third p
 # Features
 - Selectable camera perspective between the head and body.
 - Camera view is designed to render identically for the local player as well other players in the game.
-- MoreCompany and AdvancedCompany cosmetics support, see the [Compatibility](#compatibility).
+- MoreCompany and AdvancedCompany cosmetics support, see the [Compatibility](#compatibility) section.
 - All enemies, terrain, etc. that is visible to the player will be visible in the camera view.
 - The same green flash animation used when switching targets on the radar is displayed by the camera view.
 - Performance:
