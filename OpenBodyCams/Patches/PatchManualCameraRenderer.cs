@@ -6,6 +6,7 @@ using System.Reflection.Emit;
 
 using GameNetcodeStuff;
 using HarmonyLib;
+using OpenBodyCams.Compatibility;
 using Unity.Netcode;
 
 namespace OpenBodyCams.Patches
@@ -31,6 +32,7 @@ namespace OpenBodyCams.Patches
 
         [HarmonyPostfix]
         [HarmonyPatch(nameof(ManualCameraRenderer.SwitchScreenOn))]
+        [HarmonyAfter(ModGUIDs.GeneralImprovements)]
         static void SwitchScreenOnPostfix(ManualCameraRenderer __instance)
         {
             if ((object)__instance.cam != __instance.mapCamera)
