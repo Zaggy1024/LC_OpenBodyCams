@@ -1,3 +1,9 @@
+## Version 1.1.0
+- Refactored the mod to allow creation of multiple body cams through an API. This feature is not used in OpenBodyCams, but may be used in the future to provide a separate body cam for the terminal, or other use cases.
+- When no valid target is selected (i.e. when players are still respawning), the screen will now display nothing, but it will remain illuminated to indicate that it is still powered.
+- Fixed an issue where the screen would get frozen with the green transition visible when a radar booster is left behind on a planet.
+- Note: Due to refactoring much of the code that reacts to the events in the game, I'm anticipating there may be regressions in the way the body cam tracks its target's status changes (death, masking, respawning). If the camera gets stuck displaying something unexpected, please report that (preferably through a GitHub issue) with steps to reproduce the problem.
+
 ## Version 1.0.24
 - Added support for ModelReplacementAPI's third person model replacements.
 - Added support for LethalVRM's third person model replacements.
