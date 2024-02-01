@@ -93,12 +93,15 @@ namespace OpenBodyCams.Patches
 
             var instructionsList = instructions.ToList();
 
+            // SwitchRadarTargetForward(callRPC: false);
             var switchRadarTargetForward = instructionsList.FindIndexOfSequence(new Predicate<CodeInstruction>[]
             {
                 insn => insn.IsLdarg(0),
                 insn => insn.LoadsConstant(0),
                 insn => insn.Calls(m_ManualCameraRenderer_SwitchRadarTargetForward),
             });
+            // if (IsOwner)
+            //   SwitchRadarTargetForward(callRPC: true);
             instructionsList[switchRadarTargetForward.Start + 1] = new CodeInstruction(OpCodes.Ldc_I4_1);
             var notOwnerLabel = generator.DefineLabel();
             instructionsList[switchRadarTargetForward.End].labels.Add(notOwnerLabel);
