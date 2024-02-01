@@ -1,3 +1,6 @@
+## Version 1.1.1
+- Hopefully prevented an issue where in rare cases, masked players being viewed by the body cam would cause the screen to freeze. This was perhaps caused by other mods deleting renderers attached to the masked players after they were created.
+
 ## Version 1.1.0
 - Refactored the mod to allow creation of multiple body cams through an API. This feature is not used in OpenBodyCams, but may be used in the future to provide a separate body cam for the terminal, or other use cases.
 - When no valid target is selected (i.e. when players are still respawning), the screen will now display nothing, but it will remain illuminated to indicate that it is still powered.
