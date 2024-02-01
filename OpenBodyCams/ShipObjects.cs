@@ -71,7 +71,7 @@ namespace OpenBodyCams
             TerminalScript = UnityEngine.Object.FindObjectOfType<Terminal>();
             TwoRadarCamsPresent = TerminalScript.GetComponent<ManualCameraRenderer>() != null;
 
-            DoorScreenUsesExternalCamera = DoorScreenRenderer.sharedMaterials.Any(mat => mat.mainTexture == ExternalCameraRenderer.cam.targetTexture);
+            DoorScreenUsesExternalCamera = DoorScreenRenderer?.sharedMaterials.Any(mat => mat.mainTexture == ExternalCameraRenderer.cam.targetTexture) == true;
 
             InitializeBodyCam();
 
