@@ -81,6 +81,7 @@ namespace OpenBodyCams
             fogShaderMaterial = aPlayerScript.localVisor.transform.Find("ScavengerHelmet/Plane").GetComponent<MeshRenderer>().sharedMaterial;
 
             nightVisionPrefab = Instantiate(aPlayerScript.nightVision.gameObject);
+            nightVisionPrefab.hideFlags = HideFlags.HideAndDontSave;
             nightVisionPrefab.name = "NightVision";
             nightVisionPrefab.transform.localPosition = Vector3.zero;
             nightVisionPrefab.SetActive(false);
