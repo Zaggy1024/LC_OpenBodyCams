@@ -230,11 +230,11 @@ namespace OpenBodyCams
             greenFlashRenderer.forceRenderingOff = true;
             greenFlashAnimator = greenFlashObject.GetComponent<Animator>() ?? throw new Exception("Green flash object copied from the map screen has no Animator.");
 
-            var fogShaderPlane = GameObject.CreatePrimitive(PrimitiveType.Plane);
+            var fogShaderPlane = GameObject.CreatePrimitive(PrimitiveType.Quad);
             Destroy(fogShaderPlane.GetComponent<MeshCollider>());
             fogShaderPlane.transform.SetParent(CameraObject.transform, false);
-            fogShaderPlane.transform.localPosition = new Vector3(0, 0, 0.5f);
-            fogShaderPlane.transform.localRotation = Quaternion.Euler(270, 0, 0);
+            fogShaderPlane.transform.localPosition = new Vector3(0, 0, Camera.nearClipPlane * 2);
+            fogShaderPlane.transform.localRotation = Quaternion.Euler(0, 0, 0);
             fogShaderPlaneRenderer = fogShaderPlane.GetComponent<MeshRenderer>();
             fogShaderPlaneRenderer.sharedMaterial = fogShaderMaterial;
             fogShaderPlaneRenderer.shadowCastingMode = ShadowCastingMode.Off;
