@@ -547,10 +547,11 @@ namespace OpenBodyCams
 
         private void BeginCameraRendering()
         {
-            if (currentlyViewedMeshes.Length > 0 && currentlyViewedMeshes[0] == null)
-                return;
-            foreach (var mesh in currentlyViewedMeshes)
+            foreach (var mesh in currentlyViewedMeshes) {
+                if (mesh == null)
+                    continue;
                 mesh.forceRenderingOff = true;
+            }
 
             nightVisionLight.enabled = true;
             greenFlashRenderer.forceRenderingOff = false;
