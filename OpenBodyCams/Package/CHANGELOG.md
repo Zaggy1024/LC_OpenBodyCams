@@ -1,3 +1,7 @@
+## Version 1.1.2
+- Fixed error spam that could occur when changing models with ModelReplacementAPI.
+- Added a debug option that prints extra information about which cosmetics are being collected for each player, and the reason they are being collected. If you have issues with cosmetics/model replacements, I may ask for you to enable this to get new logs.
+
 ## Version 1.1.1
 - Hopefully prevented an issue where in rare cases, masked players being viewed by the body cam would cause the screen to freeze. This was perhaps caused by other mods deleting renderers attached to the masked players after they were created.
 

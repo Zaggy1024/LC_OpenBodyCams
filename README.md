@@ -38,6 +38,9 @@ Third-person model replacements by ModelReplacementAPI or LethalVRM are supporte
 - `DisableInternalShipCamera`: Disables the camera at the front of the ship facing towards the center. This may improve performance inside the ship slightly.
 - `FixDroppedItemRotation`: Defaulted to `true`, this fixes a desync of items' rotations when dropping them. See [Notes](#notes).
 
+## Debug
+- `PrintCosmeticsDebugInfo`: Prints extra information about the cosmetics being collected for each player, as well as the code that is causing the cosmetics to be collected. This is useful information to provide when reporting that you are seeing a `Collecting [x] cosmetics objects for [name]` message getting spammed in the logs.
+
 # Notes
 As mentioned above, using no framerate limit results in the best performance. Forcing the camera to render at certain intervals outside of the render pipeline seems to cause a lot of overhead, so setting the framerate limit to anything above 30fps may cause a severe dip in the game's framerate.
 
