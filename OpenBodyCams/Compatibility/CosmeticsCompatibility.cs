@@ -59,8 +59,15 @@ namespace OpenBodyCams
 
             if (Plugin.EnableModelReplacementAPICompatibility.Value && Chainloader.PluginInfos.ContainsKey(ModGUIDs.ModelReplacementAPI))
             {
-                compatibilityMode |= CompatibilityMode.ModelReplacementAPI;
-                Plugin.Instance.Logger.LogInfo("ModelReplacementAPI compatibility mode is enabled.");
+                if (ModelReplacementAPICompatibility.Initialize(harmony))
+                {
+                    compatibilityMode |= CompatibilityMode.ModelReplacementAPI;
+                    Plugin.Instance.Logger.LogInfo("ModelReplacementAPI compatibility mode is enabled.");
+                }
+                else
+                {
+                    Plugin.Instance.Logger.LogWarning("ModelReplacementAPI is installed, but the compatibility feature failed to initialize.");
+                }
             }
 
             if (Plugin.EnableLethalVRMCompatibility.Value && Chainloader.PluginInfos.ContainsKey(ModGUIDs.LethalVRM))

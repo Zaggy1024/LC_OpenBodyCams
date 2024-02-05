@@ -24,6 +24,17 @@ namespace OpenBodyCams.Patches
 
     public static class Common
     {
+        public static IEnumerable<T> IndexRangeView<T>(this List<T> list, int start, int end)
+        {
+            for (int i = start; i < end; i++)
+                yield return list[i];
+        }
+
+        public static IEnumerable<T> IndexRangeView<T>(this List<T> list, SequenceMatch range)
+        {
+            return list.IndexRangeView(range.Start, range.End);
+        }
+
         public static SequenceMatch FindIndexOfSequence<T>(this List<T> list, int startIndex, int count, IEnumerable<Predicate<T>> predicates)
         {
             var index = startIndex;
