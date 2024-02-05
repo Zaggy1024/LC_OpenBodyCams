@@ -53,6 +53,8 @@ namespace OpenBodyCams
         public static ConfigEntry<bool> DisableInternalShipCamera;
         public static ConfigEntry<bool> FixDroppedItemRotation;
 
+        public static ConfigEntry<bool> PrintCosmeticsDebugInfo;
+
         public new ManualLogSource Logger => base.Logger;
 
         void Awake()
@@ -97,6 +99,9 @@ namespace OpenBodyCams
 
             DisableInternalShipCamera = Config.Bind("Misc", "DisableInternalShipCamera", false, "Whether to disable the internal ship camera displayed above the bodycam monitor.");
             FixDroppedItemRotation = Config.Bind("Misc", "FixDroppedItemRotation", true, "If enabled, the mod will patch a bug that causes the rotation of dropped items to be desynced between clients.");
+
+            PrintCosmeticsDebugInfo = Config.Bind("Debug", "PrintCosmeticsDebugInfo", false, "Prints extra information about the cosmetics being collected for each player, as well as the code that is causing the collection.");
+            PrintCosmeticsDebugInfo.SettingChanged += (s, e) => CosmeticsCompatibility.PrintDebugInfo = PrintCosmeticsDebugInfo.Value;
 
             CosmeticsCompatibility.Initialize(harmony);
 

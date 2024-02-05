@@ -1,5 +1,5 @@
 using System;
-using System.Linq;
+using System.Collections.Generic;
 
 using BepInEx.Bootstrap;
 using GameNetcodeStuff;
@@ -7,11 +7,14 @@ using HarmonyLib;
 using UnityEngine;
 
 using OpenBodyCams.Compatibility;
+using System.Diagnostics;
 
 namespace OpenBodyCams
 {
     static class CosmeticsCompatibility
     {
+        internal static bool PrintDebugInfo = false;
+
         [Flags]
         enum CompatibilityMode
         {
@@ -74,21 +77,60 @@ namespace OpenBodyCams
             }
         }
 
+        private static void DebugLog(object data)
+        {
+            if (PrintDebugInfo)
+                Plugin.Instance.Logger.LogInfo(data);
+        }
+
         public static GameObject[] CollectCosmetics(PlayerControllerB player)
         {
             if (player == null)
                 return new GameObject[0];
-            var result = Enumerable.Empty<GameObject>();
+            var result = new List<GameObject>();
+            DebugLog($"Collecting cosmetics for {player.playerUsername}.");
+
             if (compatibilityMode.HasFlag(CompatibilityMode.MoreCompany))
-                result = result.Concat(MoreCompanyCompatibility.CollectCosmetics(player));
+            {
+                var mcCosmetics = MoreCompanyCompatibility.CollectCosmetics(player);
+                result.AddRange(mcCosmetics);
+                DebugLog($"Collected {mcCosmetics.Length} MoreCompany cosmetics objects.");
+            }
+
             if (compatibilityMode.HasFlag(CompatibilityMode.AdvancedCompany))
-                result = result.Concat(AdvancedCompanyCompatibility.CollectCosmetics(player));
+            {
+                var acCosmetics = AdvancedCompanyCompatibility.CollectCosmetics(player);
+                result.AddRange(acCosmetics);
+                DebugLog($"Collected {acCosmetics.Length} AdvancedCompany cosmetics objects.");
+            }
+
             if (compatibilityMode.HasFlag(CompatibilityMode.ModelReplacementAPI))
-                result = result.Concat(ModelReplacementAPICompatibility.CollectCosmetics(player));
+            {
+                var mrCosmetics = ModelReplacementAPICompatibility.CollectCosmetics(player);
+                result.AddRange(mrCosmetics);
+                DebugLog($"Collected {mrCosmetics.Length} ModelReplacementAPI cosmetics objects.");
+            }
+
             if (compatibilityMode.HasFlag(CompatibilityMode.LethalVRM))
-                result = result.Concat(LethalVRMCompatibility.CollectCosmetics(player));
-            var resultArray = result.ToArray();
-            Plugin.Instance.Logger.LogInfo($"Collected {resultArray.Length} cosmetics objects for {player.playerUsername}.");
+            {
+                var vrmCosmetics = LethalVRMCompatibility.CollectCosmetics(player);
+                result.AddRange(vrmCosmetics);
+                DebugLog($"Collected {vrmCosmetics.Length} LethalVRM cosmetics objects.");
+            }
+
+            Plugin.Instance.Logger.LogInfo($"Collected {result.Count} cosmetics objects for {player.playerUsername}.");
+
+            if (PrintDebugInfo)
+            {
+                Plugin.Instance.Logger.LogInfo($"Called from:");
+                var stackFrames = new StackTrace().GetFrames();
+                for (int i = 1; i < stackFrames.Length; i++)
+                {
+                    var frame = stackFrames[i];
+                    Plugin.Instance.Logger.LogInfo($"{frame.GetMethod().DeclaringType.Name}.{frame.GetMethod().Name}()");
+                }
+            }
+
             return result.ToArray();
         }
     }
