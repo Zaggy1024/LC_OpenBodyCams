@@ -71,7 +71,16 @@ namespace OpenBodyCams.Patches
         public static int PopCount(this CodeInstruction instruction)
         {
             if (instruction.opcode == OpCodes.Call || instruction.opcode == OpCodes.Callvirt)
-                return ((MethodInfo)instruction.operand).GetParameters().Length;
+            {
+                var method = (MethodInfo)instruction.operand;
+                var parameterCount = method.GetParameters().Length;
+                if (!method.IsStatic)
+                    parameterCount++;
+                return parameterCount;
+            }
+
+            if (instruction.opcode == OpCodes.Ret)
+                return 1;
 
             switch (instruction.opcode.StackBehaviourPop)
             {
@@ -123,12 +132,17 @@ namespace OpenBodyCams.Patches
         public static int PushCount(this CodeInstruction instruction)
         {
             if (instruction.opcode == OpCodes.Call || instruction.opcode == OpCodes.Callvirt)
+            {
+                var method = (MethodInfo)instruction.operand;
+                if (method.ReturnType == typeof(void))
+                    return 0;
                 return 1;
+            }
 
             switch (instruction.opcode.StackBehaviourPush)
             {
                 case StackBehaviour.Push0:
-                    return 1;
+                    return 0;
                 case StackBehaviour.Push1:
                     return 1;
                 case StackBehaviour.Push1_push1:
