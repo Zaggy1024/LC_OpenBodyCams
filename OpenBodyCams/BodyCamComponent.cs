@@ -548,11 +548,7 @@ namespace OpenBodyCams
 
         private void BeginCameraRendering()
         {
-            foreach (var mesh in currentlyViewedMeshes) {
-                if (mesh == null)
-                    continue;
-                mesh.forceRenderingOff = true;
-            }
+            hasSetUpCamera = true;
 
             nightVisionLight.enabled = true;
             greenFlashRenderer.forceRenderingOff = false;
@@ -564,7 +560,12 @@ namespace OpenBodyCams
             if ((object)currentPlayer != localPlayer)
                 SaveStateAndApplyPerspective(localPlayer, ref localPlayerCosmetics, ref localPlayerModelState, Perspective.ThirdPerson);
 
-            hasSetUpCamera = true;
+            foreach (var mesh in currentlyViewedMeshes)
+            {
+                if (mesh == null)
+                    continue;
+                mesh.forceRenderingOff = true;
+            }
         }
 
         private void ResetCameraRendering()
@@ -572,11 +573,6 @@ namespace OpenBodyCams
             if (!hasSetUpCamera)
                 return;
             hasSetUpCamera = false;
-
-            if (currentlyViewedMeshes.Length > 0 && currentlyViewedMeshes[0] == null)
-                return;
-            foreach (var mesh in currentlyViewedMeshes)
-                mesh.forceRenderingOff = false;
 
             nightVisionLight.enabled = false;
             greenFlashRenderer.forceRenderingOff = true;
@@ -587,6 +583,11 @@ namespace OpenBodyCams
             RestoreState(currentPlayer, currentPlayerCosmetics, currentPlayerModelState);
             if ((object)currentPlayer != localPlayer)
                 RestoreState(localPlayer, localPlayerCosmetics, localPlayerModelState);
+
+            if (currentlyViewedMeshes.Length > 0 && currentlyViewedMeshes[0] == null)
+                return;
+            foreach (var mesh in currentlyViewedMeshes)
+                mesh.forceRenderingOff = false;
         }
 
         void Update()
