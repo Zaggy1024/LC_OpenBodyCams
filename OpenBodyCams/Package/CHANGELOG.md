@@ -1,3 +1,6 @@
+## Version 1.1.3
+- Fixed compatibility for MoreCompany versions greater than 1.8.0. Note that there appears to be an issue where upon joining a server, cosmetics may appear blocking the view of the body cam, which may be caused by an error in MoreCompany.
+
 ## Version 1.1.2
 - Fixed error spam that could occur when changing models with ModelReplacementAPI.
 - Added a debug option that prints extra information about which cosmetics are being collected for each player, and the reason they are being collected. If you have issues with cosmetics/model replacements, I may ask for you to enable this to get new logs.
