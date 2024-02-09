@@ -22,7 +22,7 @@ namespace OpenBodyCams.Compatibility
         [MethodImpl(MethodImplOptions.NoInlining)]
         public static bool Initialize(Harmony harmony)
         {
-            var m_ClientReceiveMessagePatch_HandleDataMessage = typeof(ClientReceiveMessagePatch).GetMethod("HandleDataMessage", BindingFlags.NonPublic | BindingFlags.Static, null, new Type[] { typeof(string) }, null);
+            var m_ClientReceiveMessagePatch_HandleDataMessage = typeof(ClientReceiveMessagePatch).GetMethods(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static).First(method => method.Name == "HandleDataMessage");
 
             m_CosmeticApplication_ClearCosmetics = typeof(CosmeticApplication).GetMethod(nameof(CosmeticApplication.ClearCosmetics), new Type[0]);
             if (m_CosmeticApplication_ClearCosmetics is null)
@@ -34,7 +34,6 @@ namespace OpenBodyCams.Compatibility
             var thisType = typeof(MoreCompanyCompatibility);
             harmony.CreateProcessor(m_ClientReceiveMessagePatch_HandleDataMessage)
                 .AddTranspiler(thisType.GetMethod(nameof(ClientReceiveMessagePatch_HandleDataMessageTranspiler)))
-                .AddPostfix(thisType.GetMethod(nameof(ClientReceiveMessagePatch_HandleDataMessagePostfix)))
                 .Patch();
             Plugin.Instance.Logger.LogInfo($"Patched MoreCompany to spawn cosmetics on the local player.");
             return true;
@@ -42,8 +41,12 @@ namespace OpenBodyCams.Compatibility
 
         public static IEnumerable<CodeInstruction> ClientReceiveMessagePatch_HandleDataMessageTranspiler(IEnumerable<CodeInstruction> instructions)
         {
+            // Change cosmetic spawning to keep the cosmetics applied to the local player, but placed into the invisible enemies layer to match
+            // other mods that use it to display cosmetics in third person.
             var instructionsList = instructions.ToList();
 
+            // Search for:
+            //   bool isLocalPlayer = playerId == StartOfRound.Instance.thisClientPlayerId;
             var isLocalPlayer = instructionsList.FindIndexOfSequence(new Predicate<CodeInstruction>[]
             {
                 insn => insn.IsLdloc(),
@@ -53,16 +56,22 @@ namespace OpenBodyCams.Compatibility
                 insn => insn.IsStloc(),
             });
 
+            // Then find:
+            //   cosmeticApplication.ClearCosmetics();
             var clearCosmetics = instructionsList.FindIndexOfSequence(isLocalPlayer.End, new Predicate<CodeInstruction>[]
             {
                 insn => insn.IsLdloc(),
                 insn => insn.Calls(m_CosmeticApplication_ClearCosmetics),
             });
             instructionsList.RemoveAt(clearCosmetics.End - 1);
+            // Replace it with:
+            //   MoreCompanyCompatibility.SetUpLocalMoreCompanyCosmetics(cosmeticApplication);
             instructionsList.InsertRange(clearCosmetics.End - 1, new CodeInstruction[]
             {
                 CodeInstruction.Call(typeof(MoreCompanyCompatibility), nameof(SetUpLocalMoreCompanyCosmetics)),
             });
+
+            instructionsList.Insert(instructionsList.Count - 2, CodeInstruction.Call(typeof(BodyCamComponent), nameof(BodyCamComponent.UpdateAllTargetStatuses)));
 
             return instructionsList;
         }
@@ -74,11 +83,6 @@ namespace OpenBodyCams.Compatibility
                 foreach (var child in cosmetic.GetComponentsInChildren<Transform>())
                     child.gameObject.layer = BodyCamComponent.ENEMIES_NOT_RENDERED_LAYER;
             }
-        }
-
-        public static void ClientReceiveMessagePatch_HandleDataMessagePostfix()
-        {
-            BodyCamComponent.UpdateAllTargetStatuses();
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
