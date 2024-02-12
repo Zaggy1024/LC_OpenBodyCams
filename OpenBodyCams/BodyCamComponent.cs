@@ -24,6 +24,9 @@ namespace OpenBodyCams
         private static BodyCamComponent[] AllBodyCams = new BodyCamComponent[0];
         public static BodyCamComponent[] GetAllBodyCams() { return AllBodyCams; }
 
+        private static int mainCameraCullingMask;
+        private static FrameSettings mainCameraCustomFrameSettings;
+        private static FrameSettingsOverrideMask mainCameraCustomFrameSettingsMask;
         private static Material fogShaderMaterial;
         private static GameObject nightVisionPrefab;
 
@@ -77,6 +80,16 @@ namespace OpenBodyCams
         internal static void InitializeAtStartOfGame()
         {
             var aPlayerScript = StartOfRound.Instance.allPlayerScripts[0];
+
+            mainCameraCullingMask = aPlayerScript.gameplayCamera.cullingMask;
+
+            var mainCameraAdditionalData = aPlayerScript.gameplayCamera.GetComponent<HDAdditionalCameraData>();
+            if (mainCameraAdditionalData.customRenderingSettings)
+            {
+                Plugin.Instance.Logger.LogInfo($"Using custom camera settings from {mainCameraAdditionalData.name}.");
+                mainCameraCustomFrameSettings = mainCameraAdditionalData.renderingPathCustomFrameSettings;
+                mainCameraCustomFrameSettingsMask = mainCameraAdditionalData.renderingPathCustomFrameSettingsOverrideMask;
+            }
 
             fogShaderMaterial = aPlayerScript.localVisor.transform.Find("ScavengerHelmet/Plane").GetComponent<MeshRenderer>().sharedMaterial;
 
@@ -208,9 +221,16 @@ namespace OpenBodyCams
             CameraObject = new GameObject("BodyCam");
             Camera = CameraObject.AddComponent<Camera>();
             Camera.nearClipPlane = 0.05f;
-            Camera.cullingMask = 0b0010_0001_0011_1011_0001_0111_0101_1011;
+            Camera.cullingMask = mainCameraCullingMask & ~LayerMask.GetMask(new string[] { "Ignore Raycast", "UI", "HelmetVisor" });
+
             var cameraData = CameraObject.AddComponent<HDAdditionalCameraData>();
             cameraData.volumeLayerMask = 1;
+            if (mainCameraCustomFrameSettings != null)
+            {
+                cameraData.customRenderingSettings = true;
+                cameraData.renderingPathCustomFrameSettings = mainCameraCustomFrameSettings;
+                cameraData.renderingPathCustomFrameSettingsOverrideMask = mainCameraCustomFrameSettingsMask;
+            }
 
             var nightVision = Instantiate(nightVisionPrefab);
             nightVision.transform.SetParent(CameraObject.transform, false);
