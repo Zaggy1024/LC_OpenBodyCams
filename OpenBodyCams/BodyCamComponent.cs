@@ -296,7 +296,8 @@ namespace OpenBodyCams
 
         public void StartTargetTransition()
         {
-            greenFlashAnimator.SetTrigger("Transition");
+            if (Plugin.UseTargetTransitionAnimation.Value)
+                greenFlashAnimator.SetTrigger("Transition");
         }
 
         private static void SetCosmeticHidden(GameObject cosmetic, bool hidden)
