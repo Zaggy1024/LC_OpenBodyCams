@@ -1,3 +1,7 @@
+## Version 1.1.4
+- Added an option to disable the green flash animation displayed when changing targets on the body cam.
+- HDLethalCompany graphics options will now apply to the body cam.
+
 ## Version 1.1.3
 - Fixed compatibility for MoreCompany versions greater than 1.8.0. Note that there appears to be an issue where upon joining a server, cosmetics may appear blocking the view of the body cam, which may be caused by an error in MoreCompany.
 

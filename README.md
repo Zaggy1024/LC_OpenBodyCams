@@ -30,7 +30,9 @@ Third-person model replacements by ModelReplacementAPI or LethalVRM are supporte
 - `Framerate`: The number of frames to render per second. The default setting renders at the game's framerate and has the least impact on performance.
 - `NightVisionBrightness`: A multiplier for the brightness and range of the night vision light. A value of 1 matches the vision of the player being viewed.
 - `MonitorEmissiveColor`: The color to emit from the screen displaying the body cam. Represented as comma-separated numbers to avoid losing precision by using a 32-bit color.
+- `MonitorTextureFiltering`: Changes the texture filtering applied to the screen for the body cam. Point will result in sharp edges on the pixels, while bilinear and trilinear should both smooth out colors between them.
 - `RadarBoosterPanRPM`: This controls the number of turns that the camera should make each minute. If set to 0, the camera will be fixed in the direction that the player placing the radar booster was facing.
+- `UseTargetTransitionAnimation`: If enabled, the body cam will display a green flash animation when changing targets to mirror the behavior of the radar map.
 - `DisableCameraWhileTargetIsOnShip`: This will cause the screen to turn off while the camera's target is onboard the ship. This can be used to avoid the load of rendering large numbers of items on the ship in long runs.
 - `EnableCamera`: When this is enabled, the screen will be powered off. This can be changed in-game with LethalConfig or any similar mod.
 
