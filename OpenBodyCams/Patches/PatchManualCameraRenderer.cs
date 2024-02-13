@@ -1,4 +1,3 @@
-using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -87,30 +86,30 @@ namespace OpenBodyCams.Patches
             // player object that hasn't been taken control of, so the body cam target is invalid.
 
             // We fix this by only setting the target on the owner and allow that to sync the correct target.
-            var m_ManualCameraRenderer_SwitchRadarTargetForward = typeof(ManualCameraRenderer).GetMethod(nameof(ManualCameraRenderer.SwitchRadarTargetForward), new Type[] { typeof(bool) });
+            var m_ManualCameraRenderer_SwitchRadarTargetForward = typeof(ManualCameraRenderer).GetMethod(nameof(ManualCameraRenderer.SwitchRadarTargetForward), [ typeof(bool) ]);
 
             var m_NetworkBehaviour_IsOwner = typeof(NetworkBehaviour).GetMethod("get_IsOwner");
 
             var instructionsList = instructions.ToList();
 
             // SwitchRadarTargetForward(callRPC: false);
-            var switchRadarTargetForward = instructionsList.FindIndexOfSequence(new Predicate<CodeInstruction>[]
-            {
-                insn => insn.IsLdarg(0),
-                insn => insn.LoadsConstant(0),
-                insn => insn.Calls(m_ManualCameraRenderer_SwitchRadarTargetForward),
-            });
+            var switchRadarTargetForward = instructionsList.FindIndexOfSequence(
+                [
+                    insn => insn.IsLdarg(0),
+                    insn => insn.LoadsConstant(0),
+                    insn => insn.Calls(m_ManualCameraRenderer_SwitchRadarTargetForward),
+                ]);
             // if (IsOwner)
             //   SwitchRadarTargetForward(callRPC: true);
-            instructionsList[switchRadarTargetForward.Start + 1] = new CodeInstruction(OpCodes.Ldc_I4_1);
+            instructionsList[switchRadarTargetForward.Start + 1] = new(OpCodes.Ldc_I4_1);
             var notOwnerLabel = generator.DefineLabel();
             instructionsList[switchRadarTargetForward.End].labels.Add(notOwnerLabel);
-            instructionsList.InsertRange(switchRadarTargetForward.Start, new CodeInstruction[]
-            {
-                new CodeInstruction(OpCodes.Ldarg_0),
-                new CodeInstruction(OpCodes.Call, m_NetworkBehaviour_IsOwner),
-                new CodeInstruction(OpCodes.Brfalse_S, notOwnerLabel),
-            });
+            instructionsList.InsertRange(switchRadarTargetForward.Start,
+                [
+                    new(OpCodes.Ldarg_0),
+                    new(OpCodes.Call, m_NetworkBehaviour_IsOwner),
+                    new(OpCodes.Brfalse_S, notOwnerLabel),
+                ]);
 
             return instructionsList;
         }
