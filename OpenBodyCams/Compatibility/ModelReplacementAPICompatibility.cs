@@ -14,9 +14,7 @@ namespace OpenBodyCams.Compatibility
 {
     public static class ModelReplacementAPICompatibility
     {
-        private static MethodInfo m_UpdateModelReplacement;
-
-        private static FieldInfo f_ViewStateManager_bodyReplacement;
+        public static MethodInfo m_UpdateModelReplacement;
 
         public static bool Initialize(Harmony harmony)
         {
@@ -31,14 +29,6 @@ namespace OpenBodyCams.Compatibility
             if (m_ModelReplacementAPI_RemovePlayerModelReplacement is null)
             {
                 Plugin.Instance.Logger.LogInfo($"ModelReplacementAPI is installed, but the `ModelReplacementAPI.RemovePlayerModelReplacement()` method was not found.");
-                return false;
-            }
-
-            f_ViewStateManager_bodyReplacement = typeof(ViewStateManager).GetField("bodyReplacement", BindingFlags.Instance | BindingFlags.NonPublic);
-
-            if (f_ViewStateManager_bodyReplacement is null)
-            {
-                Plugin.Instance.Logger.LogInfo($"ModelReplacementAPI is installed, but the `ViewStateManager.bodyReplacement` field was not found.");
                 return false;
             }
 
@@ -58,8 +48,7 @@ namespace OpenBodyCams.Compatibility
         [MethodImpl(MethodImplOptions.NoInlining)]
         public static GameObject[] CollectCosmetics(PlayerControllerB player)
         {
-            var viewStateManager = player.GetComponent<ViewStateManager>();
-            var bodyReplacement = f_ViewStateManager_bodyReplacement.GetValue(viewStateManager) as BodyReplacementBase;
+            var bodyReplacement = player.GetComponent<ViewStateManager>()?.bodyReplacement;
 
             if (bodyReplacement == null)
                 return new GameObject[0];
@@ -76,19 +65,19 @@ namespace OpenBodyCams.Compatibility
         {
             var instructionsList = new List<CodeInstruction>(instructions);
 
-            var m_Object_Destroy = typeof(UnityEngine.Object).GetMethod(nameof(UnityEngine.Object.Destroy), new Type[] { typeof(UnityEngine.Object) });
-            var m_Component_GetComponent_ViewStateManager = typeof(Component).GetMethods().First(method => method.Name == "GetComponent" && method.IsGenericMethod).MakeGenericMethod(new Type[] { typeof(ViewStateManager) });
+            var m_Object_Destroy = typeof(UnityEngine.Object).GetMethod(nameof(UnityEngine.Object.Destroy), [ typeof(UnityEngine.Object) ]);
+            var m_Component_GetComponent_ViewStateManager = typeof(Component).GetMethods().First(method => method.Name == "GetComponent" && method.IsGenericMethod).MakeGenericMethod([ typeof(ViewStateManager) ]);
 
-            var m_ViewStateManager_ReportBodyReplacementRemoval = typeof(ViewStateManager).GetMethod(nameof(ViewStateManager.ReportBodyReplacementRemoval), new Type[0]);
+            var m_ViewStateManager_ReportBodyReplacementRemoval = typeof(ViewStateManager).GetMethod(nameof(ViewStateManager.ReportBodyReplacementRemoval), []);
 
             var destroyBodyReplacement = instructionsList.FindIndex(insn => insn.Calls(m_Object_Destroy));
             instructionsList.InsertRange(destroyBodyReplacement + 1,
-                new CodeInstruction[] {
-                    new CodeInstruction(OpCodes.Ldarg_0),
-                    new CodeInstruction(OpCodes.Call, m_Component_GetComponent_ViewStateManager),
-                    new CodeInstruction(OpCodes.Call, m_ViewStateManager_ReportBodyReplacementRemoval),
-                    new CodeInstruction(OpCodes.Call, m_UpdateModelReplacement),
-                });
+                [
+                    new(OpCodes.Ldarg_0),
+                    new(OpCodes.Call, m_Component_GetComponent_ViewStateManager),
+                    new(OpCodes.Call, m_ViewStateManager_ReportBodyReplacementRemoval),
+                    new(OpCodes.Call, m_UpdateModelReplacement),
+                ]);
 
             return instructionsList;
         }
