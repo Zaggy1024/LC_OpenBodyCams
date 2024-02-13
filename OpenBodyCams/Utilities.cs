@@ -4,7 +4,7 @@ namespace OpenBodyCams
 {
     public static class Utilities
     {
-        public static bool IsRendererVisibleToAnyCameraExcept(Renderer renderer, Camera cameraToSkip, bool debug = false)
+        public static bool IsVisibleToAnyCameraExcept(this Renderer renderer, Camera cameraToSkip, bool debug = false)
         {
             foreach (var camera in Camera.allCameras)
             {

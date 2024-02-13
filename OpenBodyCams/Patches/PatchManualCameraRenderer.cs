@@ -59,7 +59,7 @@ namespace OpenBodyCams.Patches
                 if (!__result)
                     return;
 
-                __result = Utilities.IsRendererVisibleToAnyCameraExcept(__instance.mesh, __instance.cam);
+                __result = __instance.mesh.IsVisibleToAnyCameraExcept(__instance.cam);
             }
             else if ((object)__instance == ShipObjects.ExternalCameraRenderer)
             {
@@ -70,7 +70,7 @@ namespace OpenBodyCams.Patches
                 if (!player.isInHangarShipRoom && StartOfRound.Instance.shipDoorsEnabled)
                     return;
 
-                __result = Utilities.IsRendererVisibleToAnyCameraExcept(ShipObjects.DoorScreenRenderer, __instance.cam, true);
+                __result = ShipObjects.DoorScreenRenderer.IsVisibleToAnyCameraExcept(__instance.cam, true);
             }
         }
 
