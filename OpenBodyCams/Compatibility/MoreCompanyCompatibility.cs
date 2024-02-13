@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -24,7 +23,7 @@ namespace OpenBodyCams.Compatibility
         {
             var m_ClientReceiveMessagePatch_HandleDataMessage = typeof(ClientReceiveMessagePatch).GetMethods(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static).First(method => method.Name == "HandleDataMessage");
 
-            m_CosmeticApplication_ClearCosmetics = typeof(CosmeticApplication).GetMethod(nameof(CosmeticApplication.ClearCosmetics), new Type[0]);
+            m_CosmeticApplication_ClearCosmetics = typeof(CosmeticApplication).GetMethod(nameof(CosmeticApplication.ClearCosmetics), []);
             if (m_CosmeticApplication_ClearCosmetics is null)
             {
                 Plugin.Instance.Logger.LogInfo($"MoreCompany is installed, but `CosmeticApplication.ClearCosmetics()` was not found.");
@@ -47,30 +46,28 @@ namespace OpenBodyCams.Compatibility
 
             // Search for:
             //   bool isLocalPlayer = playerId == StartOfRound.Instance.thisClientPlayerId;
-            var isLocalPlayer = instructionsList.FindIndexOfSequence(new Predicate<CodeInstruction>[]
-            {
-                insn => insn.IsLdloc(),
-                insn => insn.Calls(Reflection.m_StartOfRound_get_Instance),
-                insn => insn.LoadsField(Reflection.f_StartOfRound_thisClientPlayerId),
-                insn => insn.opcode == OpCodes.Ceq,
-                insn => insn.IsStloc(),
-            });
+            var isLocalPlayer = instructionsList.FindIndexOfSequence(
+                [
+                    insn => insn.IsLdloc(),
+                    insn => insn.Calls(Reflection.m_StartOfRound_get_Instance),
+                    insn => insn.LoadsField(Reflection.f_StartOfRound_thisClientPlayerId),
+                    insn => insn.opcode == OpCodes.Ceq,
+                    insn => insn.IsStloc(),
+                ]);
 
             // Then find:
             //   cosmeticApplication.ClearCosmetics();
-            var clearCosmetics = instructionsList.FindIndexOfSequence(isLocalPlayer.End, new Predicate<CodeInstruction>[]
-            {
-                insn => insn.IsLdloc(),
-                insn => insn.Calls(m_CosmeticApplication_ClearCosmetics),
-            });
+            var clearCosmetics = instructionsList.FindIndexOfSequence(isLocalPlayer.End,
+                [
+                    insn => insn.IsLdloc(),
+                    insn => insn.Calls(m_CosmeticApplication_ClearCosmetics),
+                ]);
             instructionsList.RemoveAt(clearCosmetics.End - 1);
             // Replace it with:
             //   MoreCompanyCompatibility.SetUpLocalMoreCompanyCosmetics(cosmeticApplication);
-            instructionsList.InsertRange(clearCosmetics.End - 1, new CodeInstruction[]
-            {
-                CodeInstruction.Call(typeof(MoreCompanyCompatibility), nameof(SetUpLocalMoreCompanyCosmetics)),
-            });
+            instructionsList.Insert(clearCosmetics.End - 1, CodeInstruction.Call(typeof(MoreCompanyCompatibility), nameof(SetUpLocalMoreCompanyCosmetics)));
 
+            // At the end of the function, call UpdateAllTargetStatuses()
             instructionsList.Insert(instructionsList.Count - 2, CodeInstruction.Call(typeof(BodyCamComponent), nameof(BodyCamComponent.UpdateAllTargetStatuses)));
 
             return instructionsList;
