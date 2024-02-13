@@ -90,7 +90,7 @@ namespace OpenBodyCams
                 Plugin.Instance.Logger.LogInfo(data);
         }
 
-        public static GameObject[] CollectCosmetics(PlayerControllerB player)
+        private static GameObject[] DoCollectCosmetics(PlayerControllerB player)
         {
             if (player == null)
                 return new GameObject[0];
@@ -138,7 +138,21 @@ namespace OpenBodyCams
                 }
             }
 
-            return result.ToArray();
+            return [.. result];
+        }
+
+        public static GameObject[] CollectCosmetics(PlayerControllerB player)
+        {
+            try
+            {
+                return DoCollectCosmetics(player);
+            }
+            catch (Exception e)
+            {
+                Plugin.Instance.Logger.LogError($"Failed to get cosmetics for player {player.playerUsername}:");
+                Plugin.Instance.Logger.LogError(e);
+                return [];
+            }
         }
     }
 }
