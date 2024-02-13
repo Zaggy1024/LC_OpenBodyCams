@@ -134,7 +134,7 @@ namespace OpenBodyCams
                 for (int i = 1; i < stackFrames.Length; i++)
                 {
                     var frame = stackFrames[i];
-                    Plugin.Instance.Logger.LogInfo($"{frame.GetMethod().DeclaringType.Name}.{frame.GetMethod().Name}()");
+                    Plugin.Instance.Logger.LogInfo($"  {frame.GetMethod().DeclaringType.Name}.{frame.GetMethod().Name}()");
                 }
             }
 
