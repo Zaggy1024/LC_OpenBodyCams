@@ -104,6 +104,7 @@ namespace OpenBodyCams
 
             PrintCosmeticsDebugInfo = Config.Bind("Debug", "PrintCosmeticsDebugInfo", false, "Prints extra information about the cosmetics being collected for each player, as well as the code that is causing the collection.");
             PrintCosmeticsDebugInfo.SettingChanged += (s, e) => CosmeticsCompatibility.PrintDebugInfo = PrintCosmeticsDebugInfo.Value;
+            CosmeticsCompatibility.PrintDebugInfo = PrintCosmeticsDebugInfo.Value;
 
             CosmeticsCompatibility.Initialize(harmony);
 
