@@ -14,11 +14,10 @@ namespace OpenBodyCams.Compatibility
 {
     public static class LethalVRMCompatibility
     {
+        // This must not reference a LethalVRM type so that we don't automatically load the assembly.
         static IEnumerable vrmInstances;
 
-        static FieldInfo f_LethalVRMInstance_PlayerControllerB;
-        static FieldInfo f_LethalVRMInstance_renderers;
-
+        [MethodImpl(MethodImplOptions.NoInlining)]
         public static bool Initialize(Harmony harmony)
         {
             var vrmManager = GameObject.Find("LethalVRM Manager")?.GetComponent<LethalVRMManager>();
@@ -27,8 +26,7 @@ namespace OpenBodyCams.Compatibility
                 Plugin.Instance.Logger.LogWarning("Failed to find the LethalVRMManager instance.");
                 return false;
             }
-            var f_LethalVRMManager_instances = typeof(LethalVRMManager).GetField("instances", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
-            vrmInstances = f_LethalVRMManager_instances?.GetValue(vrmManager) as IEnumerable;
+            vrmInstances = vrmManager.instances;
             if (vrmInstances is null)
             {
                 Plugin.Instance.Logger.LogWarning("Failed to get the value of the LethalVRMManager.instances field.");
@@ -39,18 +37,6 @@ namespace OpenBodyCams.Compatibility
             if (t_LethalVRMInstance is null)
             {
                 Plugin.Instance.Logger.LogWarning("LethalVRMInstance class not found.");
-                return false;
-            }
-            f_LethalVRMInstance_PlayerControllerB = t_LethalVRMInstance.GetField("PlayerControllerB", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
-            if (f_LethalVRMInstance_PlayerControllerB is null)
-            {
-                Plugin.Instance.Logger.LogWarning("LethalVRMInstance.PlayerControllerB field not found.");
-                return false;
-            }
-            f_LethalVRMInstance_renderers = t_LethalVRMInstance.GetField("renderers", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
-            if (f_LethalVRMInstance_renderers is null)
-            {
-                Plugin.Instance.Logger.LogWarning("LethalVRMInstance.renderers field not found.");
                 return false;
             }
 
@@ -71,22 +57,19 @@ namespace OpenBodyCams.Compatibility
             var instructionsList = instructions.ToList();
 
             var updateTargetMethod = typeof(BodyCamComponent).GetMethod(nameof(BodyCamComponent.UpdateAllTargetStatuses));
-            instructionsList.InsertRange(instructionsList.Count() - 2, new CodeInstruction[]
-            {
-                new CodeInstruction(OpCodes.Call, updateTargetMethod),
-            });
+            instructionsList.Insert(instructionsList.Count() - 2, new CodeInstruction(OpCodes.Call, updateTargetMethod));
 
             return instructionsList;
         }
 
+        [MethodImpl(MethodImplOptions.NoInlining)]
         public static GameObject[] CollectCosmetics(PlayerControllerB player)
         {
-            foreach (var instance in vrmInstances)
+            foreach (var instance in (ICollection<LethalVRMManager.LethalVRMInstance>)vrmInstances)
             {
-                if (!ReferenceEquals(f_LethalVRMInstance_PlayerControllerB.GetValue(instance), player))
+                if (!ReferenceEquals(instance.PlayerControllerB, player))
                     continue;
-                var renderers = f_LethalVRMInstance_renderers.GetValue(instance) as ICollection<Renderer>;
-                return renderers.Select(renderer => renderer.gameObject).ToArray();
+                return instance.renderers.Select(renderer => renderer.gameObject).ToArray();
             }
 
             return new GameObject[0];
