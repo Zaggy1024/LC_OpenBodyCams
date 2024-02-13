@@ -1,3 +1,4 @@
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -11,22 +12,27 @@ namespace OpenBodyCams.Compatibility
 {
     public static class AdvancedCompanyCompatibility
     {
+        private static int cosmeticChangesInProgress = 0;
+
         public static bool Initialize(Harmony harmony)
         {
             var t_Player = typeof(Player);
 
-            string[] postfixToMethods =
+            (string, Type[])[] postfixToMethods =
                 [
-                    nameof(Player.ReequipHead),
-                    nameof(Player.ReequipBody),
-                    nameof(Player.ReequipFeet),
-                    nameof(Player.UnequipAll)
+                    (nameof(Player.SetCosmetics), [typeof(string[]), typeof(bool)]),
+                    (nameof(Player.AddCosmetic), [typeof(string)]),
+                    (nameof(Player.ReequipHead), []),
+                    (nameof(Player.ReequipBody), []),
+                    (nameof(Player.ReequipFeet), []),
+                    (nameof(Player.UnequipAll), []),
                 ];
-            var postfixMethod = typeof(AdvancedCompanyCompatibility).GetMethod(nameof(OnEquipmentChange), BindingFlags.NonPublic | BindingFlags.Static);
+            var prefixMethod = typeof(AdvancedCompanyCompatibility).GetMethod(nameof(BeforeEquipmentChange), BindingFlags.NonPublic | BindingFlags.Static);
+            var postfixMethod = typeof(AdvancedCompanyCompatibility).GetMethod(nameof(AfterEquipmentChange), BindingFlags.NonPublic | BindingFlags.Static);
 
-            foreach (string methodName in postfixToMethods)
+            foreach ((string methodName, Type[] types) in postfixToMethods)
             {
-                var method = t_Player.GetMethod(methodName, []);
+                var method = t_Player.GetMethod(methodName, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic, null, types, null);
                 if (method is null)
                 {
                     Plugin.Instance.Logger.LogWarning($"Failed to find {t_Player.Name}.{methodName} to apply postfix.");
@@ -35,6 +41,7 @@ namespace OpenBodyCams.Compatibility
 
                 harmony
                     .CreateProcessor(method)
+                    .AddPrefix(prefixMethod)
                     .AddPostfix(postfixMethod).Patch();
             }
 
@@ -61,9 +68,15 @@ namespace OpenBodyCams.Compatibility
                 .ToArray();
         }
 
-        static void OnEquipmentChange()
+        static void BeforeEquipmentChange()
         {
-            BodyCamComponent.UpdateAllTargetStatuses();
+            cosmeticChangesInProgress++;
+        }
+
+        static void AfterEquipmentChange()
+        {
+            if (--cosmeticChangesInProgress == 0)
+                BodyCamComponent.UpdateAllTargetStatuses();
         }
     }
 }
