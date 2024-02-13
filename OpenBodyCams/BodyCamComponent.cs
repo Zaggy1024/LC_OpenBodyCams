@@ -18,10 +18,10 @@ namespace OpenBodyCams
 
         private const float RADAR_BOOSTER_INITIAL_PAN = 270;
 
-        private static readonly Vector3 BODY_CAM_OFFSET = new Vector3(0.07f, 0, 0.15f);
-        private static readonly Vector3 CAMERA_CONTAINER_OFFSET = new Vector3(0.07f, 0, 0.125f);
+        private static readonly Vector3 BODY_CAM_OFFSET = new(0.07f, 0, 0.15f);
+        private static readonly Vector3 CAMERA_CONTAINER_OFFSET = new(0.07f, 0, 0.125f);
 
-        private static BodyCamComponent[] AllBodyCams = new BodyCamComponent[0];
+        private static BodyCamComponent[] AllBodyCams = [];
         public static BodyCamComponent[] GetAllBodyCams() { return AllBodyCams; }
 
         private static int mainCameraCullingMask;
@@ -49,15 +49,15 @@ namespace OpenBodyCams
 
         private bool hasSetUpCamera = false;
 
-        private GameObject[] localPlayerCosmetics = new GameObject[0];
+        private GameObject[] localPlayerCosmetics = [];
         private PlayerModelState localPlayerModelState;
 
         private PlayerControllerB currentPlayer;
-        private GameObject[] currentPlayerCosmetics = new GameObject[0];
+        private GameObject[] currentPlayerCosmetics = [];
         private PlayerModelState currentPlayerModelState;
 
         private Transform currentActualTarget;
-        private Renderer[] currentlyViewedMeshes = new Renderer[0];
+        private Renderer[] currentlyViewedMeshes = [];
 
         private float elapsedSinceLastFrame = 0;
         private float timePerFrame = 0;
@@ -110,18 +110,19 @@ namespace OpenBodyCams
                 bodyCam.UpdateSettings();
         }
 
+        private static Color ParseColor(string str)
+        {
+            var components = str
+                .Split(new char[] { ',', ' ' }, StringSplitOptions.RemoveEmptyEntries)
+                .Select(x => float.Parse(x.Trim(), CultureInfo.InvariantCulture))
+                .ToArray();
+            if (components.Length < 0 || components.Length > 4)
+                throw new ArgumentException("Too many color components");
+            return new Color(components[0], components[1], components[2], components.Length == 4 ? components[3] : 0);
+        }
+
         private static Color GetEmissiveColor()
         {
-            Color ParseColor(string str)
-            {
-                var components = str
-                    .Split(new char[] { ',', ' ' }, StringSplitOptions.RemoveEmptyEntries)
-                    .Select(x => float.Parse(x.Trim(), CultureInfo.InvariantCulture))
-                    .ToArray();
-                if (components.Length < 0 || components.Length > 4)
-                    throw new ArgumentException("Too many color components");
-                return new Color(components[0], components[1], components[2], components.Length == 4 ? components[3] : 0);
-            }
             try
             {
                 return ParseColor(Plugin.MonitorEmissiveColor.Value);
@@ -179,10 +180,9 @@ namespace OpenBodyCams
 
         void Awake()
         {
-            AllBodyCams = AllBodyCams.Append(this).ToArray();
+            AllBodyCams = [.. AllBodyCams, this];
 
-            MonitorOnMaterial = new Material(Shader.Find("HDRP/Unlit"));
-            MonitorOnMaterial.name = "BodyCamMaterial";
+            MonitorOnMaterial = new(Shader.Find("HDRP/Unlit")) { name = "BodyCamMaterial" };
             MonitorOnMaterial.SetFloat("_AlbedoAffectEmissive", 1);
 
             MonitorOffMaterial = ShipObjects.blackScreenMaterial;
@@ -221,7 +221,7 @@ namespace OpenBodyCams
             CameraObject = new GameObject("BodyCam");
             Camera = CameraObject.AddComponent<Camera>();
             Camera.nearClipPlane = 0.05f;
-            Camera.cullingMask = mainCameraCullingMask & ~LayerMask.GetMask(new string[] { "Ignore Raycast", "UI", "HelmetVisor" });
+            Camera.cullingMask = mainCameraCullingMask & ~LayerMask.GetMask(["Ignore Raycast", "UI", "HelmetVisor"]);
 
             var cameraData = CameraObject.AddComponent<HDAdditionalCameraData>();
             cameraData.volumeLayerMask = 1;
@@ -346,7 +346,7 @@ namespace OpenBodyCams
         {
             currentPlayer = null;
             currentActualTarget = null;
-            currentlyViewedMeshes = new Renderer[0];
+            currentlyViewedMeshes = [];
             CameraObject.transform.SetParent(null, false);
             CameraObject.transform.localPosition = Vector3.zero;
             CameraObject.transform.localRotation = Quaternion.identity;
@@ -453,7 +453,7 @@ namespace OpenBodyCams
 
             if (currentActualTarget.GetComponent<RadarBoosterItem>() != null)
             {
-                currentlyViewedMeshes = new Renderer[] { currentActualTarget.transform.Find("AnimContainer/Rod").GetComponent<Renderer>() };
+                currentlyViewedMeshes = [currentActualTarget.transform.Find("AnimContainer/Rod").GetComponent<Renderer>()];
                 offset = new Vector3(0, 1.5f, 0);
                 panCamera = true;
             }
