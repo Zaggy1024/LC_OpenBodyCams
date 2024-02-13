@@ -1,3 +1,7 @@
+## Version 1.1.5
+- Fixed error spam that would occur when changing AdvancedCompany cosmetics.
+- Made the PrintCosmeticsDebugInfo option work when enabled at startup.
+
 ## Version 1.1.4
 - Added an option to disable the green flash animation displayed when changing targets on the body cam.
 - HDLethalCompany graphics options will now apply to the body cam.
