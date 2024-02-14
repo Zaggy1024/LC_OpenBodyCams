@@ -1,3 +1,6 @@
+## Version 1.1.6
+- (Tentatively) fixed an error that could softlock the ship when viewing a player with a custom ragdoll. This could occur when a player was killed by Herobrine mod.
+
 ## Version 1.1.5
 - Fixed error spam that would occur when changing AdvancedCompany cosmetics.
 - Made the PrintCosmeticsDebugInfo option work when enabled at startup.
