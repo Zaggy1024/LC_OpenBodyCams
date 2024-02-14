@@ -44,6 +44,9 @@ namespace OpenBodyCams
         internal Material MonitorOnMaterial;
         internal Material MonitorOffMaterial;
 
+        private bool keepCameraOn = false;
+        public bool ForceEnableCamera { get => keepCameraOn; set => keepCameraOn = value; }
+
         private bool enableCamera = true;
         private bool wasBlanked = false;
 
@@ -623,9 +626,11 @@ namespace OpenBodyCams
                 return;
             if (spectatedPlayer.spectatedPlayerScript != null)
                 spectatedPlayer = spectatedPlayer.spectatedPlayerScript;
-            bool enableCamera = MonitorRenderer.isVisible
+            bool enableCamera = keepCameraOn ||
+                (MonitorRenderer != null
+                && MonitorRenderer.isVisible
                 && spectatedPlayer.isInHangarShipRoom
-                && (object)MonitorRenderer.sharedMaterials[MonitorMaterialIndex] == MonitorOnMaterial;
+                && (object)MonitorRenderer.sharedMaterials[MonitorMaterialIndex] == MonitorOnMaterial);
 
             if (enableCamera)
             {
