@@ -22,7 +22,7 @@ namespace OpenBodyCams
         private static readonly Vector3 CAMERA_CONTAINER_OFFSET = new(0.07f, 0, 0.125f);
 
         private static BodyCamComponent[] AllBodyCams = [];
-        public static BodyCamComponent[] GetAllBodyCams() { return AllBodyCams; }
+        public static BodyCamComponent[] GetAllBodyCams() { return [.. AllBodyCams]; }
 
         private static int mainCameraCullingMask;
         private static FrameSettings mainCameraCustomFrameSettings;
