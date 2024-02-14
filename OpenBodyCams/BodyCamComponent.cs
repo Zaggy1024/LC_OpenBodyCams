@@ -374,6 +374,8 @@ namespace OpenBodyCams
             panCamera = false;
             Vector3 offset = Vector3.zero;
 
+            currentActualTarget = null;
+
             if (!currentPlayer.isPlayerDead)
             {
                 if (Plugin.CameraMode.Value == CameraModeOptions.Head)
@@ -425,7 +427,8 @@ namespace OpenBodyCams
                 }
                 currentlyViewedMeshes = CollectModelsToHide(currentPlayer.deadBody.transform);
             }
-            else
+
+            if (currentActualTarget == null)
             {
                 SetTargetToNone();
                 return;
