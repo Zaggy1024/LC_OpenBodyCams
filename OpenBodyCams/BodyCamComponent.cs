@@ -389,7 +389,7 @@ namespace OpenBodyCams
                     offset = BODY_CAM_OFFSET;
                 }
 
-                currentlyViewedMeshes = new Renderer[0];
+                currentlyViewedMeshes = [];
             }
             else if (currentPlayer.redirectToEnemy != null)
             {
