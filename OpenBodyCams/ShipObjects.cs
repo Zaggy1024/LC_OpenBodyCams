@@ -16,6 +16,8 @@ namespace OpenBodyCams
         public static Terminal TerminalScript;
         public static bool TwoRadarCamsPresent = false;
 
+        public static BodyCamComponent MainBodyCam;
+
         public static ManualCameraRenderer ExternalCameraRenderer;
         public static MeshRenderer DoorScreenRenderer;
         public static bool DoorScreenUsesExternalCamera = false;
@@ -74,6 +76,7 @@ namespace OpenBodyCams
             DoorScreenUsesExternalCamera = DoorScreenRenderer?.sharedMaterials.Any(mat => mat.mainTexture == ExternalCameraRenderer.cam.targetTexture) == true;
 
             InitializeBodyCam();
+            TerminalCommands.Initialize();
 
             // Prevent the radar from targeting a nonexistent player at the start of a round:
             if (!TwoRadarCamsPresent && StartOfRound.Instance.IsServer)
@@ -94,7 +97,7 @@ namespace OpenBodyCams
 
             if (bottomMonitors.GetComponent<BodyCamComponent>() == null)
             {
-                var bodyCam = bottomMonitors.AddComponent<BodyCamComponent>();
+                MainBodyCam = bottomMonitors.AddComponent<BodyCamComponent>();
 
                 bottomMonitors.AddComponent<SyncBodyCamToRadarMap>();
 
@@ -117,8 +120,8 @@ namespace OpenBodyCams
                     return;
                 }
 
-                bodyCam.MonitorRenderer = renderer;
-                bodyCam.MonitorMaterialIndex = materialIndex;
+                MainBodyCam.MonitorRenderer = renderer;
+                MainBodyCam.MonitorMaterialIndex = materialIndex;
             }
         }
     }

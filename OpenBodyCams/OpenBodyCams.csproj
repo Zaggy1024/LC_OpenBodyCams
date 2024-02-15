@@ -63,6 +63,10 @@
             <HintPath>..\..\Libraries\UnityEngine.PhysicsModule.dll</HintPath>
             <Private>false</Private>
         </Reference>
+        <Reference Include="UnityEngine.UI">
+            <HintPath>..\..\Libraries\UnityEngine.UI.dll</HintPath>
+            <Private>false</Private>
+        </Reference>
         <Reference Include="UnityEngine.UIModule">
             <HintPath>..\..\Libraries\UnityEngine.UIModule.dll</HintPath>
             <Private>false</Private>

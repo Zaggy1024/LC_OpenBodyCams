@@ -45,6 +45,10 @@ namespace OpenBodyCams
         public static ConfigEntry<bool> DisableCameraWhileTargetIsOnShip;
         public static ConfigEntry<bool> EnableCamera;
 
+        public static ConfigEntry<bool> TerminalPiPBodyCamEnabled;
+        public static ConfigEntry<PiPPosition> TerminalPiPPosition;
+        public static ConfigEntry<int> TerminalPiPWidth;
+
         public static ConfigEntry<int> GeneralImprovementsBetterMonitorIndex;
         public static ConfigEntry<bool> EnableMoreCompanyCosmeticsCompatibility;
         public static ConfigEntry<bool> EnableAdvancedCompanyCosmeticsCompatibility;
@@ -92,6 +96,16 @@ namespace OpenBodyCams
             RadarBoosterPanRPM.SettingChanged += (s, e) => BodyCamComponent.UpdateAllCameraSettings();
             DisableCameraWhileTargetIsOnShip.SettingChanged += (s, e) => BodyCamComponent.UpdateAllCameraSettings();
             EnableCamera.SettingChanged += (s, e) => BodyCamComponent.UpdateAllCameraSettings();
+
+            TerminalPiPBodyCamEnabled = Config.Bind("Terminal", "EnablePiPBodyCam", false, "Adds a 'view bodycam' command to the terminal that places a picture-in-picture view of the bodycam in front of the radar map.");
+            TerminalPiPPosition = Config.Bind("Terminal", "PiPPosition", PiPPosition.BottomRight, "The corner inside the terminal's radar map to align the body cam to.");
+            TerminalPiPWidth = Config.Bind("Terminal", "PiPWidth", 150, "The width of the picture-in-picture in pixels.");
+
+            TerminalPiPBodyCamEnabled.SettingChanged += (_, _) => TerminalCommands.Initialize();
+            TerminalPiPPosition.SettingChanged += (_, _) => TerminalCommands.Initialize();
+            TerminalPiPWidth.SettingChanged += (_, _) => TerminalCommands.Initialize();
+
+            harmony.PatchAll(typeof(TerminalCommands));
 
             GeneralImprovementsBetterMonitorIndex = Config.Bind("Compatibility", "GeneralImprovementsBetterMonitorIndex", 0, new ConfigDescription("Choose which of GeneralImprovements' extended monitor set to display the body cam on. A value of 0 will place it on the large monitor on the right, 1-14 goes left to right, top to bottom, skipping the large center monitor.", new AcceptableValueRange<int>(0, 14)));
             EnableMoreCompanyCosmeticsCompatibility = Config.Bind("Compatibility", "EnableMoreCompanyCosmeticsCompatibility", true, "If this is enabled, a patch will be applied to MoreCompany to spawn cosmetics for the local player, and all cosmetics will be shown and hidden based on the camera's perspective.");
