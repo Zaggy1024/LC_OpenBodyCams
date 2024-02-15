@@ -5,7 +5,7 @@ The camera view will display only the first person hands and disable the third p
 
 # Features
 - Selectable camera perspective between the head and body.
-- Camera view is designed to render identically for the local player as well other players in the game.
+- Camera view is designed to render identically for the local player and other players in the game.
 - MoreCompany and AdvancedCompany cosmetics support, see the [Compatibility](#compatibility) section.
 - All enemies, terrain, etc. that is visible to the player will be visible in the camera view.
 - The same green flash animation used when switching targets on the radar is displayed by the camera view.
@@ -14,11 +14,9 @@ The camera view will display only the first person hands and disable the third p
   - Camera setup logic is done ahead of time based on game events whenever possible.
 
 # Compatibility
-MoreCompany cosmetics, AdvancedCompany cosmetics and equipment, and third-person model replacements by ModelReplacementAPI and LethalVRM are supported. They will be hidden when viewing other players in the body cam, and your cosmetics will be visible on the camera when you are viewing another player looking at you.
+[MoreCompany](https://thunderstore.io/c/lethal-company/p/notnotnotswipez/MoreCompany/) cosmetics, [AdvancedCompany](https://thunderstore.io/c/lethal-company/p/PotatoePet/AdvancedCompany/) cosmetics and equipment, and third-person model replacements by [ModelReplacementAPI](https://thunderstore.io/c/lethal-company/p/BunyaPineTree/ModelReplacementAPI/) and [LethalVRM](https://thunderstore.io/c/lethal-company/p/Ooseykins/LethalVRM/) are supported. They will be hidden when viewing other players in the body cam, and your cosmetics/models will be visible on the camera when you are viewing another player looking at you.
 
-GeneralImprovements' extended monitors set is supported through a config option to select the monitor number to use for the body cam. The body cam will override any selection in the GeneralImprovements config.
-
-Third-person model replacements by ModelReplacementAPI or LethalVRM are supported and will be hidden/shown based on the body cam's perspective.
+[GeneralImprovements](https://thunderstore.io/c/lethal-company/p/ShaosilGaming/GeneralImprovements/)'s extended monitors set is supported through a config option to select the monitor number to use for the body cam. The body cam will override any selection in the GeneralImprovements config.
 
 # Configuration
 
@@ -38,14 +36,17 @@ Third-person model replacements by ModelReplacementAPI or LethalVRM are supporte
 
 ## Miscellaneous
 - `DisableInternalShipCamera`: Disables the camera at the front of the ship facing towards the center. This may improve performance inside the ship slightly.
-- `FixDroppedItemRotation`: Defaulted to `true`, this fixes a desync of items' rotations when dropping them. See [Notes](#notes).
+- `FixDroppedItemRotation`: Defaulted to `true`, this fixes a desync of items' rotations when dropping them. See [Notes/Item rotations](#item-rotations).
 
 ## Debug
 - `PrintCosmeticsDebugInfo`: Prints extra information about the cosmetics being collected for each player, as well as the code that is causing the cosmetics to be collected. This is useful information to provide when reporting that you are seeing a `Collecting [x] cosmetics objects for [name]` message getting spammed in the logs.
 
 # Notes
+
+## Framerate limits
 As mentioned above, using no framerate limit results in the best performance. Forcing the camera to render at certain intervals outside of the render pipeline seems to cause a lot of overhead, so setting the framerate limit to anything above 30fps may cause a severe dip in the game's framerate.
 
+## Item rotations
 An optional fix is included for items' rotations being desynced between the player dropping them and all other clients, which is caused by an ignored rotation parameter in the function handling dropped items. This is included to allow the radar boosters to face in a consistent direction for all clients in a game. The patch is designed to fail gracefully and allow the mod to still run, in case any other mods apply the same fix, but if problems arise, it can be disabled with the `FixDroppedItemRotation` config option.
 
 # Developers
