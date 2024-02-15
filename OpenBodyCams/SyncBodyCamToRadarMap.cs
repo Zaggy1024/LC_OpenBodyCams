@@ -82,6 +82,11 @@ namespace OpenBodyCams
             BodyCam.StartTargetTransition();
         }
 
+        internal static void OnBodyCamDestroyed(BodyCamComponent bodyCam)
+        {
+            DoForCam(bodyCam, Destroy);
+        }
+
         void OnDestroy()
         {
             AllSynchronizedCams = AllSynchronizedCams.Where(syncedCam => (object)syncedCam != this).ToArray();
