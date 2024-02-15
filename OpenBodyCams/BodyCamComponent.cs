@@ -102,6 +102,10 @@ namespace OpenBodyCams
             nightVisionPrefab.transform.localPosition = Vector3.zero;
             nightVisionPrefab.SetActive(false);
 
+            // By default, the map's night vision light renders on all layers, so let's change that so we don't see it on the body cam.
+            var mapLight = StartOfRound.Instance.mapScreen.mapCameraLight;
+            mapLight.cullingMask = 1 << mapLight.gameObject.layer;
+
             UpdateAllCameraSettings();
         }
 
@@ -192,10 +196,6 @@ namespace OpenBodyCams
 
             var nightVisionLight = nightVisionPrefab.GetComponent<Light>();
             nightVisionLight.enabled = false;
-
-            // By default, the map's night vision light renders on all layers, so let's change that so we don't see it on the body cam.
-            var mapLight = StartOfRound.Instance.mapScreen.mapCameraLight;
-            mapLight.cullingMask = 1 << mapLight.gameObject.layer;
 
             EnsureCameraExists();
 
