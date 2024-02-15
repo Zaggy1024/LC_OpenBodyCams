@@ -510,8 +510,17 @@ namespace OpenBodyCams
         {
             currentPlayerCosmetics = CosmeticsCompatibility.CollectCosmetics(currentPlayer);
             currentPlayerModelState.cosmeticsLayers = new int[currentPlayerCosmetics.Length];
-            localPlayerCosmetics = CosmeticsCompatibility.CollectCosmetics(StartOfRound.Instance.localPlayerController);
-            localPlayerModelState.cosmeticsLayers = new int[localPlayerCosmetics.Length];
+
+            if (currentPlayer != StartOfRound.Instance.localPlayerController)
+            {
+                localPlayerCosmetics = CosmeticsCompatibility.CollectCosmetics(StartOfRound.Instance.localPlayerController);
+                localPlayerModelState.cosmeticsLayers = new int[localPlayerCosmetics.Length];
+            }
+            else
+            {
+                localPlayerCosmetics = [];
+                localPlayerModelState.cosmeticsLayers = [];
+            }
         }
 
         private enum Perspective
