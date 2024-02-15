@@ -1,4 +1,4 @@
-using HarmonyLib;
+﻿using HarmonyLib;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -59,6 +59,8 @@ namespace OpenBodyCams
                     PiPImage.texture = ShipObjects.MainBodyCam.Camera.targetTexture;
                 ShipObjects.MainBodyCam.OnRenderTextureCreated += SetRenderTexture;
 
+                ShipObjects.MainBodyCam.OnBlankedSet += SetBodyCamBlanked;
+
                 pipImageObject.SetActive(false);
             }
 
@@ -68,6 +70,11 @@ namespace OpenBodyCams
         public static void SetRenderTexture(RenderTexture texture)
         {
             PiPImage.texture = texture;
+        }
+
+        public static void SetBodyCamBlanked(bool blanked)
+        {
+            PiPImage.color = blanked ? Color.black : Color.white;
         }
 
         static void InitializeCommands()

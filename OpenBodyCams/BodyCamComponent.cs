@@ -41,6 +41,7 @@ namespace OpenBodyCams
 
         public event Action<Camera> OnCameraCreated;
         public event Action<RenderTexture> OnRenderTextureCreated;
+        public event Action<bool> OnBlankedSet;
 
         internal Renderer MonitorRenderer;
         internal int MonitorMaterialIndex = -1;
@@ -52,6 +53,7 @@ namespace OpenBodyCams
 
         private bool enableCamera = true;
         private bool wasBlanked = false;
+        public bool IsBlanked { get => wasBlanked; }
 
         private bool hasSetUpCamera = false;
 
@@ -351,10 +353,12 @@ namespace OpenBodyCams
 
         private void SetScreenBlanked(bool blanked)
         {
-            if (MonitorOnMaterial == null)
-                return;
             if (blanked != wasBlanked)
-                MonitorOnMaterial.color = blanked ? Color.black : Color.white;
+            {
+                if (MonitorOnMaterial != null)
+                    MonitorOnMaterial.color = blanked ? Color.black : Color.white;
+                OnBlankedSet?.Invoke(blanked);
+            }
             wasBlanked = blanked;
         }
 
