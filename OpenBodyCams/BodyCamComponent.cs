@@ -39,6 +39,9 @@ namespace OpenBodyCams
         internal Camera Camera;
         public Camera GetCamera() { return Camera; }
 
+        public event Action<Camera> OnCameraCreated;
+        public event Action<RenderTexture> OnRenderTextureCreated;
+
         internal Renderer MonitorRenderer;
         internal int MonitorMaterialIndex = -1;
         internal Material MonitorOnMaterial;
@@ -271,6 +274,8 @@ namespace OpenBodyCams
 
             // Cloning the transition while it is playing seems to freeze it, so play the animation here to let it reset.
             StartTargetTransition();
+
+            OnCameraCreated?.Invoke(Camera);
         }
 
         public void UpdateSettings()
@@ -302,6 +307,8 @@ namespace OpenBodyCams
             nightVisionLight.range = Plugin.NightVisionRangeBase * Plugin.NightVisionBrightness.Value;
 
             enableCamera = Plugin.EnableCamera.Value;
+
+            OnRenderTextureCreated?.Invoke(Camera.targetTexture);
         }
 
         public void StartTargetTransition()
