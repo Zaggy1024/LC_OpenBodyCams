@@ -1,3 +1,7 @@
+## Vesion 1.2.0
+- Add an _opt-in_ feature that adds a `view bodycam` command to the terminal to display a picture-in-picture view of the bodycam. [TwoRadarMaps](https://thunderstore.io/c/lethal-company/p/Zaggy1024/TwoRadarMaps/) v1.2.0 will use a separate bodycam when the featuer is enabled.
+- Developer features: Added an API to force a body cam to render, and allowed body cams to function without being attached to a renderer's visibility/materials.
+
 ## Version 1.1.6
 - (Tentatively) fixed an error that could softlock the ship when viewing a player with a custom ragdoll. This could occur when a player was killed by Herobrine mod.
 

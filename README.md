@@ -12,11 +12,14 @@ The camera view will display only the first person hands and disable the third p
 - Performance:
   - The camera is attached to the player model in the engine rather than copying the transform from it.
   - Camera setup logic is done ahead of time based on game events whenever possible.
+- A _opt-in_ `view bodycam` command in the terminal displays the body cam when viewing the radar map. See [Configuration/Terminal](#terminal)
 
 # Compatibility
 [MoreCompany](https://thunderstore.io/c/lethal-company/p/notnotnotswipez/MoreCompany/) cosmetics, [AdvancedCompany](https://thunderstore.io/c/lethal-company/p/PotatoePet/AdvancedCompany/) cosmetics and equipment, and third-person model replacements by [ModelReplacementAPI](https://thunderstore.io/c/lethal-company/p/BunyaPineTree/ModelReplacementAPI/) and [LethalVRM](https://thunderstore.io/c/lethal-company/p/Ooseykins/LethalVRM/) are supported. They will be hidden when viewing other players in the body cam, and your cosmetics/models will be visible on the camera when you are viewing another player looking at you.
 
 [GeneralImprovements](https://thunderstore.io/c/lethal-company/p/ShaosilGaming/GeneralImprovements/)'s extended monitors set is supported through a config option to select the monitor number to use for the body cam. The body cam will override any selection in the GeneralImprovements config.
+
+[TwoRadarMaps](https://thunderstore.io/c/lethal-company/p/Zaggy1024/TwoRadarMaps/) will use a separate body cam for the picture-in-picture view in the terminal when `EnablePiPBodyCam` is enabled.
 
 # Configuration
 
@@ -33,6 +36,11 @@ The camera view will display only the first person hands and disable the third p
 - `UseTargetTransitionAnimation`: If enabled, the body cam will display a green flash animation when changing targets to mirror the behavior of the radar map.
 - `DisableCameraWhileTargetIsOnShip`: This will cause the screen to turn off while the camera's target is onboard the ship. This can be used to avoid the load of rendering large numbers of items on the ship in long runs.
 - `EnableCamera`: When this is enabled, the screen will be powered off. This can be changed in-game with LethalConfig or any similar mod.
+
+## Terminal
+- `EnablePiPBodyCam`: Off by default, this adds a `view bodycam` command to the terminal that displays the body cam in one corner of the radar map. When the radar map is hidden, the body cam will be hidden as well.
+- `PiPPosition`: Selects the corner of the radar map that the body cam view in the terminal should reside in.
+- `PiPWidth`: Sets the horizontal size of the body cam view in the terminal. This does not affect the render resolution of the camera.
 
 ## Miscellaneous
 - `DisableInternalShipCamera`: Disables the camera at the front of the ship facing towards the center. This may improve performance inside the ship slightly.
