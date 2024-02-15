@@ -40,7 +40,7 @@ namespace OpenBodyCams
         public Camera GetCamera() { return Camera; }
 
         internal Renderer MonitorRenderer;
-        internal int MonitorMaterialIndex;
+        internal int MonitorMaterialIndex = -1;
         internal Material MonitorOnMaterial;
         internal Material MonitorOffMaterial;
 
@@ -189,26 +189,30 @@ namespace OpenBodyCams
         {
             AllBodyCams = [.. AllBodyCams, this];
 
-            MonitorOnMaterial = new(Shader.Find("HDRP/Unlit")) { name = "BodyCamMaterial" };
-            MonitorOnMaterial.SetFloat("_AlbedoAffectEmissive", 1);
-
-            MonitorOffMaterial = ShipObjects.blackScreenMaterial;
-
             var nightVisionLight = nightVisionPrefab.GetComponent<Light>();
             nightVisionLight.enabled = false;
+        }
+
+        void Start()
+        {
+            if (MonitorRenderer != null)
+            {
+                MonitorOnMaterial = new(Shader.Find("HDRP/Unlit")) { name = "BodyCamMaterial" };
+                MonitorOnMaterial.SetFloat("_AlbedoAffectEmissive", 1);
+
+                MonitorOffMaterial = ShipObjects.blackScreenMaterial;
+                SetMaterial(MonitorRenderer, MonitorMaterialIndex, MonitorOnMaterial);
+            }
 
             EnsureCameraExists();
 
             SyncBodyCamToRadarMap.UpdateBodyCamTarget(this);
         }
 
-        void Start()
-        {
-            SetMaterial(MonitorRenderer, MonitorMaterialIndex, MonitorOnMaterial);
-        }
-
         private static void SetMaterial(Renderer renderer, int index, Material material)
         {
+            if (renderer == null || index == -1)
+                return;
             var materials = renderer.sharedMaterials;
             materials[index] = material;
             renderer.sharedMaterials = materials;
@@ -275,8 +279,11 @@ namespace OpenBodyCams
             Camera.targetTexture.filterMode = Plugin.MonitorTextureFiltering.Value;
             Camera.fieldOfView = Plugin.FieldOfView.Value;
 
-            MonitorOnMaterial.mainTexture = Camera.targetTexture;
-            MonitorOnMaterial.SetColor("_EmissiveColor", screenEmissiveColor);
+            if (MonitorOnMaterial != null)
+            {
+                MonitorOnMaterial.mainTexture = Camera.targetTexture;
+                MonitorOnMaterial.SetColor("_EmissiveColor", screenEmissiveColor);
+            }
 
             Camera.farClipPlane = Plugin.RenderDistance.Value;
 
@@ -300,7 +307,7 @@ namespace OpenBodyCams
         public void StartTargetTransition()
         {
             if (Plugin.UseTargetTransitionAnimation.Value)
-                greenFlashAnimator.SetTrigger("Transition");
+                greenFlashAnimator?.SetTrigger("Transition");
         }
 
         private static void SetCosmeticHidden(GameObject cosmetic, bool hidden)
@@ -310,9 +317,12 @@ namespace OpenBodyCams
 
         public void SetScreenPowered(bool powered)
         {
+            if (MonitorRenderer == null)
+                return;
+
             if (powered)
             {
-                if (MonitorRenderer.sharedMaterials[MonitorMaterialIndex] == MonitorOffMaterial)
+                if (!IsScreenPowered())
                     StartTargetTransition();
                 SetMaterial(MonitorRenderer, MonitorMaterialIndex, MonitorOnMaterial);
                 return;
@@ -321,8 +331,18 @@ namespace OpenBodyCams
             SetMaterial(MonitorRenderer, MonitorMaterialIndex, MonitorOffMaterial);
         }
 
+        public bool IsScreenPowered()
+        {
+            if (MonitorRenderer == null)
+                return true;
+
+            return (object)MonitorRenderer.sharedMaterials[MonitorMaterialIndex] == MonitorOnMaterial;
+        }
+
         private void SetScreenBlanked(bool blanked)
         {
+            if (MonitorOnMaterial == null)
+                return;
             if (blanked != wasBlanked)
                 MonitorOnMaterial.color = blanked ? Color.black : Color.white;
             wasBlanked = blanked;
@@ -350,6 +370,9 @@ namespace OpenBodyCams
             currentPlayer = null;
             currentActualTarget = null;
             currentlyViewedMeshes = [];
+
+            if (CameraObject == null)
+                return;
             CameraObject.transform.SetParent(null, false);
             CameraObject.transform.localPosition = Vector3.zero;
             CameraObject.transform.localRotation = Quaternion.identity;
@@ -370,6 +393,8 @@ namespace OpenBodyCams
                 SetTargetToNone();
                 return;
             }
+
+            EnsureCameraExists();
 
             currentPlayer = player;
             UpdateModelReferences();
@@ -449,6 +474,8 @@ namespace OpenBodyCams
                 SetTargetToNone();
                 return;
             }
+
+            EnsureCameraExists();
 
             currentPlayer = null;
             currentActualTarget = transform;
@@ -630,7 +657,7 @@ namespace OpenBodyCams
                 (MonitorRenderer != null
                 && MonitorRenderer.isVisible
                 && spectatedPlayer.isInHangarShipRoom
-                && (object)MonitorRenderer.sharedMaterials[MonitorMaterialIndex] == MonitorOnMaterial);
+                && IsScreenPowered());
 
             if (enableCamera)
             {
