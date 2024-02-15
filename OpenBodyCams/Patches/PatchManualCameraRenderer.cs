@@ -17,14 +17,10 @@ namespace OpenBodyCams.Patches
         [HarmonyPatch("updateMapTarget")]
         static IEnumerator updateMapTargetPostfix(IEnumerator result, ManualCameraRenderer __instance)
         {
-            if (__instance == StartOfRound.Instance.mapScreen)
-                SyncBodyCamToRadarMap.StartTargetTransitionForMap(__instance);
+            SyncBodyCamToRadarMap.StartTargetTransitionForMap(__instance);
 
             while (result.MoveNext())
                 yield return result.Current;
-
-            if (__instance != StartOfRound.Instance.mapScreen)
-                yield break;
 
             SyncBodyCamToRadarMap.UpdateBodyCamTargetForMap(__instance);
         }
@@ -34,8 +30,6 @@ namespace OpenBodyCams.Patches
         [HarmonyAfter(ModGUIDs.GeneralImprovements)]
         static void SwitchScreenOnPostfix(ManualCameraRenderer __instance)
         {
-            if ((object)__instance.cam != __instance.mapCamera)
-                return;
             SyncBodyCamToRadarMap.UpdateBodyCamTargetForMap(__instance);
         }
 
