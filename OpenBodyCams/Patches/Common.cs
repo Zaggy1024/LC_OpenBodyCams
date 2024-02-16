@@ -29,7 +29,7 @@ namespace OpenBodyCams.Patches
             return list.IndexRangeView(range.Start, range.End);
         }
 
-        public static SequenceMatch FindIndexOfSequence<T>(this List<T> list, int startIndex, int count, IEnumerable<Predicate<T>> predicates)
+        public static SequenceMatch FindIndexOfSequence<T>(this List<T> list, int startIndex, IEnumerable<Predicate<T>> predicates)
         {
             var index = startIndex;
             while (index < list.Count())
@@ -63,14 +63,9 @@ namespace OpenBodyCams.Patches
             return null;
         }
 
-        public static SequenceMatch FindIndexOfSequence<T>(this List<T> list, int startIndex, IEnumerable<Predicate<T>> predicates)
-        {
-            return FindIndexOfSequence(list, startIndex, -1, predicates);
-        }
-
         public static SequenceMatch FindIndexOfSequence<T>(this List<T> list, IEnumerable<Predicate<T>> predicates)
         {
-            return FindIndexOfSequence(list, 0, -1, predicates);
+            return FindIndexOfSequence(list, 0, predicates);
         }
 
         public static int PopCount(this CodeInstruction instruction)
