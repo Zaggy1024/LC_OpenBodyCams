@@ -85,17 +85,17 @@ namespace OpenBodyCams
             DisableCameraWhileTargetIsOnShip = Config.Bind("Camera", "DisableCameraWhileTargetIsOnShip", false, "With this option enabled, the camera will stop rendering when the target is onboard the ship to reduce the performance hit of rendering a large number of items on the ship twice.");
             EnableCamera = Config.Bind("Camera", "EnableCamera", true, "Enables/disables rendering of the body cam, and can be enabled/disabled during a game with LethalConfig.");
 
-            CameraMode.SettingChanged += (s, e) => BodyCamComponent.UpdateAllTargetStatuses();
-            HorizontalResolution.SettingChanged += (s, e) => BodyCamComponent.UpdateAllCameraSettings();
-            FieldOfView.SettingChanged += (s, e) => BodyCamComponent.UpdateAllCameraSettings();
-            RenderDistance.SettingChanged += (s, e) => BodyCamComponent.UpdateAllCameraSettings();
-            Framerate.SettingChanged += (s, e) => BodyCamComponent.UpdateAllCameraSettings();
-            NightVisionBrightness.SettingChanged += (s, e) => BodyCamComponent.UpdateAllCameraSettings();
-            MonitorEmissiveColor.SettingChanged += (s, e) => BodyCamComponent.UpdateAllCameraSettings();
-            MonitorTextureFiltering.SettingChanged += (s, e) => BodyCamComponent.UpdateAllCameraSettings();
-            RadarBoosterPanRPM.SettingChanged += (s, e) => BodyCamComponent.UpdateAllCameraSettings();
-            DisableCameraWhileTargetIsOnShip.SettingChanged += (s, e) => BodyCamComponent.UpdateAllCameraSettings();
-            EnableCamera.SettingChanged += (s, e) => BodyCamComponent.UpdateAllCameraSettings();
+            CameraMode.SettingChanged += (_, _) => BodyCamComponent.UpdateAllTargetStatuses();
+            HorizontalResolution.SettingChanged += (_, _) => BodyCamComponent.UpdateAllCameraSettings();
+            FieldOfView.SettingChanged += (_, _) => BodyCamComponent.UpdateAllCameraSettings();
+            RenderDistance.SettingChanged += (_, _) => BodyCamComponent.UpdateAllCameraSettings();
+            Framerate.SettingChanged += (_, _) => BodyCamComponent.UpdateAllCameraSettings();
+            NightVisionBrightness.SettingChanged += (_, _) => BodyCamComponent.UpdateAllCameraSettings();
+            MonitorEmissiveColor.SettingChanged += (_, _) => BodyCamComponent.UpdateAllCameraSettings();
+            MonitorTextureFiltering.SettingChanged += (_, _) => BodyCamComponent.UpdateAllCameraSettings();
+            RadarBoosterPanRPM.SettingChanged += (_, _) => BodyCamComponent.UpdateAllCameraSettings();
+            DisableCameraWhileTargetIsOnShip.SettingChanged += (_, _) => BodyCamComponent.UpdateAllCameraSettings();
+            EnableCamera.SettingChanged += (_, _) => BodyCamComponent.UpdateAllCameraSettings();
 
             TerminalPiPBodyCamEnabled = Config.Bind("Terminal", "EnablePiPBodyCam", false, "Adds a 'view bodycam' command to the terminal that places a picture-in-picture view of the bodycam in front of the radar map.");
             TerminalPiPPosition = Config.Bind("Terminal", "PiPPosition", PiPPosition.BottomRight, "The corner inside the terminal's radar map to align the body cam to.");
@@ -117,7 +117,7 @@ namespace OpenBodyCams
             FixDroppedItemRotation = Config.Bind("Misc", "FixDroppedItemRotation", true, "If enabled, the mod will patch a bug that causes the rotation of dropped items to be desynced between clients.");
 
             PrintCosmeticsDebugInfo = Config.Bind("Debug", "PrintCosmeticsDebugInfo", false, "Prints extra information about the cosmetics being collected for each player, as well as the code that is causing the collection.");
-            PrintCosmeticsDebugInfo.SettingChanged += (s, e) => CosmeticsCompatibility.PrintDebugInfo = PrintCosmeticsDebugInfo.Value;
+            PrintCosmeticsDebugInfo.SettingChanged += (_, _) => CosmeticsCompatibility.PrintDebugInfo = PrintCosmeticsDebugInfo.Value;
             CosmeticsCompatibility.PrintDebugInfo = PrintCosmeticsDebugInfo.Value;
 
             CosmeticsCompatibility.Initialize(harmony);
