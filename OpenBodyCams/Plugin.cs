@@ -72,6 +72,7 @@ namespace OpenBodyCams
             harmony.PatchAll(typeof(PatchHauntedMaskItem));
             harmony.PatchAll(typeof(PatchMaskedPlayerEnemy));
 
+            // Camera:
             CameraMode = Config.Bind("Camera", "Mode", CameraModeOptions.Head, "Choose where to attach the camera. 'Head' will attach the camera to the right side of the head, 'Body' will attach it to the chest.");
             HorizontalResolution = Config.Bind("Camera", "HorizontalResolution", 160, "The horizontal resolution of the rendering. The vertical resolution is calculated based on the aspect ratio of the monitor.");
             FieldOfView = Config.Bind("Camera", "FieldOfView", 65f, "The vertical FOV of the camera in degrees.");
@@ -97,6 +98,7 @@ namespace OpenBodyCams
             DisableCameraWhileTargetIsOnShip.SettingChanged += (_, _) => BodyCamComponent.UpdateAllCameraSettings();
             EnableCamera.SettingChanged += (_, _) => BodyCamComponent.UpdateAllCameraSettings();
 
+            // Terminal:
             TerminalPiPBodyCamEnabled = Config.Bind("Terminal", "EnablePiPBodyCam", false, "Adds a 'view bodycam' command to the terminal that places a picture-in-picture view of the bodycam in front of the radar map.");
             TerminalPiPPosition = Config.Bind("Terminal", "PiPPosition", PiPPosition.BottomRight, "The corner inside the terminal's radar map to align the body cam to.");
             TerminalPiPWidth = Config.Bind("Terminal", "PiPWidth", 150, "The width of the picture-in-picture in pixels.");
@@ -107,16 +109,20 @@ namespace OpenBodyCams
 
             harmony.PatchAll(typeof(TerminalCommands));
 
+            // Compatibility:
             GeneralImprovementsBetterMonitorIndex = Config.Bind("Compatibility", "GeneralImprovementsBetterMonitorIndex", 0, new ConfigDescription("Choose which of GeneralImprovements' extended monitor set to display the body cam on. A value of 0 will place it on the large monitor on the right, 1-14 goes left to right, top to bottom, skipping the large center monitor.", new AcceptableValueRange<int>(0, 14)));
             EnableMoreCompanyCosmeticsCompatibility = Config.Bind("Compatibility", "EnableMoreCompanyCosmeticsCompatibility", true, "If this is enabled, a patch will be applied to MoreCompany to spawn cosmetics for the local player, and all cosmetics will be shown and hidden based on the camera's perspective.");
             EnableAdvancedCompanyCosmeticsCompatibility = Config.Bind("Compatibility", "EnableAdvancedCompanyCosmeticsCompatibility", true, "When this is enabled and AdvancedCompany is installed, all cosmetics will be shown and hidden based on the camera's perspective.");
             EnableModelReplacementAPICompatibility = Config.Bind("Compatibility", "EnableModelReplacementAPICompatibility", true, "When enabled, this will get the third person model replacement and hide/show it based on the camera's perspective.");
             EnableLethalVRMCompatibility = Config.Bind("Compatibility", "EnableLethalVRMCompatibility", true, "When enabled, any VRM model will be hidden/shown based on the camera's perspective.");
 
+            // Misc:
             DisableInternalShipCamera = Config.Bind("Misc", "DisableInternalShipCamera", false, "Whether to disable the internal ship camera displayed above the bodycam monitor.");
             FixDroppedItemRotation = Config.Bind("Misc", "FixDroppedItemRotation", true, "If enabled, the mod will patch a bug that causes the rotation of dropped items to be desynced between clients.");
 
+            // Debug:
             PrintCosmeticsDebugInfo = Config.Bind("Debug", "PrintCosmeticsDebugInfo", false, "Prints extra information about the cosmetics being collected for each player, as well as the code that is causing the collection.");
+
             PrintCosmeticsDebugInfo.SettingChanged += (_, _) => CosmeticsCompatibility.PrintDebugInfo = PrintCosmeticsDebugInfo.Value;
             CosmeticsCompatibility.PrintDebugInfo = PrintCosmeticsDebugInfo.Value;
 
