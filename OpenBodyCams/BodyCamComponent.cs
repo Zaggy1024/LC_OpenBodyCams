@@ -667,7 +667,7 @@ namespace OpenBodyCams
                 mesh.forceRenderingOff = false;
         }
 
-        void Update()
+        void LateUpdate()
         {
             EnsureCameraExists();
 
