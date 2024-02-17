@@ -1,3 +1,6 @@
+## Version 1.2.1
+- Fixed an error that would occur when exiting to the menu and starting a game again with the picture-in-picture body cam enabled.
+
 ## Version 1.2.0
 - Added an _opt-in_ `view bodycam` command to the terminal to display a picture-in-picture view of the bodycam. [TwoRadarMaps](https://thunderstore.io/c/lethal-company/p/Zaggy1024/TwoRadarMaps/) v1.2.0 will use a separate bodycam when the feature is enabled.
 - Developer features: Added an API to force a body cam to render, and allowed body cams to function without being attached to a renderer's visibility/materials.
