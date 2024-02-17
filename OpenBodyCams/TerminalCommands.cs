@@ -22,7 +22,8 @@ namespace OpenBodyCams
             if (ShipObjects.TerminalScript == null || ShipObjects.MainBodyCam == null)
                 return;
 
-            Object.Destroy(PiPImage?.gameObject);
+            if (PiPImage != null)
+                Object.Destroy(PiPImage.gameObject);
             PiPImage = null;
 
             ShipObjects.MainBodyCam.OnRenderTextureCreated -= SetRenderTexture;
@@ -188,7 +189,7 @@ namespace OpenBodyCams
             }
             else
             {
-                keyword.compatibleNouns = [.. keyword.compatibleNouns, .. compatibleNouns];
+                keyword.compatibleNouns = [.. keyword.compatibleNouns ?? [], .. compatibleNouns ?? []];
                 Plugin.Instance.Logger.LogInfo($"  Keyword existed, appended nouns.");
             }
 
