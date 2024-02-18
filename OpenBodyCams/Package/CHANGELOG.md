@@ -1,3 +1,7 @@
+## Version 1.2.2
+- Added two options to allow collection of useful debug information if error spam is encountered, information which should point directly to the problematic mod. More information is available in the readme.
+- Prevented cosmetics from being collected from other mods if they have been destroyed. Not sure if this has been hit in the wild, but this may prevent some error spam.
+
 ## Version 1.2.1
 - Fixed an error that would occur when exiting to the menu and starting a game again with the picture-in-picture body cam enabled.
 
