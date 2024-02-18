@@ -35,6 +35,8 @@ namespace OpenBodyCams
 
         private static float radarBoosterPanSpeed;
 
+        private static bool bruteForcePreventNullModels;
+
         internal GameObject CameraObject;
         internal Camera Camera;
         public Camera GetCamera() { return Camera; }
@@ -152,6 +154,8 @@ namespace OpenBodyCams
             disableCameraWhileTargetIsOnShip = Plugin.DisableCameraWhileTargetIsOnShip.Value;
 
             radarBoosterPanSpeed = Plugin.RadarBoosterPanRPM.Value * 360 / 60;
+
+            bruteForcePreventNullModels = Plugin.BruteForcePreventFreezes.Value;
         }
 
         public static void UpdateAllTargetStatuses()
@@ -551,17 +555,8 @@ namespace OpenBodyCams
                 state.heldItemRotation = player.currentlyHeldObjectServer.transform.rotation;
             }
 
-            if (cosmetics.Length > 0)
-            {
-                if (cosmetics[0] == null)
-                {
-                    cosmetics = CosmeticsCompatibility.CollectCosmetics(player);
-                    state.cosmeticsLayers = new int[cosmetics.Length];
-                }
-
-                for (int i = 0; i < cosmetics.Length; i++)
-                    state.cosmeticsLayers[i] = cosmetics[i].layer;
-            }
+            for (int i = 0; i < cosmetics.Length; i++)
+                state.cosmeticsLayers[i] = cosmetics[i].layer;
 
             // Modify
             void AttachItem(GrabbableObject item, Transform holder)
@@ -667,6 +662,19 @@ namespace OpenBodyCams
                 mesh.forceRenderingOff = false;
         }
 
+        void EnsureCosmeticsExist(PlayerControllerB player, ref GameObject[] cosmetics, ref PlayerModelState state)
+        {
+            foreach (var cosmetic in cosmetics)
+            {
+                if (cosmetic != null)
+                    continue;
+                Plugin.Instance.Logger.LogError($"A cosmetic attached to {player.playerUsername} has been destroyed, re-collecting cosmetics.");
+                cosmetics = CosmeticsCompatibility.CollectCosmetics(player);
+                state.cosmeticsLayers = new int[cosmetics.Length];
+                break;
+            }
+        }
+
         void LateUpdate()
         {
             EnsureCameraExists();
@@ -690,6 +698,25 @@ namespace OpenBodyCams
                 {
                     SetScreenBlanked(disable);
                     wasBlanked = disable;
+                }
+            }
+
+            if (enableCamera && bruteForcePreventNullModels)
+            {
+                // Brute force check if all models are still valid to prevent rendering from failing and
+                // causing a frozen screen.
+                if (currentPlayer != null)
+                    EnsureCosmeticsExist(currentPlayer, ref currentPlayerCosmetics, ref currentPlayerModelState);
+                if ((object)currentPlayer != StartOfRound.Instance.localPlayerController)
+                    EnsureCosmeticsExist(StartOfRound.Instance.localPlayerController, ref localPlayerCosmetics, ref localPlayerModelState);
+
+                foreach (var renderer in currentlyViewedMeshes)
+                {
+                    if (renderer == null)
+                    {
+                        UpdateTargetStatus();
+                        break;
+                    }
                 }
             }
 

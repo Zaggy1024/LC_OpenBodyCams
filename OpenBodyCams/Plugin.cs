@@ -59,6 +59,7 @@ namespace OpenBodyCams
         public static ConfigEntry<bool> FixDroppedItemRotation;
 
         public static ConfigEntry<bool> PrintCosmeticsDebugInfo;
+        public static ConfigEntry<bool> BruteForcePreventFreezes;
 
         public new ManualLogSource Logger => base.Logger;
 
@@ -122,9 +123,11 @@ namespace OpenBodyCams
 
             // Debug:
             PrintCosmeticsDebugInfo = Config.Bind("Debug", "PrintCosmeticsDebugInfo", false, "Prints extra information about the cosmetics being collected for each player, as well as the code that is causing the collection.");
+            BruteForcePreventFreezes = Config.Bind("Debug", "BruteForcePreventFreezes", false, "Enable a brute force approach to preventing errors in the camera setup callback that can cause the screen to freeze. This causes a hopefully negligible performance decrease.");
 
             PrintCosmeticsDebugInfo.SettingChanged += (_, _) => CosmeticsCompatibility.PrintDebugInfo = PrintCosmeticsDebugInfo.Value;
             CosmeticsCompatibility.PrintDebugInfo = PrintCosmeticsDebugInfo.Value;
+            BruteForcePreventFreezes.SettingChanged += (_, _) => BodyCamComponent.UpdateStaticSettings();
 
             CosmeticsCompatibility.Initialize(harmony);
 
