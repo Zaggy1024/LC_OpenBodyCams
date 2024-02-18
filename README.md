@@ -47,8 +47,7 @@ The camera view will display only the first person hands and disable the third p
 - `FixDroppedItemRotation`: Defaulted to `true`, this fixes a desync of items' rotations when dropping them. See [Notes/Item rotations](#item-rotations).
 
 ## Debug
-- `PrintCosmeticsDebugInfo`: Prints extra information about the cosmetics being collected for each player, as well as the code that is causing the cosmetics to be collected. This is useful information to provide when reporting that you are seeing a `Collecting [x] cosmetics objects for [name]` message getting spammed in the logs.
-- `BruteForcePreventFreezes` and `ReferencedObjectDestructionDetectionEnabled`: See [Debugging](#debugging).
+See [Debugging](#debugging).
 
 # Notes
 
@@ -59,10 +58,12 @@ As mentioned above, using no framerate limit results in the best performance. Fo
 An optional fix is included for items' rotations being desynced between the player dropping them and all other clients, which is caused by an ignored rotation parameter in the function handling dropped items. This is included to allow the radar boosters to face in a consistent direction for all clients in a game. The patch is designed to fail gracefully and allow the mod to still run, in case any other mods apply the same fix, but if problems arise, it can be disabled with the `FixDroppedItemRotation` config option.
 
 ## Debugging
-If error spam or screen freezes are encountered, please reproduce the issue with both `BruteForcePreventFreezes` and `ReferencedObjectDestructionDetectionEnabled` enabled in the `[Debug]` section of the config, then provide the game logs in a [new issue on GitHub](https://github.com/Zaggy1024/LC_OpenBodyCams/issues/new). These will provide valuable information to narrow down the cause of the problem.
-
+If error spam or screen freezes are encountered, please reproduce the issue with `ReferencedObjectDestructionDetectionEnabled` enabled in the `[Debug]` section of the config, then provide the game logs in a [new issue on GitHub](https://github.com/Zaggy1024/LC_OpenBodyCams/issues/new). These will provide valuable information to narrow down the cause of the problem. After the issue occurs, `BruteForcePreventFreezes` can be used to resume normal gameplay.
 - `BruteForcePreventFreezes`: Prevents the error spam by checking every frame whether any cosmetics on viewed players have been destroyed and updating the list if so. This can be used as a stopgap measure to prevent screen freezes if a mod conflict is unavoidable.
 - `ReferencedObjectDestructionDetectionEnabled`: Prints a message and stack trace whenever an object is destroyed while a body cam is referencing it. This should point directly to any problematic mods causing issues.
+
+If messages are spammed excessively in the console/logs saying `Collecting [x] cosmetics objects for [name]`, then the `PrintCosmeticsDebugInfo` can be enabled to provide information on what is causing the collection of the cosmetics. Enable this option while the issue is occurring and provide the logs in a GitHub issue.
+- `PrintCosmeticsDebugInfo`: Prints extra information about the cosmetics being collected for each player, as well as the code that is causing the cosmetics to be collected. This is useful information to provide when reporting that you are seeing a  message getting spammed in the logs.
 
 # Developers
 If you wish to create a body cam separate from the default one included with this mod, you can simply add OpenBodyCams as a dependency and use `OpenBodyCams.API.BodyCam.CreateBodyCam()`:
