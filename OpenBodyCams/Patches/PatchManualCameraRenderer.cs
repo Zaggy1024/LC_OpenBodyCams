@@ -72,9 +72,6 @@ namespace OpenBodyCams.Patches
         [HarmonyPatch(nameof(ManualCameraRenderer.RemoveTargetFromRadar))]
         static IEnumerable<CodeInstruction> RemoveTargetFromRadarTranspiler(IEnumerable<CodeInstruction> instructions, ILGenerator generator)
         {
-            if (ShipObjects.TwoRadarCamsPresent)
-                return instructions;
-
             // RemoveTargetFromRadar is invoked by RadarBoosterItem, which in turn invokes updateMapTarget it as if it was called from
             // an RPC handler, so it skips checking if the target index is valid. This means that the radar target index can point to a
             // player object that hasn't been taken control of, so the body cam target is invalid.
