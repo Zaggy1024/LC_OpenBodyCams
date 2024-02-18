@@ -754,6 +754,53 @@ namespace OpenBodyCams
 
             SyncBodyCamToRadarMap.OnBodyCamDestroyed(this);
         }
+
+        private static bool PlayerContainsRenderer(PlayerControllerB player, Renderer renderer)
+        {
+            if (player == null)
+                return false;
+            if (player.thisPlayerModelArms == renderer)
+                return true;
+            if (player.thisPlayerModel == renderer)
+                return true;
+            return false;
+        }
+
+        public bool HasReference(Renderer renderer)
+        {
+            if (PlayerContainsRenderer(currentPlayer, renderer))
+                return true;
+            if (PlayerContainsRenderer(StartOfRound.Instance?.localPlayerController, renderer))
+                return true;
+            return currentlyViewedMeshes.Contains(renderer);
+        }
+
+        public bool HasReference(GameObject gameObject)
+        {
+            if (Array.IndexOf(currentPlayerCosmetics, gameObject) != -1)
+                return true;
+            return Array.IndexOf(localPlayerCosmetics, gameObject) != -1;
+        }
+
+        public static bool AnyBodyCamHasReference(Renderer renderer)
+        {
+            foreach (var bodyCam in AllBodyCams)
+            {
+                if (bodyCam.HasReference(renderer))
+                    return true;
+            }
+            return false;
+        }
+
+        public static bool AnyBodyCamHasReference(GameObject gameObject)
+        {
+            foreach (var bodyCam in AllBodyCams)
+            {
+                if (bodyCam.HasReference(gameObject))
+                    return true;
+            }
+            return false;
+        }
     }
 
     internal struct PlayerModelState

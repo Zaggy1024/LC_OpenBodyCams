@@ -60,6 +60,9 @@ namespace OpenBodyCams
 
         public static ConfigEntry<bool> PrintCosmeticsDebugInfo;
         public static ConfigEntry<bool> BruteForcePreventFreezes;
+        public static ConfigEntry<bool> ReferencedObjectDestructionDetectionEnabled;
+
+        private static readonly Harmony DestructionDetectionPatch = new(MOD_UNIQUE_NAME + ".DestructionDetectionPatch");
 
         public new ManualLogSource Logger => base.Logger;
 
@@ -123,17 +126,28 @@ namespace OpenBodyCams
 
             // Debug:
             PrintCosmeticsDebugInfo = Config.Bind("Debug", "PrintCosmeticsDebugInfo", false, "Prints extra information about the cosmetics being collected for each player, as well as the code that is causing the collection.");
-            BruteForcePreventFreezes = Config.Bind("Debug", "BruteForcePreventFreezes", false, "Enable a brute force approach to preventing errors in the camera setup callback that can cause the screen to freeze. This causes a hopefully negligible performance decrease.");
+            BruteForcePreventFreezes = Config.Bind("Debug", "BruteForcePreventFreezes", false, "Enable a brute force approach to preventing errors in the camera setup callback that can cause the screen to freeze.");
+            ReferencedObjectDestructionDetectionEnabled = Config.Bind("Debug", "ModelDestructionDebuggingPatchEnabled", false, "Enable this option when reproducing a camera freeze. This will cause a debug message to be printed when a model that a body cam is tracking is destroyed.");
 
             PrintCosmeticsDebugInfo.SettingChanged += (_, _) => CosmeticsCompatibility.PrintDebugInfo = PrintCosmeticsDebugInfo.Value;
             CosmeticsCompatibility.PrintDebugInfo = PrintCosmeticsDebugInfo.Value;
             BruteForcePreventFreezes.SettingChanged += (_, _) => BodyCamComponent.UpdateStaticSettings();
+            ReferencedObjectDestructionDetectionEnabled.SettingChanged += (_, _) => UpdateReferencedObjectDestructionDetectionEnabled();
+            UpdateReferencedObjectDestructionDetectionEnabled();
 
             CosmeticsCompatibility.Initialize(harmony);
 
             harmony.PatchAll(typeof(PatchFixItemDropping));
 
             BodyCamComponent.InitializeStatic();
+        }
+
+        private void UpdateReferencedObjectDestructionDetectionEnabled()
+        {
+            if (ReferencedObjectDestructionDetectionEnabled.Value)
+                DestructionDetectionPatch.PatchAll(typeof(PatchModelDestructionDebugging));
+            else
+                DestructionDetectionPatch.UnpatchSelf();
         }
     }
 }
