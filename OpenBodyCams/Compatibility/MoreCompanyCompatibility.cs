@@ -88,7 +88,11 @@ namespace OpenBodyCams.Compatibility
             if (player.GetComponentInChildren<CosmeticApplication>() is CosmeticApplication cosmeticApplication)
             {
                 Plugin.Instance.Logger.LogInfo($"Getting MoreCompany cosmetic models for {player.playerUsername}");
-                return cosmeticApplication.spawnedCosmetics.SelectMany(cosmetic => cosmetic.GetComponentsInChildren<Transform>()).Select(cosmeticObject => cosmeticObject.gameObject).ToArray();
+                return cosmeticApplication.spawnedCosmetics
+                    .Where(cosmetic => cosmetic != null)
+                    .SelectMany(cosmetic => cosmetic.GetComponentsInChildren<Transform>())
+                    .Select(cosmeticObject => cosmeticObject.gameObject)
+                    .ToArray();
             }
 
             return new GameObject[0];

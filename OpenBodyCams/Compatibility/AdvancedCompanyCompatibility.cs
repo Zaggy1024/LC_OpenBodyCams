@@ -62,6 +62,7 @@ namespace OpenBodyCams.Compatibility
                 attachedObjects = attachedObjects.Concat(feetObjects);
 
             return attachedObjects
+                .Where(cosmetic => cosmetic != null)
                 .SelectMany(cosmetic => cosmetic.GetComponentsInChildren<Transform>())
                 .Select(transform => transform.gameObject)
                 .Concat(acPlayer.HeadMount == null ? [] : [ acPlayer.HeadMount ])

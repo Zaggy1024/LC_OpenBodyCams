@@ -50,8 +50,8 @@ namespace OpenBodyCams.Compatibility
         {
             var bodyReplacement = player.GetComponent<ViewStateManager>()?.bodyReplacement;
 
-            if (bodyReplacement == null)
-                return new GameObject[0];
+            if (bodyReplacement?.replacementModel == null)
+                return [];
 
             return bodyReplacement.replacementModel.GetComponentsInChildren<Transform>().Select(cosmeticObject => cosmeticObject.gameObject).ToArray();
         }

@@ -67,9 +67,13 @@ namespace OpenBodyCams.Compatibility
         {
             foreach (var instance in (ICollection<LethalVRMManager.LethalVRMInstance>)vrmInstances)
             {
+                if (instance == null)
+                    continue;
                 if (!ReferenceEquals(instance.PlayerControllerB, player))
                     continue;
-                return instance.renderers.Select(renderer => renderer.gameObject).ToArray();
+                return instance.renderers
+                    .Select(renderer => renderer.gameObject)
+                    .ToArray();
             }
 
             return new GameObject[0];
