@@ -170,11 +170,14 @@ namespace OpenBodyCams
             // HDRP does not end one camera's rendering before beginning another's.
             // Reset the camera perspective if any other camera is beginning rendering.
             // This appears to still allow the perspective change to take effect properly.
-            foreach (var bodyCam in AllBodyCams)
-                bodyCam.ResetCameraRendering();
+            var bodyCamCount = AllBodyCams.Length;
 
-            foreach (var bodyCam in AllBodyCams)
+            for (int i = 0; i < bodyCamCount; i++)
+                AllBodyCams[i].ResetCameraRendering();
+
+            for (int i = 0; i < bodyCamCount; i++)
             {
+                var bodyCam = AllBodyCams[i];
                 if ((object)bodyCam.Camera == camera)
                 {
                     bodyCam.BeginCameraRendering();
