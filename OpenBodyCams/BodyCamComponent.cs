@@ -208,6 +208,8 @@ namespace OpenBodyCams
         {
             if (!hasFinishedStaticSetup)
             {
+                Plugin.Instance.Logger.LogError("Attempted to create a body cam before static initialization has been completed.");
+                Plugin.Instance.Logger.LogError("This may occur if the save is corrupted, or if a mod caused an error during the start of the game.");
                 Destroy(this);
                 return;
             }
