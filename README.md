@@ -59,7 +59,8 @@ An optional fix is included for items' rotations being desynced between the play
 
 ## Debugging
 ***When providing logs for issues you encounter, PLEASE make sure to enable Unity logging!***
-- Set BepInEx's `UnityLogListening` option to `true`.
+- Set BepInEx's `UnityLogListening` option in the `[Logging]` section to `true`.
+- Set BepInEx's `LogLevels` option in the `[Logging.Disk]` section to `All`.
 - Disable [DisableUnityLogs](https://thunderstore.io/c/lethal-company/p/Mhz/DisableUnityLogs/) if installed.
 
 ***Otherwise, there will be no error messages printed in the logs at all, and I cannot narrow down the cause of the problem.***
