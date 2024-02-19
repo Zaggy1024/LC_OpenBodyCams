@@ -267,6 +267,8 @@ namespace OpenBodyCams
             var greenFlashObject = Instantiate(StartOfRound.Instance.mapScreen.mapCameraAnimator.gameObject);
             greenFlashObject.transform.SetParent(greenFlashParent.transform, false);
             greenFlashObject.transform.localPosition = new Vector3(0, 0, 0.1f);
+            // Cloning the transition while it is playing seems to freeze it, so reset the scale so that it isn't visible.
+            greenFlashObject.transform.localScale = Vector3.Scale(greenFlashObject.transform.localScale, new Vector3(1, 1, 0));
             greenFlashObject.layer = DEFAULT_LAYER;
             greenFlashRenderer = greenFlashObject.GetComponent<MeshRenderer>();
             greenFlashRenderer.forceRenderingOff = true;
@@ -282,9 +284,6 @@ namespace OpenBodyCams
             fogShaderPlaneRenderer.shadowCastingMode = ShadowCastingMode.Off;
             fogShaderPlaneRenderer.receiveShadows = false;
             fogShaderPlaneRenderer.forceRenderingOff = true;
-
-            // Cloning the transition while it is playing seems to freeze it, so play the animation here to let it reset.
-            StartTargetTransition();
 
             OnCameraCreated?.Invoke(Camera);
         }
