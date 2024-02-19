@@ -1,3 +1,6 @@
+## Version 1.2.4
+- Fixed disabling the transition animation causing the green rectangle to get stuck on the body cam screen. Note that this probably doesn't fix [issue #23](https://github.com/Zaggy1024/LC_OpenBodyCams/issues/23).
+
 ## Version 1.2.3
 - Optimized some hot code which may help performance very slightly.
 
