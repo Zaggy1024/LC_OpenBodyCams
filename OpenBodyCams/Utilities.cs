@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 namespace OpenBodyCams
 {
@@ -19,8 +19,6 @@ namespace OpenBodyCams
             foreach (var camera in allCameras)
             {
                 if (camera is not null && (object)camera == cameraToSkip)
-                    continue;
-                if (!camera.isActiveAndEnabled)
                     continue;
                 if ((camera.cullingMask & (1 << layer)) == 0)
                     continue;
