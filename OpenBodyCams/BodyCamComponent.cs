@@ -49,6 +49,7 @@ namespace OpenBodyCams
         internal int MonitorMaterialIndex = -1;
         internal Material MonitorOnMaterial;
         internal Material MonitorOffMaterial;
+        internal bool MonitorIsOn = true;
 
         private bool keepCameraOn = false;
         public bool ForceEnableCamera { get => keepCameraOn; set => keepCameraOn = value; }
@@ -220,8 +221,6 @@ namespace OpenBodyCams
 
         private static void SetMaterial(Renderer renderer, int index, Material material)
         {
-            if (renderer == null || index == -1)
-                return;
             var materials = renderer.sharedMaterials;
             materials[index] = material;
             renderer.sharedMaterials = materials;
@@ -336,23 +335,23 @@ namespace OpenBodyCams
             if (MonitorRenderer == null)
                 return;
 
+            if (powered == MonitorIsOn)
+                return;
+
             if (powered)
             {
-                if (!IsScreenPowered())
-                    StartTargetTransition();
+                StartTargetTransition();
                 SetMaterial(MonitorRenderer, MonitorMaterialIndex, MonitorOnMaterial);
                 return;
             }
 
             SetMaterial(MonitorRenderer, MonitorMaterialIndex, MonitorOffMaterial);
+            MonitorIsOn = true;
         }
 
         public bool IsScreenPowered()
         {
-            if (MonitorRenderer == null)
-                return true;
-
-            return (object)MonitorRenderer.sharedMaterials[MonitorMaterialIndex] == MonitorOnMaterial;
+            return MonitorIsOn;
         }
 
         private void SetScreenBlanked(bool blanked)
