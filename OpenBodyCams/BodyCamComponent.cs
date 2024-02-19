@@ -2,6 +2,7 @@ using System;
 using System.Data;
 using System.Globalization;
 using System.Linq;
+using System.Runtime.CompilerServices;
 
 using GameNetcodeStuff;
 using UnityEngine;
@@ -23,6 +24,8 @@ namespace OpenBodyCams
 
         private static BodyCamComponent[] AllBodyCams = [];
         public static BodyCamComponent[] GetAllBodyCams() { return [.. AllBodyCams]; }
+
+        private static BodyCamComponent lastBodyCamRendered;
 
         private static int mainCameraCullingMask;
         private static FrameSettings mainCameraCustomFrameSettings;
@@ -57,8 +60,6 @@ namespace OpenBodyCams
         private bool enableCamera = true;
         private bool wasBlanked = false;
         public bool IsBlanked { get => wasBlanked; }
-
-        private bool hasSetUpCamera = false;
 
         private GameObject[] localPlayerCosmetics = [];
         private PlayerModelState localPlayerModelState;
@@ -165,21 +166,30 @@ namespace OpenBodyCams
                 bodyCam.UpdateTargetStatus();
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static void ResetLastRenderedBodyCam()
+        {
+            if (lastBodyCamRendered is not null)
+            {
+                lastBodyCamRendered.ResetCameraRendering();
+                lastBodyCamRendered = null;
+            }
+        }
+
         static void BeginAnyCameraRendering(ScriptableRenderContext context, Camera camera)
         {
             // HDRP does not end one camera's rendering before beginning another's.
             // Reset the camera perspective if any other camera is beginning rendering.
             // This appears to still allow the perspective change to take effect properly.
+            ResetLastRenderedBodyCam();
+
             var bodyCamCount = AllBodyCams.Length;
-
-            for (int i = 0; i < bodyCamCount; i++)
-                AllBodyCams[i].ResetCameraRendering();
-
             for (int i = 0; i < bodyCamCount; i++)
             {
                 var bodyCam = AllBodyCams[i];
                 if ((object)bodyCam.Camera == camera)
                 {
+                    lastBodyCamRendered = bodyCam;
                     bodyCam.BeginCameraRendering();
                     return;
                 }
@@ -188,14 +198,7 @@ namespace OpenBodyCams
 
         static void EndAnyCameraRendering(ScriptableRenderContext context, Camera camera)
         {
-            foreach (var bodyCam in AllBodyCams)
-            {
-                if ((object)bodyCam.Camera == camera)
-                {
-                    bodyCam.ResetCameraRendering();
-                    return;
-                }
-            }
+            ResetLastRenderedBodyCam();
         }
 
         void Awake()
@@ -622,8 +625,6 @@ namespace OpenBodyCams
 
         private void BeginCameraRendering()
         {
-            hasSetUpCamera = true;
-
             nightVisionLight.enabled = true;
             greenFlashRenderer.forceRenderingOff = false;
             fogShaderPlaneRenderer.forceRenderingOff = false;
@@ -644,10 +645,6 @@ namespace OpenBodyCams
 
         private void ResetCameraRendering()
         {
-            if (!hasSetUpCamera)
-                return;
-            hasSetUpCamera = false;
-
             nightVisionLight.enabled = false;
             greenFlashRenderer.forceRenderingOff = true;
             fogShaderPlaneRenderer.forceRenderingOff = true;
