@@ -32,6 +32,7 @@ namespace OpenBodyCams
         private static FrameSettingsOverrideMask mainCameraCustomFrameSettingsMask;
         private static Material fogShaderMaterial;
         private static GameObject nightVisionPrefab;
+        private static bool hasFinishedStaticSetup = false;
 
         private static bool disableCameraWhileTargetIsOnShip = false;
         private static Color screenEmissiveColor;
@@ -116,6 +117,8 @@ namespace OpenBodyCams
             mapLight.cullingMask = 1 << mapLight.gameObject.layer;
 
             UpdateAllCameraSettings();
+
+            hasFinishedStaticSetup = true;
         }
 
         public static void UpdateAllCameraSettings()
@@ -203,6 +206,12 @@ namespace OpenBodyCams
 
         void Awake()
         {
+            if (!hasFinishedStaticSetup)
+            {
+                Destroy(this);
+                return;
+            }
+
             AllBodyCams = [.. AllBodyCams, this];
 
             var nightVisionLight = nightVisionPrefab.GetComponent<Light>();
