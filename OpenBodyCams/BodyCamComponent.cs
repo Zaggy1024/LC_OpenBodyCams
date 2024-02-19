@@ -539,7 +539,7 @@ namespace OpenBodyCams
 
         private static void SaveStateAndApplyPerspective(PlayerControllerB player, ref GameObject[] cosmetics, ref PlayerModelState state, Perspective perspective)
         {
-            if (player == null)
+            if (player is null)
                 return;
 
             // Save
@@ -599,7 +599,7 @@ namespace OpenBodyCams
 
         private static void RestoreState(PlayerControllerB player, GameObject[] cosmetics, PlayerModelState state)
         {
-            if (player == null)
+            if (player is null)
                 return;
 
             player.thisPlayerModel.shadowCastingMode = state.bodyShadowMode;
