@@ -358,11 +358,12 @@ namespace OpenBodyCams
             {
                 StartTargetTransition();
                 SetMaterial(MonitorRenderer, MonitorMaterialIndex, MonitorOnMaterial);
+                MonitorIsOn = true;
                 return;
             }
 
             SetMaterial(MonitorRenderer, MonitorMaterialIndex, MonitorOffMaterial);
-            MonitorIsOn = true;
+            MonitorIsOn = false;
         }
 
         public bool IsScreenPowered()
