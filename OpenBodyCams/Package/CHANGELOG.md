@@ -1,3 +1,6 @@
+## Version 1.2.6
+- Fixed the body cam not powering back on after the monitors are turned off.
+
 ## Version 1.2.5
 - Fixed an error that would occur if the door screen was destroyed.
 
