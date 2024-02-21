@@ -65,13 +65,15 @@ An optional fix is included for items' rotations being desynced between the play
 
 ***Otherwise, there will be no error messages printed in the logs at all, and I cannot narrow down the cause of the problem.***
 
+The logs can be found in the BepInEx folder within the mod manager's profile folder (`%appdata%\r2modmanPlus-local\LethalCompany\profiles\[profile name]` for r2modman), or inside the game's Steam install folder. Please ensure that the modification date indicates that the file is the most recent launch of the game.
+
 ### Screen freezes/error spam
-If error spam or screen freezes are encountered, please reproduce the issue with `ReferencedObjectDestructionDetectionEnabled` enabled in the `[Debug]` section of the config, then provide the game logs in a [new issue on GitHub](https://github.com/Zaggy1024/LC_OpenBodyCams/issues/new). These will provide valuable information to narrow down the cause of the problem. After the issue occurs, `BruteForcePreventFreezes` can be used to resume normal gameplay.
+If error spam or screen freezes are encountered, please reproduce the issue with `ReferencedObjectDestructionDetectionEnabled` enabled in the `[Debug]` section of the config, then provide the game logs in a [new issue on GitHub](https://github.com/Zaggy1024/LC_OpenBodyCams/issues/new)  (see [Debugging](#debugging) to find the `.log` file).  These will provide valuable information to narrow down the cause of the problem. After the issue occurs, `BruteForcePreventFreezes` can be used to resume normal gameplay.
 - `BruteForcePreventFreezes`: Prevents the error spam by checking every frame whether any cosmetics on viewed players have been destroyed and updating the list if so. This can be used as a stopgap measure to prevent screen freezes if a mod conflict is unavoidable.
 - `ReferencedObjectDestructionDetectionEnabled`: Prints a message and stack trace whenever an object is destroyed while a body cam is referencing it. This should point directly to any problematic mods causing issues.
 
 ### "Collected cosmetics" spam
-If messages are spammed excessively in the console/logs saying `Collected [x] cosmetics objects for [name]`, then the `PrintCosmeticsDebugInfo` can be enabled to provide information on what is causing the collection of the cosmetics. Enable this option while the issue is occurring and provide the logs in a GitHub issue.
+If messages are spammed excessively in the console/logs saying `Collected [x] cosmetics objects for [name]`, then the `PrintCosmeticsDebugInfo` can be enabled to provide information on what is causing the collection of the cosmetics. Enable this option while the issue is occurring and provide the logs in a GitHub issue (see [Debugging](#debugging) to find the `.log` file).
 - `PrintCosmeticsDebugInfo`: Prints extra information about the cosmetics being collected for each player, as well as the code that is causing the cosmetics to be collected. This is useful information to provide when reporting that you are seeing a  message getting spammed in the logs.
 
 # Developers
