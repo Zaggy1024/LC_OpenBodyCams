@@ -27,7 +27,7 @@ namespace OpenBodyCams
 
         private static BodyCamComponent lastBodyCamRendered;
 
-        private static int mainCameraCullingMask;
+        private static int bodyCamCullingMask;
         private static FrameSettings mainCameraCustomFrameSettings;
         private static FrameSettingsOverrideMask mainCameraCustomFrameSettingsMask;
         private static Material fogShaderMaterial;
@@ -94,7 +94,7 @@ namespace OpenBodyCams
         {
             var aPlayerScript = StartOfRound.Instance.allPlayerScripts[0];
 
-            mainCameraCullingMask = aPlayerScript.gameplayCamera.cullingMask;
+            bodyCamCullingMask = aPlayerScript.gameplayCamera.cullingMask & ~LayerMask.GetMask(["Ignore Raycast", "UI", "HelmetVisor"]);
 
             var mainCameraAdditionalData = aPlayerScript.gameplayCamera.GetComponent<HDAdditionalCameraData>();
             if (mainCameraAdditionalData.customRenderingSettings)
@@ -253,7 +253,7 @@ namespace OpenBodyCams
             CameraObject = new GameObject("BodyCam");
             Camera = CameraObject.AddComponent<Camera>();
             Camera.nearClipPlane = 0.05f;
-            Camera.cullingMask = mainCameraCullingMask & ~LayerMask.GetMask(["Ignore Raycast", "UI", "HelmetVisor"]);
+            Camera.cullingMask = bodyCamCullingMask;
 
             var cameraData = CameraObject.AddComponent<HDAdditionalCameraData>();
             cameraData.volumeLayerMask = 1;
@@ -396,7 +396,7 @@ namespace OpenBodyCams
 
         private static Renderer[] CollectModelsToHide(Transform parent)
         {
-            return parent.GetComponentsInChildren<Renderer>().Where(r => r.gameObject.layer == DEFAULT_LAYER || r.gameObject.layer == ENEMIES_LAYER).ToArray();
+            return parent.GetComponentsInChildren<Renderer>().Where(r => ((1 << r.gameObject.layer) & bodyCamCullingMask) != 0).ToArray();
         }
 
         public void SetTargetToNone()
@@ -477,17 +477,20 @@ namespace OpenBodyCams
             }
             else if (currentPlayer.deadBody != null)
             {
+                Transform obstructingAttachmentPoint;
                 if (Plugin.CameraMode.Value == CameraModeOptions.Head)
                 {
                     currentActualTarget = currentPlayer.deadBody.transform.Find("spine.001/spine.002/spine.003/spine.004/spine.004_end");
+                    obstructingAttachmentPoint = currentActualTarget.parent;
                     offset = CAMERA_CONTAINER_OFFSET - new Vector3(0, 0.15f, 0);
                 }
                 else
                 {
                     currentActualTarget = currentPlayer.deadBody.transform.Find("spine.001/spine.002/spine.003");
+                    obstructingAttachmentPoint = currentActualTarget;
                     offset = BODY_CAM_OFFSET;
                 }
-                currentlyViewedMeshes = CollectModelsToHide(currentPlayer.deadBody.transform);
+                currentlyViewedMeshes = CollectModelsToHide(obstructingAttachmentPoint);
             }
 
             if (currentActualTarget == null)
