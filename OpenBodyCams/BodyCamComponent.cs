@@ -389,12 +389,27 @@ namespace OpenBodyCams
         {
             if (!enableCamera)
                 return true;
+
             if (currentActualTarget == null)
                 return true;
-            if (currentPlayer is not null && !currentPlayer.isPlayerControlled && currentPlayer.deadBody == null && currentPlayer.redirectToEnemy == null)
-                return true;
 
-            return disableCameraWhileTargetIsOnShip && currentPlayer?.isInHangarShipRoom == true;
+            if (currentPlayer is not null)
+            {
+                if (currentPlayer.isPlayerControlled)
+                    return disableCameraWhileTargetIsOnShip && currentPlayer.isInHangarShipRoom;
+                if (!currentPlayer.isPlayerDead)
+                    return false;
+                if (currentPlayer.redirectToEnemy != null)
+                    return disableCameraWhileTargetIsOnShip && currentPlayer.redirectToEnemy.isInsidePlayerShip;
+                if (currentPlayer.deadBody != null)
+                    return disableCameraWhileTargetIsOnShip && currentPlayer.deadBody.isInShip;
+            }
+
+            var radarBooster = currentActualTarget.GetComponent<RadarBoosterItem>();
+            if (radarBooster is not null)
+                return disableCameraWhileTargetIsOnShip && radarBooster.isInShipRoom;
+
+            return true;
         }
 
         private static void CollectDescendentModelsToHide(Transform parent, List<Renderer> list)
