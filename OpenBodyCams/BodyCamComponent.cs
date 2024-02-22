@@ -284,9 +284,12 @@ namespace OpenBodyCams
             greenFlashRenderer.forceRenderingOff = true;
             greenFlashAnimator = greenFlashObject.GetComponent<Animator>() ?? throw new Exception("Green flash object copied from the map screen has no Animator.");
 
-            // The green flash animation ends with the scale non-zero and the renderer disabled, so let's ensure that state is the default.
-            greenFlashObject.transform.localScale = new Vector3(13.542f, 13.542f, 0.33266f);
-            greenFlashRenderer.enabled = false;
+            // The animator defaults to a state that has no values for localScale and Renderer.enabled.
+            // However, Unity keeps default values for these properties that are seemingly set when the
+            // animator is cloned. Therefore, we need to play the last frame of the transition to reset
+            // them to their default values.
+            greenFlashAnimator.Play("MapTransitionGreen", layer: 0, normalizedTime: 1);
+            greenFlashAnimator.WriteDefaultValues();
 
             var fogShaderPlane = GameObject.CreatePrimitive(PrimitiveType.Quad);
             Destroy(fogShaderPlane.GetComponent<MeshCollider>());
