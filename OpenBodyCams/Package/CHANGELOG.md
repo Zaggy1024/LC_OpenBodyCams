@@ -1,3 +1,7 @@
+## Version 1.2.7
+- Fixed the green transition appearing on the player's view when switching from a dead body or mimic to that player. The transition could remain visible until the target was switched again if `DisableCameraWhileTargetIsOnShip` was enabled.
+- Allowed `DisableCameraWhileTargetIsOnShip` to disable body cams based on whether other targets types (corpses, masked players, and radar boosters) are on the ship.
+
 ## Version 1.2.6
 - Fixed the body cam not powering back on after the monitors are turned off.
 
