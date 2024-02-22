@@ -278,12 +278,14 @@ namespace OpenBodyCams
             var greenFlashObject = Instantiate(StartOfRound.Instance.mapScreen.mapCameraAnimator.gameObject);
             greenFlashObject.transform.SetParent(greenFlashParent.transform, false);
             greenFlashObject.transform.localPosition = new Vector3(0, 0, 0.1f);
-            // Cloning the transition while it is playing seems to freeze it, so reset the scale so that it isn't visible.
-            greenFlashObject.transform.localScale = Vector3.Scale(greenFlashObject.transform.localScale, new Vector3(1, 1, 0));
             greenFlashObject.layer = DEFAULT_LAYER;
             greenFlashRenderer = greenFlashObject.GetComponent<MeshRenderer>();
             greenFlashRenderer.forceRenderingOff = true;
             greenFlashAnimator = greenFlashObject.GetComponent<Animator>() ?? throw new Exception("Green flash object copied from the map screen has no Animator.");
+
+            // The green flash animation ends with the scale non-zero and the renderer disabled, so let's ensure that state is the default.
+            greenFlashObject.transform.localScale = new Vector3(13.542f, 13.542f, 0.33266f);
+            greenFlashRenderer.enabled = false;
 
             var fogShaderPlane = GameObject.CreatePrimitive(PrimitiveType.Quad);
             Destroy(fogShaderPlane.GetComponent<MeshCollider>());
