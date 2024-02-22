@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Data;
 using System.Globalization;
 using System.Linq;
@@ -396,9 +397,30 @@ namespace OpenBodyCams
             return disableCameraWhileTargetIsOnShip && currentPlayer?.isInHangarShipRoom == true;
         }
 
+        private static void CollectDescendentModelsToHide(Transform parent, List<Renderer> list)
+        {
+            // Skip all descendents of body cams. Otherwise, we will set visibility on
+            // the green flash animation and make it visible to the main camera, and
+            // invisible to the body cam.
+            foreach (var bodyCam in AllBodyCams)
+            {
+                if (parent == bodyCam.CameraObject.transform)
+                    return;
+            }
+
+            var renderer = parent.GetComponent<Renderer>();
+            if (renderer != null && ((1 << renderer.gameObject.layer) & bodyCamCullingMask) != 0)
+                list.Add(renderer);
+
+            foreach (Transform transform in parent)
+                CollectDescendentModelsToHide(transform, list);
+        }
+
         private static Renderer[] CollectModelsToHide(Transform parent)
         {
-            return parent.GetComponentsInChildren<Renderer>().Where(r => ((1 << r.gameObject.layer) & bodyCamCullingMask) != 0).ToArray();
+            var descendentRenderers = new List<Renderer>(20);
+            CollectDescendentModelsToHide(parent, descendentRenderers);
+            return [.. descendentRenderers];
         }
 
         public void SetTargetToNone()
