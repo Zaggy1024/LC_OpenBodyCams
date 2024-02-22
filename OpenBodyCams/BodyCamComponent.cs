@@ -388,7 +388,7 @@ namespace OpenBodyCams
                 return true;
             if (currentActualTarget == null)
                 return true;
-            if (currentPlayer != null && !currentPlayer.isPlayerControlled && currentPlayer.deadBody == null && currentPlayer.redirectToEnemy == null)
+            if (currentPlayer is not null && !currentPlayer.isPlayerControlled && currentPlayer.deadBody == null && currentPlayer.redirectToEnemy == null)
                 return true;
 
             return disableCameraWhileTargetIsOnShip && currentPlayer?.isInHangarShipRoom == true;
