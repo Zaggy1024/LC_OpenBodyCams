@@ -1,4 +1,4 @@
-## Versions
+## Version 1.2.9
 - Fixed a freeze/error spam that would occur if MoreCompany encountered an error while syncing cosmetics.
 
 ## Version 1.2.8
