@@ -33,6 +33,7 @@ namespace OpenBodyCams.Compatibility
             var thisType = typeof(MoreCompanyCompatibility);
             harmony.CreateProcessor(m_ClientReceiveMessagePatch_HandleDataMessage)
                 .AddTranspiler(thisType.GetMethod(nameof(ClientReceiveMessagePatch_HandleDataMessageTranspiler)))
+                .AddFinalizer(thisType.GetMethod(nameof(ClientReceiveMessagePatch_HandleDataMessageFinalizer)))
                 .Patch();
             Plugin.Instance.Logger.LogInfo($"Patched MoreCompany to spawn cosmetics on the local player.");
             return true;
@@ -67,10 +68,12 @@ namespace OpenBodyCams.Compatibility
             //   MoreCompanyCompatibility.SetUpLocalMoreCompanyCosmetics(cosmeticApplication);
             instructionsList.Insert(clearCosmetics.End - 1, CodeInstruction.Call(typeof(MoreCompanyCompatibility), nameof(SetUpLocalMoreCompanyCosmetics)));
 
-            // At the end of the function, call UpdateAllTargetStatuses()
-            instructionsList.Insert(instructionsList.Count - 2, CodeInstruction.Call(typeof(BodyCamComponent), nameof(BodyCamComponent.UpdateAllTargetStatuses)));
-
             return instructionsList;
+        }
+
+        public static void ClientReceiveMessagePatch_HandleDataMessageFinalizer()
+        {
+            BodyCamComponent.UpdateAllTargetStatuses();
         }
 
         static void SetUpLocalMoreCompanyCosmetics(CosmeticApplication cosmeticApplication)
