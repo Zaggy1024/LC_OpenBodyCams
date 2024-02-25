@@ -1,3 +1,6 @@
+## Versions
+- Fixed a freeze/error spam that would occur if MoreCompany encountered an error while syncing cosmetics.
+
 ## Version 1.2.8
 - Fixed the green transition animation becoming permanently frozen on the body cam screen if `UseTargetTransitionAnimation` was disabled.
 
