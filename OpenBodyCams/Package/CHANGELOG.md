@@ -1,3 +1,6 @@
+## Version 1.2.10
+- Prevent errors when body cams are immediately destroyed between setting and resetting the perspective.
+
 ## Version 1.2.9
 - Fixed a freeze/error spam that would occur if MoreCompany encountered an error while syncing cosmetics.
 
