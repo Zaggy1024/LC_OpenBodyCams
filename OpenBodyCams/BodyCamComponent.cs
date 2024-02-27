@@ -173,7 +173,7 @@ namespace OpenBodyCams
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static void ResetLastRenderedBodyCam()
         {
-            if (lastBodyCamRendered is not null)
+            if (lastBodyCamRendered != null)
             {
                 lastBodyCamRendered.ResetCameraRendering();
                 lastBodyCamRendered = null;
