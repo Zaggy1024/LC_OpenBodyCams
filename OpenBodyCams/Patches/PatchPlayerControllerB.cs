@@ -1,16 +1,17 @@
 ﻿using GameNetcodeStuff;
 using HarmonyLib;
 
+using OpenBodyCams.Compatibility;
+
 namespace OpenBodyCams.Patches
 {
     [HarmonyPatch(typeof(PlayerControllerB))]
     internal class PatchPlayerControllerB
     {
-        // Run after the GeneralImprovements finalizer which has a Low priority.
         [HarmonyFinalizer]
         [HarmonyPatch(nameof(PlayerControllerB.ConnectClientToPlayerObject))]
-        [HarmonyPriority(Priority.VeryLow)]
-        static void ConnectClientToPlayerObjectFinalizer(PlayerControllerB __instance)
+        [HarmonyAfter(ModGUIDs.GeneralImprovements)]
+        static void ConnectClientToPlayerObjectFinalizer()
         {
             ShipObjects.LateInitialization();
         }
