@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Data;
 using System.Globalization;
@@ -168,6 +169,12 @@ namespace OpenBodyCams
         {
             foreach (var bodyCam in AllBodyCams)
                 bodyCam.UpdateTargetStatus();
+        }
+
+        public static void UpdateAllTargetStatusesOnNextFrame()
+        {
+            foreach (var bodyCam in AllBodyCams)
+                bodyCam.UpdateTargetStatusOnNextFrame();
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -460,6 +467,17 @@ namespace OpenBodyCams
                 SetTargetToPlayer(currentPlayer);
             else
                 SetTargetToTransform(currentActualTarget);
+        }
+
+        private IEnumerator UpdateTargetStatusOnNextFrameCoroutine()
+        {
+            yield return null;
+            UpdateTargetStatus();
+        }
+
+        public void UpdateTargetStatusOnNextFrame()
+        {
+            StartCoroutine(UpdateTargetStatusOnNextFrameCoroutine());
         }
 
         public void SetTargetToPlayer(PlayerControllerB player)

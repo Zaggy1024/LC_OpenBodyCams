@@ -1,9 +1,12 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
+
 using AdvancedCompany.Game;
+using AdvancedCompany.Objects;
 using GameNetcodeStuff;
 using HarmonyLib;
 using UnityEngine;
@@ -45,6 +48,11 @@ namespace OpenBodyCams.Compatibility
                     .AddPostfix(postfixMethod).Patch();
             }
 
+            harmony
+                .CreateProcessor(typeof(LightShoeRGB).GetMethod(nameof(LightShoeRGB.LiftCurse), BindingFlags.NonPublic | BindingFlags.Instance))
+                .AddPostfix(typeof(AdvancedCompanyCompatibility).GetMethod(nameof(UpdateCosmeticsAfterCoroutine), BindingFlags.NonPublic | BindingFlags.Static))
+                .Patch();
+
             return true;
         }
 
@@ -78,6 +86,27 @@ namespace OpenBodyCams.Compatibility
         {
             if (--cosmeticChangesInProgress == 0)
                 BodyCamComponent.UpdateAllTargetStatuses();
+        }
+
+        static IEnumerator UpdateCosmeticsAfterCoroutine(IEnumerator __result, LightShoeRGB __instance)
+        {
+            while (true)
+            {
+                try
+                {
+                    if (!__result.MoveNext())
+                        break;
+                }
+                catch (Exception e)
+                {
+                    Plugin.Instance.Logger.LogError("AdvancedCompany encountered an error in a coroutine:");
+                    Plugin.Instance.Logger.LogError(e);
+                    break;
+                }
+                yield return __result.Current;
+            }
+
+            BodyCamComponent.UpdateAllTargetStatusesOnNextFrame();
         }
     }
 }
