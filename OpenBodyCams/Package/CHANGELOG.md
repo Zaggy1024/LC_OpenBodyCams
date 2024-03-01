@@ -1,3 +1,6 @@
+## Version 1.2.11
+- Fixed error spam that would occur when the Advanced Company light shoes curse was lifted.
+
 ## Version 1.2.10
 - Prevent errors when body cams are immediately destroyed between setting and resetting the perspective.
 
