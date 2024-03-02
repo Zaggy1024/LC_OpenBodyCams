@@ -7,6 +7,25 @@ namespace OpenBodyCams.Patches
 {
     internal static class PatchModelDestructionDebugging
     {
+        private static bool IsChildReferenced(GameObject obj)
+        {
+            var transforms = obj.GetComponentsInChildren<Transform>(includeInactive: true);
+            foreach (var transform in transforms)
+            {
+                if (BodyCamComponent.AnyBodyCamHasReference(transform.gameObject))
+                    return true;
+            }
+
+            var renderers = obj.GetComponentsInChildren<Renderer>(includeInactive: true);
+            foreach (var renderer in renderers)
+            {
+                if (BodyCamComponent.AnyBodyCamHasReference(renderer))
+                    return true;
+            }
+
+            return false;
+        }
+
         private static bool IsReferencedObject(Object obj)
         {
             // It's not an error to call Destroy on null.
@@ -14,24 +33,10 @@ namespace OpenBodyCams.Patches
             // since (hopefully) that will have been caught already.
             if (obj == null)
                 return false;
-            if (obj is Renderer)
-                return BodyCamComponent.AnyBodyCamHasReference((Renderer)obj);
+            if (obj is Renderer renderer)
+                return BodyCamComponent.AnyBodyCamHasReference(renderer);
             if (obj is GameObject gameObject)
-            {
-                var transforms = gameObject.GetComponentsInChildren<Transform>(includeInactive: true);
-                foreach (var transform in transforms)
-                {
-                    if (BodyCamComponent.AnyBodyCamHasReference(transform.gameObject))
-                        return true;
-                }
-
-                var renderers = gameObject.GetComponentsInChildren<Renderer>();
-                foreach (var renderer in renderers)
-                {
-                    if (BodyCamComponent.AnyBodyCamHasReference(renderer))
-                        return true;
-                }
-            }
+                return IsChildReferenced(gameObject);
 
             return false;
         }
