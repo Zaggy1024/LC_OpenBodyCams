@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -33,26 +33,19 @@ namespace OpenBodyCams.Compatibility
                 return false;
             }
 
-            var t_LethalVRMInstance = typeof(LethalVRMManager).GetNestedType("LethalVRMInstance", BindingFlags.NonPublic | BindingFlags.Public);
-            if (t_LethalVRMInstance is null)
-            {
-                Plugin.Instance.Logger.LogWarning("LethalVRMInstance class not found.");
-                return false;
-            }
-
-            var loadModelMethod = typeof(LethalVRMManager).GetMethod("LoadModelToPlayer", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+            var loadModelMethod = typeof(LethalVRMManager).GetMethod(nameof(LethalVRMManager.LoadModelToPlayer), BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
             var moveNextMethod = loadModelMethod
                 .GetCustomAttribute<AsyncStateMachineAttribute>().StateMachineType
                 .GetMethod("MoveNext", BindingFlags.NonPublic | BindingFlags.Instance);
             harmony
                 .CreateProcessor(moveNextMethod)
-                .AddTranspiler(typeof(LethalVRMCompatibility).GetMethod(nameof(LoadModelToPlayerPostfix), BindingFlags.Static | BindingFlags.NonPublic))
+                .AddTranspiler(typeof(LethalVRMCompatibility).GetMethod(nameof(LoadModelToPlayerTranspiler), BindingFlags.Static | BindingFlags.NonPublic))
                 .Patch();
 
             return true;
         }
 
-        static IEnumerable<CodeInstruction> LoadModelToPlayerPostfix(IEnumerable<CodeInstruction> instructions)
+        static IEnumerable<CodeInstruction> LoadModelToPlayerTranspiler(IEnumerable<CodeInstruction> instructions)
         {
             var instructionsList = instructions.ToList();
 
