@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -88,7 +88,7 @@ namespace OpenBodyCams.Compatibility
                 BodyCamComponent.UpdateAllTargetStatuses();
         }
 
-        static IEnumerator UpdateCosmeticsAfterCoroutine(IEnumerator __result, LightShoeRGB __instance)
+        static IEnumerator UpdateCosmeticsAfterCoroutine(IEnumerator __result)
         {
             while (true)
             {
