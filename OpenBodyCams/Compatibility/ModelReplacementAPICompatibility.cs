@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -18,14 +18,14 @@ namespace OpenBodyCams.Compatibility
 
         public static bool Initialize(Harmony harmony)
         {
-            var m_ViewStateManager_ReportBodyReplacementAddition = typeof(ViewStateManager).GetMethod(nameof(ViewStateManager.ReportBodyReplacementAddition), new Type[] { typeof(BodyReplacementBase) });
+            var m_ViewStateManager_ReportBodyReplacementAddition = typeof(ViewStateManager).GetMethod(nameof(ViewStateManager.ReportBodyReplacementAddition), [typeof(BodyReplacementBase)]);
             if (m_ViewStateManager_ReportBodyReplacementAddition is null)
             {
                 Plugin.Instance.Logger.LogInfo($"ModelReplacementAPI is installed, but the `ViewStateManager.ReportBodyReplacementAddition()` method was not found.");
                 return false;
             }
 
-            var m_ModelReplacementAPI_RemovePlayerModelReplacement = typeof(ModelReplacementAPI).GetMethod(nameof(ModelReplacementAPI.RemovePlayerModelReplacement), new Type[] { typeof(PlayerControllerB) });
+            var m_ModelReplacementAPI_RemovePlayerModelReplacement = typeof(ModelReplacementAPI).GetMethod(nameof(ModelReplacementAPI.RemovePlayerModelReplacement), [typeof(PlayerControllerB)]);
             if (m_ModelReplacementAPI_RemovePlayerModelReplacement is null)
             {
                 Plugin.Instance.Logger.LogInfo($"ModelReplacementAPI is installed, but the `ModelReplacementAPI.RemovePlayerModelReplacement()` method was not found.");
@@ -42,6 +42,8 @@ namespace OpenBodyCams.Compatibility
             harmony.CreateProcessor(m_ModelReplacementAPI_RemovePlayerModelReplacement)
                 .AddTranspiler(m_RemoveModelReplacementTranspiler)
                 .Patch();
+
+            m_UpdateModelReplacement = null;
             return true;
         }
 
