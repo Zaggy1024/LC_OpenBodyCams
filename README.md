@@ -3,12 +3,6 @@ An open-source implementation of a body/head camera that is displayed on the bot
 
 The camera view will display only the first person hands and disable the third person model as well as MoreCompany cosmetics to prevent obstructed vision.
 
-![Player pointing at the body cam screen displaying them pointing at the screen](https://raw.githubusercontent.com/Zaggy1024/LC_OpenBodyCams/master/Media/screenshot_pointing.png)
-
-![Watching a player being eaten by a giant on the body cam](https://raw.githubusercontent.com/Zaggy1024/LC_OpenBodyCams/master/Media/screenshot_captured.png)
-
-![Nutcracker and Blob inside the mansion on the body cam](https://raw.githubusercontent.com/Zaggy1024/LC_OpenBodyCams/master/Media/screenshot_mansion.png)
-
 Please **report any issues [here](https://github.com/Zaggy1024/LC_OpenBodyCams/issues)**, and include any relevant information according to [the Debugging section](#debugging).
 
 # Features
@@ -28,6 +22,14 @@ Please **report any issues [here](https://github.com/Zaggy1024/LC_OpenBodyCams/i
 [GeneralImprovements](https://thunderstore.io/c/lethal-company/p/ShaosilGaming/GeneralImprovements/)'s extended monitors set is supported through a config option to select the monitor number to use for the body cam. The body cam will override any selection in the GeneralImprovements config.
 
 [TwoRadarMaps](https://thunderstore.io/c/lethal-company/p/Zaggy1024/TwoRadarMaps/) will use a separate body cam for the picture-in-picture view in the terminal when `EnablePiPBodyCam` is enabled.
+
+# Screenshots
+
+![Player pointing at the body cam screen displaying them pointing at the screen](https://raw.githubusercontent.com/Zaggy1024/LC_OpenBodyCams/master/Media/screenshot_pointing.png)
+
+![Watching a player being eaten by a giant on the body cam](https://raw.githubusercontent.com/Zaggy1024/LC_OpenBodyCams/master/Media/screenshot_captured.png)
+
+![Nutcracker and Blob inside the mansion on the body cam](https://raw.githubusercontent.com/Zaggy1024/LC_OpenBodyCams/master/Media/screenshot_mansion.png)
 
 # Configuration
 
