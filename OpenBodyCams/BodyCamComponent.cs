@@ -854,11 +854,7 @@ namespace OpenBodyCams
             {
                 var disable = ShouldHideOutput();
                 enableCamera = !disable;
-                if (disable != wasBlanked)
-                {
-                    SetScreenBlanked(disable);
-                    wasBlanked = disable;
-                }
+                SetScreenBlanked(disable);
             }
 
             if (enableCamera && bruteForcePreventNullModels)
