@@ -780,10 +780,16 @@ namespace OpenBodyCams
             if ((object)currentPlayer != localPlayer)
                 SaveStateAndApplyPerspective(localPlayer, ref localPlayerCosmetics, ref localPlayerModelState, Perspective.ThirdPerson);
 
+            bool warnedNullMesh = false;
             foreach (var mesh in currentlyViewedMeshes)
             {
                 if (mesh == null)
+                {
+                    if (!warnedNullMesh)
+                        Plugin.Instance.Logger.LogError($"Mesh obstructing the body cam on {name} which should be hidden was unexpectedly null.");
+                    warnedNullMesh = true;
                     continue;
+                }
                 mesh.forceRenderingOff = true;
             }
         }
@@ -800,10 +806,12 @@ namespace OpenBodyCams
             if ((object)currentPlayer != localPlayer)
                 RestoreState(localPlayer, localPlayerCosmetics, localPlayerModelState);
 
-            if (currentlyViewedMeshes.Length > 0 && currentlyViewedMeshes[0] == null)
-                return;
             foreach (var mesh in currentlyViewedMeshes)
+            {
+                if (mesh == null)
+                    continue;
                 mesh.forceRenderingOff = false;
+            }
         }
 
         bool AllCosmeticsExist(PlayerControllerB player, GameObject[] cosmetics)
