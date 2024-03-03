@@ -1,3 +1,7 @@
+## Version 1.3.0
+- Fixed a long-standing issue where MoreCompany cosmetics being destroyed on a masked enemy would cause a freeze.
+- Significantly reworked how cosmetics are updated. These changes may introduce old or new bugs, please report them on GitHub.
+
 ## Version 1.2.11
 - Fixed error spam that would occur when the Advanced Company light shoes curse was lifted.
 

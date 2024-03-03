@@ -1,6 +1,6 @@
 {
     "name": "OpenBodyCams",
-    "version_number": "1.2.11",
+    "version_number": "1.3.0",
     "website_url": "https://github.com/Zaggy1024/LC_OpenBodyCams/",
     "description": "An open-source implementation of a body/head camera that is displayed on the bottom right monitor in the ship, with the goal of appearing almost identical to the player's actual perspective while providing good performance.",
     "dependencies": [
