@@ -1,7 +1,7 @@
 # OpenBodyCams
 An open-source implementation of a body/head camera that is displayed on the bottom right monitor in the ship, with the goal of appearing almost identical to the player's actual perspective while providing good performance.
 
-The camera view will display only the first person hands and disable the third person model as well as MoreCompany cosmetics to prevent obstructed vision.
+The camera view will display only the first person hands and hide the third person model as well as many mods' cosmetics to prevent obstructed vision.
 
 Please **report any issues [here](https://github.com/Zaggy1024/LC_OpenBodyCams/issues)**, and include any relevant information according to [the Debugging section](#debugging).
 
