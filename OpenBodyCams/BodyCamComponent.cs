@@ -15,6 +15,14 @@ namespace OpenBodyCams
 {
     public class BodyCamComponent : MonoBehaviour
     {
+        [Flags]
+        private enum TargetDirtyStatus
+        {
+            None = 0,
+            Immediate = 1,
+            UntilRender = 2,
+        }
+
         public const int DEFAULT_LAYER = 0;
         public const int ENEMIES_LAYER = 19;
         public const int ENEMIES_NOT_RENDERED_LAYER = 23;
@@ -72,7 +80,9 @@ namespace OpenBodyCams
         private PlayerModelState currentPlayerModelState;
 
         private Transform currentActualTarget;
-        private Renderer[] currentlyViewedMeshes = [];
+        internal Renderer[] currentlyViewedMeshes = [];
+
+        private TargetDirtyStatus targetDirtyStatus = TargetDirtyStatus.None;
 
         private float elapsedSinceLastFrame = 0;
         private float timePerFrame = 0;
@@ -165,16 +175,28 @@ namespace OpenBodyCams
             bruteForcePreventNullModels = Plugin.BruteForcePreventFreezes.Value;
         }
 
-        public static void UpdateAllTargetStatuses()
+        public static void MarkTargetDirtyUntilRenderForAllBodyCams(Transform target)
         {
             foreach (var bodyCam in AllBodyCams)
-                bodyCam.UpdateTargetStatus();
+                bodyCam.MarkTargetDirtyUntilRender(target);
         }
 
-        public static void UpdateAllTargetStatusesOnNextFrame()
+        public static void MarkTargetDirtyUntilRenderForAllBodyCams()
         {
             foreach (var bodyCam in AllBodyCams)
-                bodyCam.UpdateTargetStatusOnNextFrame();
+                bodyCam.MarkTargetDirtyUntilRender();
+        }
+
+        public static void MarkTargetStatusChangedForAllBodyCams(Transform target)
+        {
+            foreach (var bodyCam in AllBodyCams)
+                bodyCam.MarkTargetStatusChanged(target);
+        }
+
+        public static void MarkTargetStatusChangedForAllBodyCams()
+        {
+            foreach (var bodyCam in AllBodyCams)
+                bodyCam.MarkTargetStatusChanged();
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -448,8 +470,48 @@ namespace OpenBodyCams
             return [.. descendentRenderers];
         }
 
+        private bool TargetWouldRequireUpdate(Transform target)
+        {
+            if (target is null)
+                return true;
+            if ((object)currentActualTarget == target)
+                return true;
+            if ((object)StartOfRound.Instance.localPlayerController.transform == target)
+                return true;
+            return false;
+        }
+
+        public void MarkTargetStatusChanged(Transform transform)
+        {
+            if (!targetDirtyStatus.HasFlag(TargetDirtyStatus.Immediate) && TargetWouldRequireUpdate(transform))
+                targetDirtyStatus |= TargetDirtyStatus.Immediate;
+        }
+
+        public void MarkTargetStatusChanged()
+        {
+            MarkTargetStatusChanged(null);
+        }
+
+        public void MarkTargetDirtyUntilRender(Transform transform)
+        {
+            if (!targetDirtyStatus.HasFlag(TargetDirtyStatus.UntilRender) && TargetWouldRequireUpdate(transform))
+                targetDirtyStatus |= TargetDirtyStatus.UntilRender;
+        }
+
+        public void MarkTargetDirtyUntilRender()
+        {
+            MarkTargetDirtyUntilRender(null);
+        }
+
+        private void ClearTargetDirtyImmediate()
+        {
+            targetDirtyStatus &= ~TargetDirtyStatus.Immediate;
+        }
+
         public void SetTargetToNone()
         {
+            ClearTargetDirtyImmediate();
+
             currentPlayer = null;
             currentActualTarget = null;
             currentlyViewedMeshes = [];
@@ -459,25 +521,6 @@ namespace OpenBodyCams
             CameraObject.transform.SetParent(null, false);
             CameraObject.transform.localPosition = Vector3.zero;
             CameraObject.transform.localRotation = Quaternion.identity;
-        }
-
-        public void UpdateTargetStatus()
-        {
-            if (currentPlayer != null)
-                SetTargetToPlayer(currentPlayer);
-            else
-                SetTargetToTransform(currentActualTarget);
-        }
-
-        private IEnumerator UpdateTargetStatusOnNextFrameCoroutine()
-        {
-            yield return null;
-            UpdateTargetStatus();
-        }
-
-        public void UpdateTargetStatusOnNextFrame()
-        {
-            StartCoroutine(UpdateTargetStatusOnNextFrameCoroutine());
         }
 
         public void SetTargetToPlayer(PlayerControllerB player)
@@ -490,6 +533,8 @@ namespace OpenBodyCams
 
             EnsureCameraExists();
 
+            ClearTargetDirtyImmediate();
+
             currentPlayer = player;
             UpdateModelReferences();
 
@@ -497,20 +542,22 @@ namespace OpenBodyCams
             Vector3 offset = Vector3.zero;
 
             currentActualTarget = null;
+            Transform attachmentPoint = null;
 
             if (!currentPlayer.isPlayerDead)
             {
                 if (Plugin.CameraMode.Value == CameraModeOptions.Head)
                 {
-                    currentActualTarget = currentPlayer.gameplayCamera.transform;
+                    attachmentPoint = currentPlayer.gameplayCamera.transform;
                     offset = CAMERA_CONTAINER_OFFSET;
                 }
                 else
                 {
-                    currentActualTarget = currentPlayer.playerGlobalHead.transform.parent;
+                    attachmentPoint = currentPlayer.playerGlobalHead.transform.parent;
                     offset = BODY_CAM_OFFSET;
                 }
 
+                currentActualTarget = currentPlayer.transform;
                 currentlyViewedMeshes = [];
             }
             else if (currentPlayer.redirectToEnemy != null)
@@ -519,47 +566,50 @@ namespace OpenBodyCams
                 {
                     if (Plugin.CameraMode.Value == CameraModeOptions.Head)
                     {
-                        currentActualTarget = masked.headTiltTarget;
+                        attachmentPoint = masked.headTiltTarget;
                         offset = CAMERA_CONTAINER_OFFSET;
                     }
                     else
                     {
-                        currentActualTarget = masked.animationContainer.Find("metarig/spine/spine.001/spine.002/spine.003");
+                        attachmentPoint = masked.animationContainer.Find("metarig/spine/spine.001/spine.002/spine.003");
                         offset = BODY_CAM_OFFSET;
                     }
                 }
                 else
                 {
-                    currentActualTarget = currentPlayer.redirectToEnemy.eye;
+                    attachmentPoint = currentPlayer.redirectToEnemy.eye;
                 }
 
-                currentlyViewedMeshes = CollectModelsToHide(currentPlayer.redirectToEnemy.transform);
+                currentActualTarget = currentPlayer.redirectToEnemy.transform;
+                currentlyViewedMeshes = CollectModelsToHide(currentActualTarget);
             }
             else if (currentPlayer.deadBody != null)
             {
-                Transform obstructingAttachmentPoint;
+                Transform obstructingMeshParent;
                 if (Plugin.CameraMode.Value == CameraModeOptions.Head)
                 {
-                    currentActualTarget = currentPlayer.deadBody.transform.Find("spine.001/spine.002/spine.003/spine.004/spine.004_end");
-                    obstructingAttachmentPoint = currentActualTarget.parent;
+                    attachmentPoint = currentPlayer.deadBody.transform.Find("spine.001/spine.002/spine.003/spine.004/spine.004_end");
+                    obstructingMeshParent = attachmentPoint.parent;
                     offset = CAMERA_CONTAINER_OFFSET - new Vector3(0, 0.15f, 0);
                 }
                 else
                 {
-                    currentActualTarget = currentPlayer.deadBody.transform.Find("spine.001/spine.002/spine.003");
-                    obstructingAttachmentPoint = currentActualTarget;
+                    attachmentPoint = currentPlayer.deadBody.transform.Find("spine.001/spine.002/spine.003");
+                    obstructingMeshParent = attachmentPoint;
                     offset = BODY_CAM_OFFSET;
                 }
-                currentlyViewedMeshes = CollectModelsToHide(obstructingAttachmentPoint);
+
+                currentActualTarget = currentPlayer.deadBody.transform;
+                currentlyViewedMeshes = CollectModelsToHide(obstructingMeshParent);
             }
 
-            if (currentActualTarget == null)
+            if (attachmentPoint == null)
             {
                 SetTargetToNone();
                 return;
             }
 
-            CameraObject.transform.SetParent(currentActualTarget.transform, false);
+            CameraObject.transform.SetParent(attachmentPoint, false);
             CameraObject.transform.localPosition = offset;
             CameraObject.transform.localRotation = Quaternion.identity;
         }
@@ -573,6 +623,8 @@ namespace OpenBodyCams
             }
 
             EnsureCameraExists();
+
+            ClearTargetDirtyImmediate();
 
             currentPlayer = null;
             currentActualTarget = transform;
@@ -591,6 +643,14 @@ namespace OpenBodyCams
             CameraObject.transform.SetParent(currentActualTarget.transform, false);
             CameraObject.transform.localPosition = offset;
             CameraObject.transform.localRotation = Quaternion.identity;
+        }
+
+        private void UpdateTargetStatus()
+        {
+            if (currentPlayer != null)
+                SetTargetToPlayer(currentPlayer);
+            else
+                SetTargetToTransform(currentActualTarget);
         }
 
         private void UpdateModelReferences()
@@ -697,8 +757,19 @@ namespace OpenBodyCams
             }
         }
 
+        private void UpdateTargetStatusBeforeRender()
+        {
+            if (targetDirtyStatus.HasFlag(TargetDirtyStatus.UntilRender))
+            {
+                UpdateTargetStatus();
+                targetDirtyStatus ^= TargetDirtyStatus.UntilRender;
+            }
+        }
+
         private void BeginCameraRendering()
         {
+            UpdateTargetStatusBeforeRender();
+
             nightVisionLight.enabled = true;
             greenFlashRenderer.forceRenderingOff = false;
             fogShaderPlaneRenderer.forceRenderingOff = false;
@@ -735,22 +806,30 @@ namespace OpenBodyCams
                 mesh.forceRenderingOff = false;
         }
 
-        void EnsureCosmeticsExist(PlayerControllerB player, ref GameObject[] cosmetics, ref PlayerModelState state)
+        bool AllCosmeticsExist(PlayerControllerB player, GameObject[] cosmetics)
         {
             foreach (var cosmetic in cosmetics)
             {
-                if (cosmetic != null)
-                    continue;
-                Plugin.Instance.Logger.LogError($"A cosmetic attached to {player.playerUsername} has been destroyed, re-collecting cosmetics.");
-                cosmetics = CosmeticsCompatibility.CollectCosmetics(player);
-                state.cosmeticsLayers = new int[cosmetics.Length];
-                break;
+                if (cosmetic == null)
+                {
+                    Plugin.Instance.Logger.LogError($"A cosmetic attached to {player.playerUsername} has been destroyed, re-collecting cosmetics.");
+                    return false;
+                }
             }
+            return true;
+        }
+
+        private void UpdateTargetStatusDuringUpdate()
+        {
+            if (targetDirtyStatus.HasFlag(TargetDirtyStatus.Immediate))
+                UpdateTargetStatus();
         }
 
         void LateUpdate()
         {
             EnsureCameraExists();
+
+            UpdateTargetStatusDuringUpdate();
 
             var spectatedPlayer = StartOfRound.Instance.localPlayerController;
             if (spectatedPlayer == null)
@@ -778,19 +857,26 @@ namespace OpenBodyCams
             {
                 // Brute force check if all models are still valid to prevent rendering from failing and
                 // causing a frozen screen.
-                if (currentPlayer != null)
-                    EnsureCosmeticsExist(currentPlayer, ref currentPlayerCosmetics, ref currentPlayerModelState);
-                if ((object)currentPlayer != StartOfRound.Instance.localPlayerController)
-                    EnsureCosmeticsExist(StartOfRound.Instance.localPlayerController, ref localPlayerCosmetics, ref localPlayerModelState);
+                bool foundNull = false;
+
+                if (currentPlayer != null && !AllCosmeticsExist(currentPlayer, currentPlayerCosmetics))
+                    foundNull = true;
+                var localPlayer = StartOfRound.Instance.localPlayerController;
+                if ((object)currentPlayer != localPlayer && !AllCosmeticsExist(localPlayer, localPlayerCosmetics))
+                    foundNull = true;
 
                 foreach (var renderer in currentlyViewedMeshes)
                 {
                     if (renderer == null)
                     {
-                        UpdateTargetStatus();
+                        Plugin.Instance.Logger.LogError($"A mesh attached to non-player target {currentActualTarget.name} is null, marking dirty.");
+                        foundNull = true;
                         break;
                     }
                 }
+
+                if (foundNull)
+                    UpdateTargetStatus();
             }
 
             if (!enableCamera)
@@ -841,15 +927,27 @@ namespace OpenBodyCams
 
         public bool HasReference(Renderer renderer)
         {
+            if (targetDirtyStatus.HasFlag(TargetDirtyStatus.UntilRender))
+                return false;
+            if (targetDirtyStatus.HasFlag(TargetDirtyStatus.Immediate))
+                UpdateTargetStatus();
+
             if (PlayerContainsRenderer(currentPlayer, renderer))
                 return true;
             if (PlayerContainsRenderer(StartOfRound.Instance?.localPlayerController, renderer))
                 return true;
-            return currentlyViewedMeshes.Contains(renderer);
+            if (Array.IndexOf(currentlyViewedMeshes, renderer) != -1)
+                return true;
+            return false;
         }
 
         public bool HasReference(GameObject gameObject)
         {
+            if (targetDirtyStatus.HasFlag(TargetDirtyStatus.UntilRender))
+                return false;
+            if (targetDirtyStatus.HasFlag(TargetDirtyStatus.Immediate))
+                UpdateTargetStatus();
+
             if (Array.IndexOf(currentPlayerCosmetics, gameObject) != -1)
                 return true;
             return Array.IndexOf(localPlayerCosmetics, gameObject) != -1;

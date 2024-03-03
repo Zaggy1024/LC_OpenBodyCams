@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -32,7 +32,7 @@ namespace OpenBodyCams.Compatibility
                 return false;
             }
 
-            m_UpdateModelReplacement = typeof(ModelReplacementAPICompatibility).GetMethod(nameof(UpdateModelReplacement));
+            m_UpdateModelReplacement = typeof(ModelReplacementAPICompatibility).GetMethod(nameof(UpdateModelReplacement), [typeof(ViewStateManager)]);
 
             harmony.CreateProcessor(m_ViewStateManager_ReportBodyReplacementAddition)
                 .AddPostfix(m_UpdateModelReplacement)
@@ -58,9 +58,9 @@ namespace OpenBodyCams.Compatibility
             return bodyReplacement.replacementModel.GetComponentsInChildren<Transform>().Select(cosmeticObject => cosmeticObject.gameObject).ToArray();
         }
 
-        public static void UpdateModelReplacement()
+        public static void UpdateModelReplacement(ViewStateManager __instance)
         {
-            BodyCamComponent.UpdateAllTargetStatuses();
+            BodyCamComponent.MarkTargetDirtyUntilRenderForAllBodyCams(__instance.controller.transform);
         }
 
         public static IEnumerable<CodeInstruction> RemoveModelReplacementTranspiler(IEnumerable<CodeInstruction> instructions)
@@ -68,7 +68,7 @@ namespace OpenBodyCams.Compatibility
             var instructionsList = new List<CodeInstruction>(instructions);
 
             var m_Object_Destroy = typeof(UnityEngine.Object).GetMethod(nameof(UnityEngine.Object.Destroy), [ typeof(UnityEngine.Object) ]);
-            var m_Component_GetComponent_ViewStateManager = typeof(Component).GetMethods().First(method => method.Name == "GetComponent" && method.IsGenericMethod).MakeGenericMethod([ typeof(ViewStateManager) ]);
+            var m_Component_GetComponent_ViewStateManager = typeof(Component).GetMethods().First(method => method.Name == "GetComponent" && method.IsGenericMethod).MakeGenericMethod([typeof(ViewStateManager)]);
 
             var m_ViewStateManager_ReportBodyReplacementRemoval = typeof(ViewStateManager).GetMethod(nameof(ViewStateManager.ReportBodyReplacementRemoval), []);
 
@@ -77,6 +77,7 @@ namespace OpenBodyCams.Compatibility
                 [
                     new(OpCodes.Ldarg_0),
                     new(OpCodes.Call, m_Component_GetComponent_ViewStateManager),
+                    new(OpCodes.Dup),
                     new(OpCodes.Call, m_ViewStateManager_ReportBodyReplacementRemoval),
                     new(OpCodes.Call, m_UpdateModelReplacement),
                 ]);

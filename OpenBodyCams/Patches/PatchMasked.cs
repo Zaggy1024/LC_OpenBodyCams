@@ -11,7 +11,7 @@ namespace OpenBodyCams.Patches
         [HarmonyPatch(nameof(HauntedMaskItem.CreateMimicServerRpc))]
         static void CreateMimicServerRpcPostfix()
         {
-            BodyCamComponent.UpdateAllTargetStatuses();
+            BodyCamComponent.MarkTargetStatusChangedForAllBodyCams();
         }
 
         [HarmonyPostfix]
@@ -21,7 +21,7 @@ namespace OpenBodyCams.Patches
             while (__result.MoveNext())
                 yield return __result.Current;
 
-            BodyCamComponent.UpdateAllTargetStatuses();
+            BodyCamComponent.MarkTargetStatusChangedForAllBodyCams();
         }
     }
 
@@ -34,7 +34,7 @@ namespace OpenBodyCams.Patches
         {
             var killedPlayer = __0;
             if (killedPlayer)
-                BodyCamComponent.UpdateAllTargetStatuses();
+                BodyCamComponent.MarkTargetStatusChangedForAllBodyCams();
         }
 
         [HarmonyPostfix]
@@ -44,7 +44,7 @@ namespace OpenBodyCams.Patches
             while (__result.MoveNext())
                 yield return __result.Current;
 
-            BodyCamComponent.UpdateAllTargetStatuses();
+            BodyCamComponent.MarkTargetStatusChangedForAllBodyCams();
         }
     }
 }

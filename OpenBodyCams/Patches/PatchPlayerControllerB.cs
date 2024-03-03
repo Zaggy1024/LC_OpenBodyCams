@@ -21,7 +21,7 @@ namespace OpenBodyCams.Patches
         static void KillPlayerPostfix(PlayerControllerB __instance)
         {
             if (__instance.IsOwner)
-                BodyCamComponent.UpdateAllTargetStatuses();
+                BodyCamComponent.MarkTargetStatusChangedForAllBodyCams(__instance.transform);
         }
 
         [HarmonyPostfix]
@@ -29,7 +29,7 @@ namespace OpenBodyCams.Patches
         static void KillPlayerClientRpcPostfix(PlayerControllerB __instance)
         {
             if (!__instance.IsOwner)
-                BodyCamComponent.UpdateAllTargetStatuses();
+                BodyCamComponent.MarkTargetStatusChangedForAllBodyCams(__instance.transform);
         }
     }
 }

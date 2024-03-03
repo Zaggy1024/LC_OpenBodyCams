@@ -1,4 +1,4 @@
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -49,7 +49,7 @@ namespace OpenBodyCams.Compatibility
         {
             var instructionsList = instructions.ToList();
 
-            var updateTargetMethod = typeof(BodyCamComponent).GetMethod(nameof(BodyCamComponent.UpdateAllTargetStatuses));
+            var updateTargetMethod = typeof(BodyCamComponent).GetMethod(nameof(BodyCamComponent.MarkTargetDirtyUntilRenderForAllBodyCams), []);
             instructionsList.Insert(instructionsList.Count() - 2, new CodeInstruction(OpCodes.Call, updateTargetMethod));
 
             return instructionsList;

@@ -17,7 +17,7 @@ namespace OpenBodyCams.Patches
         [HarmonyPatch("ReviveDeadPlayers")]
         static void ReviveDeadPlayersPostfix()
         {
-            BodyCamComponent.UpdateAllTargetStatuses();
+            BodyCamComponent.MarkTargetStatusChangedForAllBodyCams();
         }
     }
 }

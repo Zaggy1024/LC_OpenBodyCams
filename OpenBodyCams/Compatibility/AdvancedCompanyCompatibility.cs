@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -30,7 +30,6 @@ namespace OpenBodyCams.Compatibility
                     (nameof(Player.ReequipFeet), []),
                     (nameof(Player.UnequipAll), []),
                 ];
-            var prefixMethod = typeof(AdvancedCompanyCompatibility).GetMethod(nameof(BeforeEquipmentChange), BindingFlags.NonPublic | BindingFlags.Static);
             var postfixMethod = typeof(AdvancedCompanyCompatibility).GetMethod(nameof(AfterEquipmentChange), BindingFlags.NonPublic | BindingFlags.Static);
 
             foreach ((string methodName, Type[] types) in postfixToMethods)
@@ -44,7 +43,6 @@ namespace OpenBodyCams.Compatibility
 
                 harmony
                     .CreateProcessor(method)
-                    .AddPrefix(prefixMethod)
                     .AddPostfix(postfixMethod).Patch();
             }
 
@@ -77,15 +75,9 @@ namespace OpenBodyCams.Compatibility
                 .ToArray();
         }
 
-        static void BeforeEquipmentChange()
-        {
-            cosmeticChangesInProgress++;
-        }
-
         static void AfterEquipmentChange()
         {
-            if (--cosmeticChangesInProgress == 0)
-                BodyCamComponent.UpdateAllTargetStatuses();
+            BodyCamComponent.MarkTargetDirtyUntilRenderForAllBodyCams();
         }
 
         static IEnumerator UpdateCosmeticsAfterCoroutine(IEnumerator __result)
@@ -106,7 +98,7 @@ namespace OpenBodyCams.Compatibility
                 yield return __result.Current;
             }
 
-            BodyCamComponent.UpdateAllTargetStatusesOnNextFrame();
+            BodyCamComponent.MarkTargetDirtyUntilRenderForAllBodyCams();
         }
     }
 }

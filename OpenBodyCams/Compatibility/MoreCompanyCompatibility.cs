@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -33,8 +34,21 @@ namespace OpenBodyCams.Compatibility
             var thisType = typeof(MoreCompanyCompatibility);
             harmony.CreateProcessor(m_ClientReceiveMessagePatch_HandleDataMessage)
                 .AddTranspiler(thisType.GetMethod(nameof(ClientReceiveMessagePatch_HandleDataMessageTranspiler)))
-                .AddFinalizer(thisType.GetMethod(nameof(ClientReceiveMessagePatch_HandleDataMessageFinalizer)))
                 .Patch();
+
+            (string, Type[])[] cosmeticApplicationMethods = [
+                (nameof(CosmeticApplication.ClearCosmetics), []),
+                (nameof(CosmeticApplication.ApplyCosmetic), [typeof(string), typeof(bool)]),
+            ];
+            var m_UpdateCosmetics = thisType.GetMethod(nameof(UpdateCosmetics), BindingFlags.NonPublic | BindingFlags.Static);
+
+            foreach (var (method, parameters) in cosmeticApplicationMethods)
+            {
+                harmony.CreateProcessor(typeof(CosmeticApplication).GetMethod(method, parameters))
+                    .AddPrefix(m_UpdateCosmetics)
+                    .Patch();
+            }
+
             Plugin.Instance.Logger.LogInfo($"Patched MoreCompany to spawn cosmetics on the local player.");
             return true;
         }
@@ -71,9 +85,9 @@ namespace OpenBodyCams.Compatibility
             return instructionsList;
         }
 
-        public static void ClientReceiveMessagePatch_HandleDataMessageFinalizer()
+        private static void UpdateCosmetics()
         {
-            BodyCamComponent.UpdateAllTargetStatuses();
+            BodyCamComponent.MarkTargetDirtyUntilRenderForAllBodyCams();
         }
 
         static void SetUpLocalMoreCompanyCosmetics(CosmeticApplication cosmeticApplication)
