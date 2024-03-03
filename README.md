@@ -3,6 +3,14 @@ An open-source implementation of a body/head camera that is displayed on the bot
 
 The camera view will display only the first person hands and disable the third person model as well as MoreCompany cosmetics to prevent obstructed vision.
 
+![Player pointing at the body cam screen displaying them pointing at the screen](https://raw.githubusercontent.com/Zaggy1024/LC_OpenBodyCams/master/Media/screenshot_pointing.png)
+
+![Watching a player being eaten by a giant on the body cam](https://raw.githubusercontent.com/Zaggy1024/LC_OpenBodyCams/master/Media/screenshot_captured.png)
+
+![Nutcracker and Blob inside the mansion on the body cam](https://raw.githubusercontent.com/Zaggy1024/LC_OpenBodyCams/master/Media/screenshot_mansion.png)
+
+Please **report any issues [here](https://github.com/Zaggy1024/LC_OpenBodyCams/issues)**, and include any relevant information according to [the Debugging section](#debugging).
+
 # Features
 - Selectable camera perspective between the head and body.
 - Camera view is designed to render identically for the local player and other players in the game.
