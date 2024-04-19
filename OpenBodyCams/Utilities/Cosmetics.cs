@@ -90,13 +90,39 @@ namespace OpenBodyCams.Utilities
                 Plugin.Instance.Logger.LogInfo(data);
         }
 
+        public static GameObject[] CollectVanillaFirstPersonCosmetics(PlayerControllerB player)
+        {
+            var headChildrenTransforms = player.headCostumeContainerLocal.GetComponentsInChildren<Transform>();
+
+            var objects = new GameObject[headChildrenTransforms.Length - 1];
+
+            for (var i = 1; i < headChildrenTransforms.Length; i++)
+                objects[i - 1] = headChildrenTransforms[i].gameObject;
+            return objects;
+        }
+
+        public static GameObject[] CollectVanillaThirdPersonCosmetics(PlayerControllerB player)
+        {
+            var headChildrenTransforms = player.headCostumeContainer.GetComponentsInChildren<Transform>();
+            var lowerTorsoChildrenTransforms = player.lowerTorsoCostumeContainer.GetComponentsInChildren<Transform>();
+
+            var childrenObjects = new GameObject[headChildrenTransforms.Length + lowerTorsoChildrenTransforms.Length - 2];
+
+            var resultIndex = 0;
+            for (var i = 1; i < headChildrenTransforms.Length; i++)
+                childrenObjects[resultIndex++] = headChildrenTransforms[i].gameObject;
+            for (var i = 1; i < lowerTorsoChildrenTransforms.Length; i++)
+                childrenObjects[resultIndex++] = lowerTorsoChildrenTransforms[i].gameObject;
+            return childrenObjects;
+        }
+
         private static GameObject[] DoCollectThirdPersonCosmetics(PlayerControllerB player)
         {
             if (player == null)
                 return [];
 
             DebugLog($"Collecting third-person cosmetics for {player.playerUsername}.");
-            GameObject[] result = [];
+            GameObject[] result = CollectVanillaThirdPersonCosmetics(player);
 
             if (compatibilityMode.HasFlag(CompatibilityMode.MoreCompany))
             {
@@ -142,6 +168,19 @@ namespace OpenBodyCams.Utilities
             return result;
         }
 
+        private static GameObject[] DoCollectFirstPersonCosmetics(PlayerControllerB player)
+        {
+            if (player == null)
+                return [];
+            DebugLog($"Collecting first-person cosmetics for {player.playerUsername}.");
+
+            var result = CollectVanillaFirstPersonCosmetics(player);
+
+            Plugin.Instance.Logger.LogInfo($"Collected {result.Length} first-person cosmetics objects for {player.playerUsername}.");
+
+            return result;
+        }
+
         public static GameObject[] CollectThirdPersonCosmetics(PlayerControllerB player)
         {
             try
@@ -151,6 +190,20 @@ namespace OpenBodyCams.Utilities
             catch (Exception e)
             {
                 Plugin.Instance.Logger.LogError($"Failed to get third-person cosmetics for player {player.playerUsername}:");
+                Plugin.Instance.Logger.LogError(e);
+                return [];
+            }
+        }
+
+        public static GameObject[] CollectFirstPersonCosmetics(PlayerControllerB player)
+        {
+            try
+            {
+                return DoCollectFirstPersonCosmetics(player);
+            }
+            catch (Exception e)
+            {
+                Plugin.Instance.Logger.LogError($"Failed to get first-person cosmetics for player {player.playerUsername}:");
                 Plugin.Instance.Logger.LogError(e);
                 return [];
             }

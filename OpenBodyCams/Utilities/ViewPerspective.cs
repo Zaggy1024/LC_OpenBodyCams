@@ -29,11 +29,17 @@ namespace OpenBodyCams.Utilities
             {
                 state.thirdPersonCosmetics = [];
                 state.thirdPersonCosmeticsLayers = [];
+
+                state.firstPersonCosmetics = [];
+                state.firstPersonCosmeticsLayers = [];
                 return;
             }
 
             state.thirdPersonCosmetics = Cosmetics.CollectThirdPersonCosmetics(player);
             state.thirdPersonCosmeticsLayers = new int[state.thirdPersonCosmetics.Length];
+
+            state.firstPersonCosmetics = Cosmetics.CollectFirstPersonCosmetics(player);
+            state.firstPersonCosmeticsLayers = new int[state.firstPersonCosmetics.Length];
         }
 
         internal static void Apply(PlayerControllerB player, ref PlayerModelState state, Perspective perspective)
@@ -56,6 +62,8 @@ namespace OpenBodyCams.Utilities
 
             for (int i = 0; i < state.thirdPersonCosmetics.Length; i++)
                 state.thirdPersonCosmeticsLayers[i] = state.thirdPersonCosmetics[i].layer;
+            for (int i = 0; i < state.firstPersonCosmetics.Length; i++)
+                state.firstPersonCosmeticsLayers[i] = state.firstPersonCosmetics[i].layer;
 
             // Modify
             void AttachItem(GrabbableObject item, Transform holder)
@@ -79,6 +87,8 @@ namespace OpenBodyCams.Utilities
 
                     foreach (var cosmetic in state.thirdPersonCosmetics)
                         SetCosmeticHidden(cosmetic, true);
+                    foreach (var cosmetic in state.firstPersonCosmetics)
+                        SetCosmeticHidden(cosmetic, false);
                     break;
                 case Perspective.ThirdPerson:
                     player.thisPlayerModel.shadowCastingMode = ShadowCastingMode.On;
@@ -92,6 +102,8 @@ namespace OpenBodyCams.Utilities
 
                     foreach (var cosmetic in state.thirdPersonCosmetics)
                         SetCosmeticHidden(cosmetic, false);
+                    foreach (var cosmetic in state.firstPersonCosmetics)
+                        SetCosmeticHidden(cosmetic, true);
                     break;
             }
         }
@@ -109,6 +121,9 @@ namespace OpenBodyCams.Utilities
 
             for (int i = 0; i < state.thirdPersonCosmetics.Length; i++)
                 state.thirdPersonCosmetics[i].layer = state.thirdPersonCosmeticsLayers[i];
+
+            for (int i = 0; i < state.firstPersonCosmetics.Length; i++)
+                state.firstPersonCosmetics[i].layer = state.firstPersonCosmeticsLayers[i];
 
             if (player.currentlyHeldObjectServer != null)
             {
@@ -128,6 +143,9 @@ namespace OpenBodyCams.Utilities
 
         public GameObject[] thirdPersonCosmetics;
         public int[] thirdPersonCosmeticsLayers;
+
+        public GameObject[] firstPersonCosmetics;
+        public int[] firstPersonCosmeticsLayers;
 
         public Vector3 heldItemPosition;
         public Quaternion heldItemRotation;
@@ -149,6 +167,11 @@ namespace OpenBodyCams.Utilities
                 Plugin.Instance.Logger.LogError($"A third-person cosmetic attached to {name} has been destroyed.");
                 return false;
             }
+            if (!AllObjectsExistInArray(firstPersonCosmetics))
+            {
+                Plugin.Instance.Logger.LogError($"A first-person cosmetic attached to {name} has been destroyed.");
+                return false;
+            }
 
             return true;
         }
@@ -156,6 +179,8 @@ namespace OpenBodyCams.Utilities
         internal readonly bool ReferencesObject(GameObject obj)
         {
             if (Array.IndexOf(thirdPersonCosmetics, obj) != -1)
+                return true;
+            if (Array.IndexOf(firstPersonCosmetics, obj) != -1)
                 return true;
             return false;
         }

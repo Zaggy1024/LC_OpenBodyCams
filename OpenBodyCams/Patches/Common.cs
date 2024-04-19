@@ -29,6 +29,16 @@ namespace OpenBodyCams.Patches
             return list.IndexRangeView(range.Start, range.End);
         }
 
+        public static void RemoveAbsoluteRange<T>(this List<T> list, int start, int end)
+        {
+            list.RemoveRange(start, end - start);
+        }
+
+        public static void RemoveRange<T>(this List<T> list, SequenceMatch range)
+        {
+            list.RemoveAbsoluteRange(range.Start, range.End);
+        }
+
         public static SequenceMatch FindIndexOfSequence<T>(this List<T> list, int startIndex, IEnumerable<Predicate<T>> predicates)
         {
             var index = startIndex;
