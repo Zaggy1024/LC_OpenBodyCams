@@ -1,4 +1,6 @@
-﻿using UnityEngine.Rendering;
+﻿using System;
+
+using UnityEngine.Rendering;
 using UnityEngine;
 using GameNetcodeStuff;
 
@@ -21,7 +23,20 @@ namespace OpenBodyCams
             cosmetic.layer = hidden ? ENEMIES_NOT_RENDERED_LAYER : DEFAULT_LAYER;
         }
 
-        internal static void Apply(PlayerControllerB player, ref GameObject[] cosmetics, ref PlayerModelState state, Perspective perspective)
+        internal static void PrepareModelState(PlayerControllerB player, ref PlayerModelState state)
+        {
+            if (player is null)
+            {
+                state.cosmetics = [];
+                state.cosmeticsLayers = [];
+                return;
+            }
+
+            state.cosmetics = CosmeticsCompatibility.CollectCosmetics(player);
+            state.cosmeticsLayers = new int[state.cosmetics.Length];
+        }
+
+        internal static void Apply(PlayerControllerB player, ref PlayerModelState state, Perspective perspective)
         {
             if (player is null)
                 return;
@@ -39,8 +54,8 @@ namespace OpenBodyCams
                 state.heldItemRotation = player.currentlyHeldObjectServer.transform.rotation;
             }
 
-            for (int i = 0; i < cosmetics.Length; i++)
-                state.cosmeticsLayers[i] = cosmetics[i].layer;
+            for (int i = 0; i < state.cosmetics.Length; i++)
+                state.cosmeticsLayers[i] = state.cosmetics[i].layer;
 
             // Modify
             void AttachItem(GrabbableObject item, Transform holder)
@@ -62,7 +77,7 @@ namespace OpenBodyCams
                     if (player.currentlyHeldObjectServer != null)
                         AttachItem(player.currentlyHeldObjectServer, player.localItemHolder);
 
-                    foreach (var cosmetic in cosmetics)
+                    foreach (var cosmetic in state.cosmetics)
                         SetCosmeticHidden(cosmetic, true);
                     break;
                 case Perspective.ThirdPerson:
@@ -75,13 +90,13 @@ namespace OpenBodyCams
                     if (player.currentlyHeldObjectServer != null)
                         AttachItem(player.currentlyHeldObjectServer, player.serverItemHolder);
 
-                    foreach (var cosmetic in cosmetics)
+                    foreach (var cosmetic in state.cosmetics)
                         SetCosmeticHidden(cosmetic, false);
                     break;
             }
         }
 
-        internal static void Restore(PlayerControllerB player, GameObject[] cosmetics, PlayerModelState state)
+        internal static void Restore(PlayerControllerB player, PlayerModelState state)
         {
             if (player is null)
                 return;
@@ -92,8 +107,8 @@ namespace OpenBodyCams
             player.thisPlayerModelArms.enabled = state.armsEnabled;
             player.thisPlayerModelArms.gameObject.layer = state.armsLayer;
 
-            for (int i = 0; i < cosmetics.Length; i++)
-                cosmetics[i].layer = state.cosmeticsLayers[i];
+            for (int i = 0; i < state.cosmetics.Length; i++)
+                state.cosmetics[i].layer = state.cosmeticsLayers[i];
 
             if (player.currentlyHeldObjectServer != null)
             {
@@ -107,10 +122,42 @@ namespace OpenBodyCams
     {
         public ShadowCastingMode bodyShadowMode;
         public int bodyLayer;
+
         public bool armsEnabled;
         public int armsLayer;
+
+        public GameObject[] cosmetics;
         public int[] cosmeticsLayers;
+
         public Vector3 heldItemPosition;
         public Quaternion heldItemRotation;
+
+        private static bool AllObjectsExistInArray(GameObject[] objects)
+        {
+            foreach (var obj in objects)
+            {
+                if (obj == null)
+                    return false;
+            }
+            return true;
+        }
+
+        internal readonly bool VerifyCosmeticsExist(string name)
+        {
+            if (!AllObjectsExistInArray(cosmetics))
+            {
+                Plugin.Instance.Logger.LogError($"A third-person cosmetic attached to {name} has been destroyed.");
+                return false;
+            }
+
+            return true;
+        }
+
+        internal readonly bool ReferencesObject(GameObject obj)
+        {
+            if (Array.IndexOf(cosmetics, obj) != -1)
+                return true;
+            return false;
+        }
     }
 }

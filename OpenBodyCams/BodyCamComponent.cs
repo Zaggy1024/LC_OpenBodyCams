@@ -70,11 +70,9 @@ namespace OpenBodyCams
 
         private bool vanillaMapNightVisionLightWasEnabled;
 
-        private GameObject[] localPlayerCosmetics = [];
         private PlayerModelState localPlayerModelState;
 
         private PlayerControllerB currentPlayer;
-        private GameObject[] currentPlayerCosmetics = [];
         private PlayerModelState currentPlayerModelState;
 
         private Transform currentActualTarget;
@@ -646,19 +644,9 @@ namespace OpenBodyCams
 
         private void UpdateModelReferences()
         {
-            currentPlayerCosmetics = CosmeticsCompatibility.CollectCosmetics(currentPlayer);
-            currentPlayerModelState.cosmeticsLayers = new int[currentPlayerCosmetics.Length];
-
+            ViewPerspective.PrepareModelState(currentPlayer, ref currentPlayerModelState);
             if (currentPlayer != StartOfRound.Instance.localPlayerController)
-            {
-                localPlayerCosmetics = CosmeticsCompatibility.CollectCosmetics(StartOfRound.Instance.localPlayerController);
-                localPlayerModelState.cosmeticsLayers = new int[localPlayerCosmetics.Length];
-            }
-            else
-            {
-                localPlayerCosmetics = [];
-                localPlayerModelState.cosmeticsLayers = [];
-            }
+                ViewPerspective.PrepareModelState(StartOfRound.Instance.localPlayerController, ref localPlayerModelState);
         }
 
         private void UpdateTargetStatusBeforeRender()
@@ -683,9 +671,9 @@ namespace OpenBodyCams
 
             var localPlayer = StartOfRound.Instance.localPlayerController;
 
-            ViewPerspective.Apply(currentPlayer, ref currentPlayerCosmetics, ref currentPlayerModelState, Perspective.FirstPerson);
+            ViewPerspective.Apply(currentPlayer, ref currentPlayerModelState, Perspective.FirstPerson);
             if ((object)currentPlayer != localPlayer)
-                ViewPerspective.Apply(localPlayer, ref localPlayerCosmetics, ref localPlayerModelState, Perspective.ThirdPerson);
+                ViewPerspective.Apply(localPlayer, ref localPlayerModelState, Perspective.ThirdPerson);
 
             bool warnedNullMesh = false;
             foreach (var mesh in currentlyViewedMeshes)
@@ -711,9 +699,9 @@ namespace OpenBodyCams
 
             var localPlayer = StartOfRound.Instance.localPlayerController;
 
-            ViewPerspective.Restore(currentPlayer, currentPlayerCosmetics, currentPlayerModelState);
+            ViewPerspective.Restore(currentPlayer, currentPlayerModelState);
             if ((object)currentPlayer != localPlayer)
-                ViewPerspective.Restore(localPlayer, localPlayerCosmetics, localPlayerModelState);
+                ViewPerspective.Restore(localPlayer, localPlayerModelState);
 
             foreach (var mesh in currentlyViewedMeshes)
             {
@@ -721,19 +709,6 @@ namespace OpenBodyCams
                     continue;
                 mesh.forceRenderingOff = false;
             }
-        }
-
-        bool AllCosmeticsExist(PlayerControllerB player, GameObject[] cosmetics)
-        {
-            foreach (var cosmetic in cosmetics)
-            {
-                if (cosmetic == null)
-                {
-                    Plugin.Instance.Logger.LogError($"A cosmetic attached to {player.playerUsername} has been destroyed, re-collecting cosmetics.");
-                    return false;
-                }
-            }
-            return true;
         }
 
         private void UpdateTargetStatusDuringUpdate()
@@ -772,10 +747,10 @@ namespace OpenBodyCams
                 // causing a frozen screen.
                 bool foundNull = false;
 
-                if (currentPlayer != null && !AllCosmeticsExist(currentPlayer, currentPlayerCosmetics))
+                if (currentPlayer != null && !currentPlayerModelState.VerifyCosmeticsExist(currentPlayer.playerUsername))
                     foundNull = true;
                 var localPlayer = StartOfRound.Instance.localPlayerController;
-                if ((object)currentPlayer != localPlayer && !AllCosmeticsExist(localPlayer, localPlayerCosmetics))
+                if ((object)currentPlayer != localPlayer && !localPlayerModelState.VerifyCosmeticsExist(localPlayer.playerUsername))
                     foundNull = true;
 
                 foreach (var renderer in currentlyViewedMeshes)
@@ -861,9 +836,11 @@ namespace OpenBodyCams
             if (targetDirtyStatus.HasFlag(TargetDirtyStatus.Immediate))
                 UpdateTargetStatus();
 
-            if (Array.IndexOf(currentPlayerCosmetics, gameObject) != -1)
+            if (currentPlayerModelState.ReferencesObject(gameObject))
                 return true;
-            return Array.IndexOf(localPlayerCosmetics, gameObject) != -1;
+            if (localPlayerModelState.ReferencesObject(gameObject))
+                return true;
+            return false;
         }
 
         public static bool AnyBodyCamHasReference(Renderer renderer)
