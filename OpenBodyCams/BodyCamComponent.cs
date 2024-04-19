@@ -42,6 +42,7 @@ namespace OpenBodyCams
         private static FrameSettingsOverrideMask mainCameraCustomFrameSettingsMask;
         private static Material fogShaderMaterial;
         private static GameObject nightVisionPrefab;
+        private static Light vanillaMapNightVisionLight;
         private static bool hasFinishedStaticSetup = false;
 
         private static bool disableCameraWhileTargetIsOnShip = false;
@@ -71,6 +72,8 @@ namespace OpenBodyCams
         private bool enableCamera = true;
         private bool wasBlanked = false;
         public bool IsBlanked { get => wasBlanked; }
+
+        private bool vanillaMapNightVisionLightWasEnabled;
 
         private GameObject[] localPlayerCosmetics = [];
         private PlayerModelState localPlayerModelState;
@@ -124,9 +127,7 @@ namespace OpenBodyCams
             nightVisionPrefab.transform.localPosition = Vector3.zero;
             nightVisionPrefab.SetActive(false);
 
-            // By default, the map's night vision light renders on all layers, so let's change that so we don't see it on the body cam.
-            var mapLight = StartOfRound.Instance.mapScreen.mapCameraLight;
-            mapLight.cullingMask = 1 << mapLight.gameObject.layer;
+            vanillaMapNightVisionLight = StartOfRound.Instance.mapScreen.mapCameraLight;
 
             UpdateAllCameraSettings();
 
@@ -770,6 +771,9 @@ namespace OpenBodyCams
         {
             UpdateTargetStatusBeforeRender();
 
+            vanillaMapNightVisionLightWasEnabled = vanillaMapNightVisionLight.enabled;
+            vanillaMapNightVisionLight.enabled = false;
+
             nightVisionLight.enabled = true;
             greenFlashRenderer.forceRenderingOff = false;
             fogShaderPlaneRenderer.forceRenderingOff = false;
@@ -796,6 +800,8 @@ namespace OpenBodyCams
 
         private void ResetCameraRendering()
         {
+            vanillaMapNightVisionLight.enabled = vanillaMapNightVisionLightWasEnabled;
+
             nightVisionLight.enabled = false;
             greenFlashRenderer.forceRenderingOff = true;
             fogShaderPlaneRenderer.forceRenderingOff = true;
