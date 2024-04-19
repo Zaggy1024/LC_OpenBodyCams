@@ -61,6 +61,7 @@ namespace OpenBodyCams.Compatibility
 
             // Search for:
             //   bool isLocalPlayer = playerId == StartOfRound.Instance.thisClientPlayerId;
+            // Debug IL:
             var isLocalPlayer = instructionsList.FindIndexOfSequence(
                 [
                     insn => insn.IsLdloc(),
@@ -68,6 +69,16 @@ namespace OpenBodyCams.Compatibility
                     insn => insn.LoadsField(Reflection.f_StartOfRound_thisClientPlayerId),
                     insn => insn.opcode == OpCodes.Ceq,
                     insn => insn.IsStloc(),
+                    insn => insn.IsLdloc(),
+                    insn => insn.opcode == OpCodes.Brfalse_S || insn.opcode == OpCodes.Brfalse
+                ]);
+            // Release IL:
+            isLocalPlayer ??= instructionsList.FindIndexOfSequence(
+                [
+                    insn => insn.IsLdloc(),
+                    insn => insn.Calls(Reflection.m_StartOfRound_get_Instance),
+                    insn => insn.LoadsField(Reflection.f_StartOfRound_thisClientPlayerId),
+                    insn => insn.opcode == OpCodes.Bne_Un_S || insn.opcode == OpCodes.Bne_Un,
                 ]);
 
             // Then find:
