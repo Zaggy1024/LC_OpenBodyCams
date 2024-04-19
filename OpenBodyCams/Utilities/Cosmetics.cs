@@ -93,8 +93,8 @@ namespace OpenBodyCams.Utilities
         private static GameObject[] DoCollectThirdPersonCosmetics(PlayerControllerB player)
         {
             if (player == null)
-                return new GameObject[0];
-            var result = new List<GameObject>();
+                return [];
+
             DebugLog($"Collecting third-person cosmetics for {player.playerUsername}.");
 
             if (compatibilityMode.HasFlag(CompatibilityMode.MoreCompany))
