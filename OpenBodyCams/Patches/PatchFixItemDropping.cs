@@ -12,7 +12,7 @@ namespace OpenBodyCams.Patches
 {
     internal static class PatchFixItemDropping
     {
-        private readonly static MethodInfo m_PlayerControllerB_SetObjectAsNoLongerHeld = typeof(PlayerControllerB).GetMethod(nameof(PlayerControllerB.SetObjectAsNoLongerHeld), new Type[] { typeof(bool), typeof(bool), typeof(Vector3), typeof(GrabbableObject), typeof(int) });
+        private readonly static MethodInfo m_PlayerControllerB_SetObjectAsNoLongerHeld = typeof(PlayerControllerB).GetMethod(nameof(PlayerControllerB.SetObjectAsNoLongerHeld), [ typeof(bool), typeof(bool), typeof(Vector3), typeof(GrabbableObject), typeof(int) ]);
 
         [HarmonyTranspiler]
         [HarmonyPatch(typeof(PlayerControllerB), "ThrowObjectClientRpc")]
