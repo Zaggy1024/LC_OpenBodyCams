@@ -96,36 +96,37 @@ namespace OpenBodyCams.Utilities
                 return [];
 
             DebugLog($"Collecting third-person cosmetics for {player.playerUsername}.");
+            GameObject[] result = [];
 
             if (compatibilityMode.HasFlag(CompatibilityMode.MoreCompany))
             {
                 var mcCosmetics = MoreCompanyCompatibility.CollectCosmetics(player);
-                result.AddRange(mcCosmetics);
+                result = [.. result, .. mcCosmetics];
                 DebugLog($"Collected {mcCosmetics.Length} MoreCompany third-person cosmetics objects.");
             }
 
             if (compatibilityMode.HasFlag(CompatibilityMode.AdvancedCompany))
             {
                 var acCosmetics = AdvancedCompanyCompatibility.CollectCosmetics(player);
-                result.AddRange(acCosmetics);
+                result = [.. result, .. acCosmetics];
                 DebugLog($"Collected {acCosmetics.Length} AdvancedCompany third-person cosmetics objects.");
             }
 
             if (compatibilityMode.HasFlag(CompatibilityMode.ModelReplacementAPI))
             {
                 var mrCosmetics = ModelReplacementAPICompatibility.CollectCosmetics(player);
-                result.AddRange(mrCosmetics);
+                result = [.. result, .. mrCosmetics];
                 DebugLog($"Collected {mrCosmetics.Length} ModelReplacementAPI third-person cosmetics objects.");
             }
 
             if (compatibilityMode.HasFlag(CompatibilityMode.LethalVRM))
             {
                 var vrmCosmetics = LethalVRMCompatibility.CollectCosmetics(player);
-                result.AddRange(vrmCosmetics);
+                result = [.. result, .. vrmCosmetics];
                 DebugLog($"Collected {vrmCosmetics.Length} LethalVRM cosmetics objects.");
             }
 
-            Plugin.Instance.Logger.LogInfo($"Collected {result.Count} third-person cosmetics objects for {player.playerUsername}.");
+            Plugin.Instance.Logger.LogInfo($"Collected {result.Length} third-person cosmetics objects for {player.playerUsername}.");
 
             if (PrintDebugInfo)
             {
@@ -138,7 +139,7 @@ namespace OpenBodyCams.Utilities
                 }
             }
 
-            return [.. result];
+            return result;
         }
 
         public static GameObject[] CollectThirdPersonCosmetics(PlayerControllerB player)
