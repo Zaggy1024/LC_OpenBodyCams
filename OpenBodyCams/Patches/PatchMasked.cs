@@ -5,18 +5,18 @@ using HarmonyLib;
 namespace OpenBodyCams.Patches
 {
     [HarmonyPatch(typeof(HauntedMaskItem))]
-    internal class PatchHauntedMaskItem
+    internal static class PatchHauntedMaskItem
     {
         [HarmonyPostfix]
         [HarmonyPatch(nameof(HauntedMaskItem.CreateMimicServerRpc))]
-        static void CreateMimicServerRpcPostfix()
+        private static void CreateMimicServerRpcPostfix()
         {
             BodyCamComponent.MarkTargetStatusChangedForAllBodyCams();
         }
 
         [HarmonyPostfix]
         [HarmonyPatch("waitForMimicEnemySpawn")]
-        static IEnumerator waitForMimicEnemySpawnPostfix(IEnumerator __result)
+        private static IEnumerator waitForMimicEnemySpawnPostfix(IEnumerator __result)
         {
             while (__result.MoveNext())
                 yield return __result.Current;
@@ -26,11 +26,11 @@ namespace OpenBodyCams.Patches
     }
 
     [HarmonyPatch(typeof(MaskedPlayerEnemy))]
-    internal class PatchMaskedPlayerEnemy
+    internal static class PatchMaskedPlayerEnemy
     {
         [HarmonyPrefix]
         [HarmonyPatch(nameof(MaskedPlayerEnemy.FinishKillAnimation))]
-        static void FinishKillAnimationPrefix(bool __0)
+        private static void FinishKillAnimationPrefix(bool __0)
         {
             var killedPlayer = __0;
             if (killedPlayer)
@@ -39,7 +39,7 @@ namespace OpenBodyCams.Patches
 
         [HarmonyPostfix]
         [HarmonyPatch("waitForMimicEnemySpawn")]
-        static IEnumerator waitForMimicEnemySpawnPostfix(IEnumerator __result)
+        private static IEnumerator waitForMimicEnemySpawnPostfix(IEnumerator __result)
         {
             while (__result.MoveNext())
                 yield return __result.Current;

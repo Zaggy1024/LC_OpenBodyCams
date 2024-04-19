@@ -6,19 +6,19 @@ using OpenBodyCams.Compatibility;
 namespace OpenBodyCams.Patches
 {
     [HarmonyPatch(typeof(PlayerControllerB))]
-    internal class PatchPlayerControllerB
+    internal static class PatchPlayerControllerB
     {
         [HarmonyFinalizer]
         [HarmonyPatch(nameof(PlayerControllerB.ConnectClientToPlayerObject))]
         [HarmonyAfter(ModGUIDs.GeneralImprovements)]
-        static void ConnectClientToPlayerObjectFinalizer()
+        private static void ConnectClientToPlayerObjectFinalizer()
         {
             ShipObjects.LateInitialization();
         }
 
         [HarmonyPostfix]
         [HarmonyPatch(nameof(PlayerControllerB.KillPlayer))]
-        static void KillPlayerPostfix(PlayerControllerB __instance)
+        private static void KillPlayerPostfix(PlayerControllerB __instance)
         {
             if (__instance.IsOwner)
                 BodyCamComponent.MarkTargetStatusChangedForAllBodyCams(__instance.transform);
@@ -26,7 +26,7 @@ namespace OpenBodyCams.Patches
 
         [HarmonyPostfix]
         [HarmonyPatch("KillPlayerClientRpc")]
-        static void KillPlayerClientRpcPostfix(PlayerControllerB __instance)
+        private static void KillPlayerClientRpcPostfix(PlayerControllerB __instance)
         {
             if (!__instance.IsOwner)
                 BodyCamComponent.MarkTargetStatusChangedForAllBodyCams(__instance.transform);

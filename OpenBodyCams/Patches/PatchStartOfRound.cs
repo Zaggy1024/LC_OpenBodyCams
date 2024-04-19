@@ -3,19 +3,19 @@ using HarmonyLib;
 namespace OpenBodyCams.Patches
 {
     [HarmonyPatch(typeof(StartOfRound))]
-    internal class PatchStartOfRound
+    internal static class PatchStartOfRound
     {
         [HarmonyPostfix]
         [HarmonyPatch("Start")]
         [HarmonyPriority(Priority.VeryHigh)]
-        static void StartPostfix()
+        private static void StartPostfix()
         {
             ShipObjects.EarlyInitialization();
         }
 
         [HarmonyPostfix]
         [HarmonyPatch("ReviveDeadPlayers")]
-        static void ReviveDeadPlayersPostfix()
+        private static void ReviveDeadPlayersPostfix()
         {
             BodyCamComponent.MarkTargetStatusChangedForAllBodyCams();
         }

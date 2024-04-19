@@ -10,13 +10,13 @@ using UnityEngine;
 
 namespace OpenBodyCams.Patches
 {
-    internal class PatchFixItemDropping
+    internal static class PatchFixItemDropping
     {
-        readonly static MethodInfo m_PlayerControllerB_SetObjectAsNoLongerHeld = typeof(PlayerControllerB).GetMethod(nameof(PlayerControllerB.SetObjectAsNoLongerHeld), new Type[] { typeof(bool), typeof(bool), typeof(Vector3), typeof(GrabbableObject), typeof(int) });
+        private readonly static MethodInfo m_PlayerControllerB_SetObjectAsNoLongerHeld = typeof(PlayerControllerB).GetMethod(nameof(PlayerControllerB.SetObjectAsNoLongerHeld), new Type[] { typeof(bool), typeof(bool), typeof(Vector3), typeof(GrabbableObject), typeof(int) });
 
         [HarmonyTranspiler]
         [HarmonyPatch(typeof(PlayerControllerB), "ThrowObjectClientRpc")]
-        static IEnumerable<CodeInstruction> ThrowObjectClientRpcTranspiler(IEnumerable<CodeInstruction> instructions, MethodBase method)
+        private static IEnumerable<CodeInstruction> ThrowObjectClientRpcTranspiler(IEnumerable<CodeInstruction> instructions, MethodBase method)
         {
             if (!Plugin.FixDroppedItemRotation.Value)
                 return instructions;

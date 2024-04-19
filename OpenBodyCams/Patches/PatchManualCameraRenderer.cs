@@ -13,11 +13,11 @@ using OpenBodyCams.Utilities;
 namespace OpenBodyCams.Patches
 {
     [HarmonyPatch(typeof(ManualCameraRenderer))]
-    internal class PatchManualCameraRenderer
+    internal static class PatchManualCameraRenderer
     {
         [HarmonyPostfix]
         [HarmonyPatch("updateMapTarget")]
-        static IEnumerator updateMapTargetPostfix(IEnumerator result, ManualCameraRenderer __instance)
+        private static IEnumerator updateMapTargetPostfix(IEnumerator result, ManualCameraRenderer __instance)
         {
             SyncBodyCamToRadarMap.StartTargetTransitionForMap(__instance);
 
@@ -30,14 +30,14 @@ namespace OpenBodyCams.Patches
         [HarmonyPostfix]
         [HarmonyPatch(nameof(ManualCameraRenderer.SwitchScreenOn))]
         [HarmonyAfter(ModGUIDs.GeneralImprovements)]
-        static void SwitchScreenOnPostfix(ManualCameraRenderer __instance)
+        private static void SwitchScreenOnPostfix(ManualCameraRenderer __instance)
         {
             SyncBodyCamToRadarMap.UpdateBodyCamTargetForMap(__instance);
         }
 
         [HarmonyPostfix]
         [HarmonyPatch("MeetsCameraEnabledConditions")]
-        static void MeetsCameraEnabledConditionsPostfix(ManualCameraRenderer __instance, ref bool __result, PlayerControllerB player)
+        private static void MeetsCameraEnabledConditionsPostfix(ManualCameraRenderer __instance, ref bool __result, PlayerControllerB player)
         {
             if ((object)__instance == StartOfRound.Instance.mapScreen)
             {
@@ -72,7 +72,7 @@ namespace OpenBodyCams.Patches
 
         [HarmonyTranspiler]
         [HarmonyPatch(nameof(ManualCameraRenderer.RemoveTargetFromRadar))]
-        static IEnumerable<CodeInstruction> RemoveTargetFromRadarTranspiler(IEnumerable<CodeInstruction> instructions, ILGenerator generator)
+        private static IEnumerable<CodeInstruction> RemoveTargetFromRadarTranspiler(IEnumerable<CodeInstruction> instructions, ILGenerator generator)
         {
             // RemoveTargetFromRadar is invoked by RadarBoosterItem, which in turn invokes updateMapTarget it as if it was called from
             // an RPC handler, so it skips checking if the target index is valid. This means that the radar target index can point to a
