@@ -15,8 +15,6 @@ namespace OpenBodyCams.Compatibility
 {
     public static class AdvancedCompanyCompatibility
     {
-        private static int cosmeticChangesInProgress = 0;
-
         public static bool Initialize(Harmony harmony)
         {
             var t_Player = typeof(Player);
