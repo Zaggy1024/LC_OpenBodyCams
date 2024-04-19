@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-namespace OpenBodyCams
+namespace OpenBodyCams.Utilities
 {
     public static class Utilities
     {

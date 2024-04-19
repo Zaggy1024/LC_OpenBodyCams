@@ -4,8 +4,9 @@ using BepInEx.Logging;
 using HarmonyLib;
 using UnityEngine;
 
-using OpenBodyCams.Patches;
 using OpenBodyCams.Compatibility;
+using OpenBodyCams.Patches;
+using OpenBodyCams.Utilities;
 
 namespace OpenBodyCams
 {
@@ -129,13 +130,13 @@ namespace OpenBodyCams
             BruteForcePreventFreezes = Config.Bind("Debug", "BruteForcePreventFreezes", false, "Enable a brute force approach to preventing errors in the camera setup callback that can cause the screen to freeze.");
             ReferencedObjectDestructionDetectionEnabled = Config.Bind("Debug", "ModelDestructionDebuggingPatchEnabled", false, "Enable this option when reproducing a camera freeze. This will cause a debug message to be printed when a model that a body cam is tracking is destroyed.");
 
-            PrintCosmeticsDebugInfo.SettingChanged += (_, _) => CosmeticsCompatibility.PrintDebugInfo = PrintCosmeticsDebugInfo.Value;
-            CosmeticsCompatibility.PrintDebugInfo = PrintCosmeticsDebugInfo.Value;
+            PrintCosmeticsDebugInfo.SettingChanged += (_, _) => Cosmetics.PrintDebugInfo = PrintCosmeticsDebugInfo.Value;
+            Cosmetics.PrintDebugInfo = PrintCosmeticsDebugInfo.Value;
             BruteForcePreventFreezes.SettingChanged += (_, _) => BodyCamComponent.UpdateStaticSettings();
             ReferencedObjectDestructionDetectionEnabled.SettingChanged += (_, _) => UpdateReferencedObjectDestructionDetectionEnabled();
             UpdateReferencedObjectDestructionDetectionEnabled();
 
-            CosmeticsCompatibility.Initialize(harmony);
+            Cosmetics.Initialize(harmony);
 
             harmony.PatchAll(typeof(PatchFixItemDropping));
 

@@ -12,6 +12,7 @@ using MoreCompany;
 using MoreCompany.Cosmetics;
 
 using OpenBodyCams.Patches;
+using OpenBodyCams.Utilities;
 
 namespace OpenBodyCams.Compatibility
 {

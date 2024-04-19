@@ -5,8 +5,10 @@ using System.Reflection.Emit;
 
 using GameNetcodeStuff;
 using HarmonyLib;
-using OpenBodyCams.Compatibility;
 using Unity.Netcode;
+
+using OpenBodyCams.Compatibility;
+using OpenBodyCams.Utilities;
 
 namespace OpenBodyCams.Patches
 {

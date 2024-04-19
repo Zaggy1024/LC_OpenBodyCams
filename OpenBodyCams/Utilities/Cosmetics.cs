@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 
 using BepInEx.Bootstrap;
 using GameNetcodeStuff;
@@ -7,11 +8,10 @@ using HarmonyLib;
 using UnityEngine;
 
 using OpenBodyCams.Compatibility;
-using System.Diagnostics;
 
-namespace OpenBodyCams
+namespace OpenBodyCams.Utilities
 {
-    static class CosmeticsCompatibility
+    static class Cosmetics
     {
         internal static bool PrintDebugInfo = false;
 

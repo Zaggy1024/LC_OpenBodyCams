@@ -4,7 +4,7 @@ using UnityEngine.Rendering;
 using UnityEngine;
 using GameNetcodeStuff;
 
-namespace OpenBodyCams
+namespace OpenBodyCams.Utilities
 {
     internal enum Perspective
     {
@@ -32,7 +32,7 @@ namespace OpenBodyCams
                 return;
             }
 
-            state.thirdPersonCosmetics = CosmeticsCompatibility.CollectThirdPersonCosmetics(player);
+            state.thirdPersonCosmetics = Cosmetics.CollectThirdPersonCosmetics(player);
             state.thirdPersonCosmeticsLayers = new int[state.thirdPersonCosmetics.Length];
         }
 
@@ -62,7 +62,7 @@ namespace OpenBodyCams
             {
                 item.transform.rotation = holder.rotation;
                 item.transform.Rotate(item.itemProperties.rotationOffset);
-                item.transform.position = holder.position + (holder.rotation * item.itemProperties.positionOffset);
+                item.transform.position = holder.position + holder.rotation * item.itemProperties.positionOffset;
             }
 
             switch (perspective)
