@@ -106,7 +106,7 @@ namespace OpenBodyCams.Compatibility
             foreach (var cosmetic in cosmeticApplication.spawnedCosmetics)
             {
                 foreach (var child in cosmetic.GetComponentsInChildren<Transform>())
-                    child.gameObject.layer = BodyCamComponent.ENEMIES_NOT_RENDERED_LAYER;
+                    child.gameObject.layer = ViewPerspective.ENEMIES_NOT_RENDERED_LAYER;
             }
         }
 

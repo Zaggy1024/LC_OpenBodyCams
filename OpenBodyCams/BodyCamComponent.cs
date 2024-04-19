@@ -22,10 +22,6 @@ namespace OpenBodyCams
             UntilRender = 2,
         }
 
-        public const int DEFAULT_LAYER = 0;
-        public const int ENEMIES_LAYER = 19;
-        public const int ENEMIES_NOT_RENDERED_LAYER = 23;
-
         private const float RADAR_BOOSTER_INITIAL_PAN = 270;
 
         private static readonly Vector3 BODY_CAM_OFFSET = new(0.07f, 0, 0.15f);
@@ -308,7 +304,7 @@ namespace OpenBodyCams
             var greenFlashObject = Instantiate(StartOfRound.Instance.mapScreen.mapCameraAnimator.gameObject);
             greenFlashObject.transform.SetParent(greenFlashParent.transform, false);
             greenFlashObject.transform.localPosition = new Vector3(0, 0, 0.1f);
-            greenFlashObject.layer = DEFAULT_LAYER;
+            greenFlashObject.layer = ViewPerspective.DEFAULT_LAYER;
             greenFlashRenderer = greenFlashObject.GetComponent<MeshRenderer>();
             greenFlashRenderer.forceRenderingOff = true;
             greenFlashAnimator = greenFlashObject.GetComponent<Animator>() ?? throw new Exception("Green flash object copied from the map screen has no Animator.");
@@ -374,11 +370,6 @@ namespace OpenBodyCams
         {
             if (Plugin.UseTargetTransitionAnimation.Value)
                 greenFlashAnimator?.SetTrigger("Transition");
-        }
-
-        private static void SetCosmeticHidden(GameObject cosmetic, bool hidden)
-        {
-            cosmetic.layer = hidden ? ENEMIES_NOT_RENDERED_LAYER : DEFAULT_LAYER;
         }
 
         public void SetScreenPowered(bool powered)
@@ -670,93 +661,6 @@ namespace OpenBodyCams
             }
         }
 
-        private enum Perspective
-        {
-            FirstPerson,
-            ThirdPerson,
-        }
-
-        private static void SaveStateAndApplyPerspective(PlayerControllerB player, ref GameObject[] cosmetics, ref PlayerModelState state, Perspective perspective)
-        {
-            if (player is null)
-                return;
-
-            // Save
-            state.bodyShadowMode = player.thisPlayerModel.shadowCastingMode;
-            state.bodyLayer = player.thisPlayerModel.gameObject.layer;
-
-            state.armsEnabled = player.thisPlayerModelArms.enabled;
-            state.armsLayer = player.thisPlayerModelArms.gameObject.layer;
-
-            if (player.currentlyHeldObjectServer != null)
-            {
-                state.heldItemPosition = player.currentlyHeldObjectServer.transform.position;
-                state.heldItemRotation = player.currentlyHeldObjectServer.transform.rotation;
-            }
-
-            for (int i = 0; i < cosmetics.Length; i++)
-                state.cosmeticsLayers[i] = cosmetics[i].layer;
-
-            // Modify
-            void AttachItem(GrabbableObject item, Transform holder)
-            {
-                item.transform.rotation = holder.rotation;
-                item.transform.Rotate(item.itemProperties.rotationOffset);
-                item.transform.position = holder.position + (holder.rotation * item.itemProperties.positionOffset);
-            }
-
-            switch (perspective)
-            {
-                case Perspective.FirstPerson:
-                    player.thisPlayerModel.shadowCastingMode = ShadowCastingMode.ShadowsOnly;
-                    player.thisPlayerModel.gameObject.layer = ENEMIES_NOT_RENDERED_LAYER;
-
-                    player.thisPlayerModelArms.enabled = true;
-                    player.thisPlayerModelArms.gameObject.layer = DEFAULT_LAYER;
-
-                    if (player.currentlyHeldObjectServer != null)
-                        AttachItem(player.currentlyHeldObjectServer, player.localItemHolder);
-
-                    foreach (var cosmetic in cosmetics)
-                        SetCosmeticHidden(cosmetic, true);
-                    break;
-                case Perspective.ThirdPerson:
-                    player.thisPlayerModel.shadowCastingMode = ShadowCastingMode.On;
-                    player.thisPlayerModel.gameObject.layer = DEFAULT_LAYER;
-
-                    player.thisPlayerModelArms.enabled = false;
-                    player.thisPlayerModelArms.gameObject.layer = ENEMIES_NOT_RENDERED_LAYER;
-
-                    if (player.currentlyHeldObjectServer != null)
-                        AttachItem(player.currentlyHeldObjectServer, player.serverItemHolder);
-
-                    foreach (var cosmetic in cosmetics)
-                        SetCosmeticHidden(cosmetic, false);
-                    break;
-            }
-        }
-
-        private static void RestoreState(PlayerControllerB player, GameObject[] cosmetics, PlayerModelState state)
-        {
-            if (player is null)
-                return;
-
-            player.thisPlayerModel.shadowCastingMode = state.bodyShadowMode;
-            player.thisPlayerModel.gameObject.layer = state.bodyLayer;
-
-            player.thisPlayerModelArms.enabled = state.armsEnabled;
-            player.thisPlayerModelArms.gameObject.layer = state.armsLayer;
-
-            for (int i = 0; i < cosmetics.Length; i++)
-                cosmetics[i].layer = state.cosmeticsLayers[i];
-
-            if (player.currentlyHeldObjectServer != null)
-            {
-                player.currentlyHeldObjectServer.transform.position = state.heldItemPosition;
-                player.currentlyHeldObjectServer.transform.rotation = state.heldItemRotation;
-            }
-        }
-
         private void UpdateTargetStatusBeforeRender()
         {
             if (targetDirtyStatus.HasFlag(TargetDirtyStatus.UntilRender))
@@ -779,9 +683,9 @@ namespace OpenBodyCams
 
             var localPlayer = StartOfRound.Instance.localPlayerController;
 
-            SaveStateAndApplyPerspective(currentPlayer, ref currentPlayerCosmetics, ref currentPlayerModelState, Perspective.FirstPerson);
+            ViewPerspective.Apply(currentPlayer, ref currentPlayerCosmetics, ref currentPlayerModelState, Perspective.FirstPerson);
             if ((object)currentPlayer != localPlayer)
-                SaveStateAndApplyPerspective(localPlayer, ref localPlayerCosmetics, ref localPlayerModelState, Perspective.ThirdPerson);
+                ViewPerspective.Apply(localPlayer, ref localPlayerCosmetics, ref localPlayerModelState, Perspective.ThirdPerson);
 
             bool warnedNullMesh = false;
             foreach (var mesh in currentlyViewedMeshes)
@@ -807,9 +711,9 @@ namespace OpenBodyCams
 
             var localPlayer = StartOfRound.Instance.localPlayerController;
 
-            RestoreState(currentPlayer, currentPlayerCosmetics, currentPlayerModelState);
+            ViewPerspective.Restore(currentPlayer, currentPlayerCosmetics, currentPlayerModelState);
             if ((object)currentPlayer != localPlayer)
-                RestoreState(localPlayer, localPlayerCosmetics, localPlayerModelState);
+                ViewPerspective.Restore(localPlayer, localPlayerCosmetics, localPlayerModelState);
 
             foreach (var mesh in currentlyViewedMeshes)
             {
@@ -982,16 +886,4 @@ namespace OpenBodyCams
             return false;
         }
     }
-
-    internal struct PlayerModelState
-    {
-        public ShadowCastingMode bodyShadowMode;
-        public int bodyLayer;
-        public bool armsEnabled;
-        public int armsLayer;
-        public int[] cosmeticsLayers;
-        public Vector3 heldItemPosition;
-        public Quaternion heldItemRotation;
-    }
-
 }
