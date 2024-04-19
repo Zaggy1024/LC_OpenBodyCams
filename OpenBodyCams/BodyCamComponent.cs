@@ -127,6 +127,9 @@ namespace OpenBodyCams
             nightVisionPrefab.transform.localPosition = Vector3.zero;
             nightVisionPrefab.SetActive(false);
 
+            var nightVisionLight = nightVisionPrefab.GetComponent<Light>();
+            nightVisionLight.enabled = false;
+
             vanillaMapNightVisionLight = StartOfRound.Instance.mapScreen.mapCameraLight;
 
             UpdateAllCameraSettings();
@@ -246,9 +249,6 @@ namespace OpenBodyCams
             }
 
             AllBodyCams = [.. AllBodyCams, this];
-
-            var nightVisionLight = nightVisionPrefab.GetComponent<Light>();
-            nightVisionLight.enabled = false;
         }
 
         void Start()
