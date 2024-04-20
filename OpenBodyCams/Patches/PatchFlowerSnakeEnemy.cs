@@ -89,6 +89,15 @@ namespace OpenBodyCams.Patches
             if (__instance.clingingToPlayer != null)
                 PlayersClingedFlowerSnakes[__instance.clingingToPlayer.playerClientId].Remove(__instance);
         }
+
+        [HarmonyPrefix]
+        [HarmonyPatch(typeof(EnemyAI), nameof(EnemyAI.OnDestroy))]
+        private static void UnloadSceneObjectsEarly(EnemyAI __instance)
+        {
+            if (__instance is not FlowerSnakeEnemy flowerSnake)
+                return;
+            StopClingingToPlayerPrefix(flowerSnake);
+        }
     }
 
     [HarmonyPatch(typeof(PatchFlowerSnakeEnemy))]
