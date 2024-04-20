@@ -77,6 +77,8 @@ namespace OpenBodyCams
             harmony.PatchAll(typeof(PatchHauntedMaskItem));
             harmony.PatchAll(typeof(PatchMaskedPlayerEnemy));
             harmony.PatchAll(typeof(PatchUnlockableSuit));
+            harmony.PatchAll(typeof(PatchFlowerSnakeEnemy));
+            harmony.PatchAll(typeof(PatchCopyVanillaFlowerSnakeEnemyCode));
 
             // Camera:
             CameraMode = Config.Bind("Camera", "Mode", CameraModeOptions.Head, "Choose where to attach the camera. 'Head' will attach the camera to the right side of the head, 'Body' will attach it to the chest.");

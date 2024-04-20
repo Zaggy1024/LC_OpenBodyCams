@@ -4,6 +4,8 @@ using UnityEngine.Rendering;
 using UnityEngine;
 using GameNetcodeStuff;
 
+using OpenBodyCams.Patches;
+
 namespace OpenBodyCams.Utilities
 {
     internal enum Perspective
@@ -89,6 +91,16 @@ namespace OpenBodyCams.Utilities
                         SetCosmeticHidden(cosmetic, true);
                     foreach (var cosmetic in state.firstPersonCosmetics)
                         SetCosmeticHidden(cosmetic, false);
+
+                    if (PatchFlowerSnakeEnemy.PlayersClingedFlowerSnakes != null)
+                    {
+                        foreach (var clingingFlowerSnake in PatchFlowerSnakeEnemy.PlayersClingedFlowerSnakes[player.playerClientId])
+                        {
+                            if (clingingFlowerSnake == null)
+                                continue;
+                            PatchFlowerSnakeEnemy.SetFirstPersonClingingAnimationPosition(clingingFlowerSnake);
+                        }
+                    }
                     break;
                 case Perspective.ThirdPerson:
                     player.thisPlayerModel.shadowCastingMode = ShadowCastingMode.On;
@@ -104,6 +116,16 @@ namespace OpenBodyCams.Utilities
                         SetCosmeticHidden(cosmetic, false);
                     foreach (var cosmetic in state.firstPersonCosmetics)
                         SetCosmeticHidden(cosmetic, true);
+
+                    if (PatchFlowerSnakeEnemy.PlayersClingedFlowerSnakes != null)
+                    {
+                        foreach (var clingingFlowerSnake in PatchFlowerSnakeEnemy.PlayersClingedFlowerSnakes[player.playerClientId])
+                        {
+                            if (clingingFlowerSnake == null)
+                                continue;
+                            PatchFlowerSnakeEnemy.SetThirdPersonClingingAnimationPosition(clingingFlowerSnake);
+                        }
+                    }
                     break;
             }
         }
@@ -129,6 +151,16 @@ namespace OpenBodyCams.Utilities
             {
                 player.currentlyHeldObjectServer.transform.position = state.heldItemPosition;
                 player.currentlyHeldObjectServer.transform.rotation = state.heldItemRotation;
+            }
+
+            if (PatchFlowerSnakeEnemy.PlayersClingedFlowerSnakes != null)
+            {
+                foreach (var clingingFlowerSnake in PatchFlowerSnakeEnemy.PlayersClingedFlowerSnakes[player.playerClientId])
+                {
+                    if (clingingFlowerSnake == null)
+                        continue;
+                    clingingFlowerSnake.SetClingingAnimationPosition();
+                }
             }
         }
     }

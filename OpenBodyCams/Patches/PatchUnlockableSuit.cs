@@ -5,7 +5,6 @@ using System.Reflection.Emit;
 
 using GameNetcodeStuff;
 using HarmonyLib;
-using UnityEngine;
 
 using OpenBodyCams.Utilities;
 
@@ -18,19 +17,14 @@ namespace OpenBodyCams.Patches
         [HarmonyPatch(nameof(UnlockableSuit.SwitchSuitForPlayer))]
         private static IEnumerable<CodeInstruction> SwitchSuitForPlayerTranspiler(IEnumerable<CodeInstruction> instructions)
         {
-            MethodInfo m_GameNetworkManager_get_Instance = typeof(GameNetworkManager).GetMethod("get_Instance", []);
-            FieldInfo f_GameNetworkManager_localPlayerController = typeof(GameNetworkManager).GetField(nameof(GameNetworkManager.localPlayerController));
-
-            MethodInfo m_Object_op_Inequality = typeof(Object).GetMethod("op_Inequality", [typeof(Object), typeof(Object)]);
-
             var instructionsList = instructions.ToList();
 
             var checkForLocalPlayer = instructionsList.FindIndexOfSequence(
                 [
-                    insn => insn.Calls(m_GameNetworkManager_get_Instance),
-                    insn => insn.LoadsField(f_GameNetworkManager_localPlayerController),
+                    insn => insn.Calls(Reflection.m_GameNetworkManager_get_Instance),
+                    insn => insn.LoadsField(Reflection.f_GameNetworkManager_localPlayerController),
                     insn => insn.opcode == OpCodes.Ldarg_0,
-                    insn => insn.Calls(m_Object_op_Inequality),
+                    insn => insn.Calls(Reflection.m_Object_op_Inequality),
                     insn => insn.opcode == OpCodes.Brfalse_S || insn.opcode == OpCodes.Brfalse,
                 ]);
             var isLocalPlayerLabel = (Label)instructionsList[checkForLocalPlayer.End - 1].operand;
