@@ -34,7 +34,7 @@ namespace OpenBodyCams
             BodyCamComponent.InitializeAtStartOfGame();
         }
 
-        static void GetAndMaybeDisableShipCamera()
+        private static void GetAndMaybeDisableShipCamera()
         {
             var shipCameraObject = GameObject.Find("Environment/HangarShip/Cameras/ShipCamera");
             if (shipCameraObject == null)
@@ -87,7 +87,7 @@ namespace OpenBodyCams
             }
         }
 
-        static void InitializeBodyCam()
+        private static void InitializeBodyCam()
         {
             var bottomMonitors = GameObject.Find("Environment/HangarShip/ShipModels2b/MonitorWall/Cube.001");
             if (bottomMonitors == null)
