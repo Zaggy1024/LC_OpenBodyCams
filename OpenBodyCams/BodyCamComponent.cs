@@ -60,6 +60,7 @@ namespace OpenBodyCams
         internal Renderer MonitorRenderer;
         internal int MonitorMaterialIndex = -1;
         internal Material MonitorOnMaterial;
+        internal Material MonitorNoTargetMaterial;
         internal Material MonitorOffMaterial;
         internal bool MonitorIsOn = true;
 
@@ -255,7 +256,7 @@ namespace OpenBodyCams
 
                 if (MonitorOffMaterial == null)
                     MonitorOffMaterial = ShipObjects.blackScreenMaterial;
-                SetMaterial(MonitorRenderer, MonitorMaterialIndex, MonitorOnMaterial);
+                SetMonitorMaterial(MonitorOnMaterial);
             }
 
             EnsureCameraExists();
@@ -268,6 +269,13 @@ namespace OpenBodyCams
             var materials = renderer.sharedMaterials;
             materials[index] = material;
             renderer.sharedMaterials = materials;
+        }
+
+        private void SetMonitorMaterial(Material material)
+        {
+            if (MonitorRenderer == null)
+                return;
+            SetMaterial(MonitorRenderer, MonitorMaterialIndex, material);
         }
 
         public void EnsureCameraExists()
@@ -384,12 +392,12 @@ namespace OpenBodyCams
             if (powered)
             {
                 StartTargetTransition();
-                SetMaterial(MonitorRenderer, MonitorMaterialIndex, MonitorOnMaterial);
+                SetMonitorMaterial(MonitorOnMaterial);
                 MonitorIsOn = true;
                 return;
             }
 
-            SetMaterial(MonitorRenderer, MonitorMaterialIndex, MonitorOffMaterial);
+            SetMonitorMaterial(MonitorOffMaterial);
             MonitorIsOn = false;
         }
 
@@ -402,8 +410,21 @@ namespace OpenBodyCams
         {
             if (blanked != wasBlanked)
             {
-                if (MonitorOnMaterial != null)
-                    MonitorOnMaterial.color = blanked ? Color.black : Color.white;
+                if (blanked)
+                {
+                    if (MonitorNoTargetMaterial != null)
+                        SetMonitorMaterial(MonitorNoTargetMaterial);
+                    MonitorOnMaterial.color = Color.black;
+                }
+                else if (MonitorIsOn)
+                {
+                    SetMonitorMaterial(MonitorOnMaterial);
+                    MonitorOnMaterial.color = Color.white;
+                }
+                else
+                {
+                    SetMonitorMaterial(MonitorOffMaterial);
+                }
                 OnBlankedSet?.Invoke(blanked);
             }
             wasBlanked = blanked;

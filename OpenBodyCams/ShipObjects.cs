@@ -123,6 +123,8 @@ namespace OpenBodyCams
 
                 MainBodyCam.MonitorRenderer = renderer;
                 MainBodyCam.MonitorMaterialIndex = materialIndex;
+                if (Plugin.DisplayOriginalScreenWhenDisabled.Value)
+                    MainBodyCam.MonitorNoTargetMaterial = renderer.sharedMaterials[materialIndex];
             }
         }
     }
