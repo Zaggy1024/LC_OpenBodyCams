@@ -253,7 +253,8 @@ namespace OpenBodyCams
                 MonitorOnMaterial = new(Shader.Find("HDRP/Unlit")) { name = "BodyCamMaterial" };
                 MonitorOnMaterial.SetFloat("_AlbedoAffectEmissive", 1);
 
-                MonitorOffMaterial = ShipObjects.blackScreenMaterial;
+                if (MonitorOffMaterial == null)
+                    MonitorOffMaterial = ShipObjects.blackScreenMaterial;
                 SetMaterial(MonitorRenderer, MonitorMaterialIndex, MonitorOnMaterial);
             }
 
