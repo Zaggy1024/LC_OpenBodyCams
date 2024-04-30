@@ -18,9 +18,9 @@ namespace OpenBodyCams
 
     [BepInPlugin(MOD_UNIQUE_NAME, MOD_NAME, MOD_VERSION)]
     [BepInDependency(ModGUIDs.AdvancedCompany, BepInDependency.DependencyFlags.SoftDependency)]
-    [BepInDependency(ModGUIDs.MoreCompany, BepInDependency.DependencyFlags.SoftDependency)]
-    [BepInDependency(ModGUIDs.ModelReplacementAPI, BepInDependency.DependencyFlags.SoftDependency)]
     [BepInDependency(ModGUIDs.LethalVRM, BepInDependency.DependencyFlags.SoftDependency)]
+    [BepInDependency(ModGUIDs.ModelReplacementAPI, BepInDependency.DependencyFlags.SoftDependency)]
+    [BepInDependency(ModGUIDs.MoreCompany, BepInDependency.DependencyFlags.SoftDependency)]
     public class Plugin : BaseUnityPlugin
     {
         public const string MOD_NAME = "OpenBodyCams";
