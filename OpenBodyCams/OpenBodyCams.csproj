@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
         <TargetFramework>netstandard2.1</TargetFramework>
@@ -79,9 +79,9 @@
 
     <PropertyGroup>
         <PostBuildEvent>
-            mkdir $(MSBuildProjectDirectory)\Package\BepInEx\plugins
+            mkdir $(MSBuildProjectDirectory)\Package
             copy /Y $(SolutionDir)README.md $(MSBuildProjectDirectory)\Package
-            copy /Y $(OutDir)OpenBodyCams.dll $(MSBuildProjectDirectory)\Package\BepInEx\plugins
+            copy /Y $(OutDir)OpenBodyCams.dll $(MSBuildProjectDirectory)\Package\plugins
         </PostBuildEvent>
     </PropertyGroup>
 
