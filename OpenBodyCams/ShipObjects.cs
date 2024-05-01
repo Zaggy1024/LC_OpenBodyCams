@@ -9,22 +9,22 @@ namespace OpenBodyCams
 {
     public static class ShipObjects
     {
-        public static Material blackScreenMaterial;
+        internal static Material BlackScreenMaterial;
 
-        public static ManualCameraRenderer ShipCameraRenderer;
-
-        public static Terminal TerminalScript;
-        public static bool TwoRadarCamsPresent = false;
+        internal static Terminal TerminalScript;
+        internal static bool TwoRadarCamsPresent = false;
 
         public static BodyCamComponent MainBodyCam;
 
-        public static ManualCameraRenderer ExternalCameraRenderer;
-        public static MeshRenderer DoorScreenRenderer;
-        public static bool DoorScreenUsesExternalCamera = false;
+        internal static ManualCameraRenderer ShipCameraRenderer;
+
+        internal static ManualCameraRenderer ExternalCameraRenderer;
+        internal static MeshRenderer DoorScreenRenderer;
+        internal static bool DoorScreenUsesExternalCamera = false;
 
         public static void EarlyInitialization()
         {
-            blackScreenMaterial = StartOfRound.Instance.mapScreen.offScreenMat;
+            BlackScreenMaterial = StartOfRound.Instance.mapScreen.offScreenMat;
 
             ExternalCameraRenderer = GameObject.Find("Environment/HangarShip/Cameras/FrontDoorSecurityCam/SecurityCamera")?.GetComponent<ManualCameraRenderer>();
             DoorScreenRenderer = GameObject.Find("Environment/HangarShip/ShipModels2b/MonitorWall/SingleScreen")?.GetComponent<MeshRenderer>();
@@ -55,7 +55,7 @@ namespace OpenBodyCams
 
             var shipScreenMaterialIndex = Array.FindIndex(ShipCameraRenderer.mesh.sharedMaterials, material => material.name.StartsWith("ShipScreen1Mat"));
 
-            if (blackScreenMaterial == null || shipScreenMaterialIndex == -1)
+            if (BlackScreenMaterial == null || shipScreenMaterialIndex == -1)
             {
                 Plugin.Instance.Logger.LogError("Internal ship camera monitor does not have the expected materials.");
                 return;
@@ -64,7 +64,7 @@ namespace OpenBodyCams
             shipCameraObject.SetActive(false);
 
             var newMaterials = ShipCameraRenderer.mesh.sharedMaterials;
-            newMaterials[shipScreenMaterialIndex] = blackScreenMaterial;
+            newMaterials[shipScreenMaterialIndex] = BlackScreenMaterial;
             ShipCameraRenderer.mesh.sharedMaterials = newMaterials;
         }
 

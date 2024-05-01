@@ -255,7 +255,7 @@ namespace OpenBodyCams
                 MonitorOnMaterial.SetFloat("_AlbedoAffectEmissive", 1);
 
                 if (MonitorOffMaterial == null)
-                    MonitorOffMaterial = ShipObjects.blackScreenMaterial;
+                    MonitorOffMaterial = ShipObjects.BlackScreenMaterial;
                 SetMonitorMaterial(MonitorOnMaterial);
             }
 
