@@ -455,8 +455,10 @@ namespace OpenBodyCams
             }
         }
 
-        private bool ShouldHideOutput()
+        private bool ShouldHideOutput(out bool targetIsOnShip)
         {
+            targetIsOnShip = false;
+
             if (!enableCamera)
                 return true;
 
@@ -466,18 +468,30 @@ namespace OpenBodyCams
             if (currentPlayer is not null)
             {
                 if (currentPlayer.isPlayerControlled)
-                    return disableCameraWhileTargetIsOnShip && currentPlayer.isInHangarShipRoom;
+                {
+                    targetIsOnShip = currentPlayer.isInHangarShipRoom;
+                    return false;
+                }
                 if (!currentPlayer.isPlayerDead)
                     return false;
                 if (currentPlayer.redirectToEnemy != null)
-                    return disableCameraWhileTargetIsOnShip && currentPlayer.redirectToEnemy.isInsidePlayerShip;
+                {
+                    targetIsOnShip = currentPlayer.redirectToEnemy.isInsidePlayerShip;
+                    return false;
+                }
                 if (currentPlayer.deadBody != null)
-                    return disableCameraWhileTargetIsOnShip && currentPlayer.deadBody.isInShip;
+                {
+                    targetIsOnShip = currentPlayer.deadBody.isInShip;
+                    return false;
+                }
             }
 
             var radarBooster = currentActualTarget.GetComponent<RadarBoosterItem>();
             if (radarBooster is not null)
-                return disableCameraWhileTargetIsOnShip && radarBooster.isInShipRoom;
+            {
+                targetIsOnShip = radarBooster.isInShipRoom;
+                return false;
+            }
 
             return true;
         }
@@ -785,7 +799,9 @@ namespace OpenBodyCams
 
             if (enableCamera)
             {
-                var disable = ShouldHideOutput();
+                var disable = ShouldHideOutput(out var targetIsOnShip);
+                if (disableCameraWhileTargetIsOnShip && !keepCameraOn)
+                    disable = targetIsOnShip;
                 enableCamera = !disable;
                 SetScreenBlanked(disable);
             }
