@@ -123,9 +123,21 @@ namespace OpenBodyCams
 
                 MainBodyCam.MonitorRenderer = renderer;
                 MainBodyCam.MonitorMaterialIndex = materialIndex;
-                if (Plugin.DisplayOriginalScreenWhenDisabled.Value)
-                    MainBodyCam.MonitorNoTargetMaterial = renderer.sharedMaterials[materialIndex];
+                MainBodyCam.MonitorDisabledMaterial = renderer.sharedMaterials[materialIndex];
+                UpdateMainBodyCamNoTargetMaterial();
+
+                if (Plugin.BodyCamsShipUpgradeEnabled.Value)
+                    MainBodyCam.enabled = UnityEngine.Object.FindAnyObjectByType<EnableMainBodyCam>() != null;
             }
+        }
+
+        internal static void UpdateMainBodyCamNoTargetMaterial()
+        {
+            if (Plugin.DisplayOriginalScreenWhenDisabled.Value)
+                MainBodyCam.MonitorNoTargetMaterial = MainBodyCam.MonitorDisabledMaterial;
+            else
+                MainBodyCam.MonitorNoTargetMaterial = null;
+            MainBodyCam.UpdateScreenMaterial();
         }
     }
 }

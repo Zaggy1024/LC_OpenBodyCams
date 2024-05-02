@@ -62,6 +62,7 @@ namespace OpenBodyCams
         internal Material MonitorOnMaterial;
         internal Material MonitorNoTargetMaterial;
         internal Material MonitorOffMaterial;
+        internal Material MonitorDisabledMaterial;
         internal bool MonitorIsOn = true;
 
         private bool keepCameraOn = false;
@@ -249,16 +250,6 @@ namespace OpenBodyCams
 
         void Start()
         {
-            if (MonitorRenderer != null)
-            {
-                MonitorOnMaterial = new(Shader.Find("HDRP/Unlit")) { name = "BodyCamMaterial" };
-                MonitorOnMaterial.SetFloat("_AlbedoAffectEmissive", 1);
-
-                if (MonitorOffMaterial == null)
-                    MonitorOffMaterial = ShipObjects.BlackScreenMaterial;
-                SetMonitorMaterial(MonitorOnMaterial);
-            }
-
             EnsureCameraExists();
 
             SyncBodyCamToRadarMap.UpdateBodyCamTarget(this);
@@ -278,12 +269,34 @@ namespace OpenBodyCams
             SetMaterial(MonitorRenderer, MonitorMaterialIndex, material);
         }
 
+        private void EnsureMaterialsExist()
+        {
+            bool createdMaterial = false;
+
+            if (MonitorOnMaterial == null)
+            {
+                MonitorOnMaterial = new(Shader.Find("HDRP/Unlit")) { name = "BodyCamMaterial" };
+                MonitorOnMaterial.SetFloat("_AlbedoAffectEmissive", 1);
+                createdMaterial = true;
+            }
+
+            if (MonitorOffMaterial == null)
+            {
+                MonitorOffMaterial = ShipObjects.BlackScreenMaterial;
+                createdMaterial = true;
+            }
+
+            if (createdMaterial)
+                UpdateScreenMaterial();
+        }
+
         public void EnsureCameraExists()
         {
             if (CameraObject != null)
                 return;
 
             Plugin.Instance.Logger.LogInfo("Camera has been destroyed, recreating it.");
+            EnsureMaterialsExist();
 
             CameraObject = new GameObject("BodyCam");
             Camera = CameraObject.AddComponent<Camera>();
@@ -381,6 +394,37 @@ namespace OpenBodyCams
                 greenFlashAnimator?.SetTrigger("Transition");
         }
 
+        public void UpdateScreenMaterial()
+        {
+            EnsureMaterialsExist();
+
+            if (!MonitorIsOn)
+            {
+                SetMonitorMaterial(MonitorOffMaterial);
+                return;
+            }
+
+            var isEnabled = enabled;
+            if (wasBlanked || !isEnabled)
+            {
+                MonitorOnMaterial.color = Color.black;
+
+                if (!isEnabled && MonitorDisabledMaterial != null)
+                {
+                    SetMonitorMaterial(MonitorDisabledMaterial);
+                    return;
+                }
+                if (MonitorNoTargetMaterial != null)
+                {
+                    SetMonitorMaterial(MonitorNoTargetMaterial);
+                    return;
+                }
+            }
+
+            MonitorOnMaterial.color = Color.white;
+            SetMonitorMaterial(MonitorOnMaterial);
+        }
+
         public void SetScreenPowered(bool powered)
         {
             if (MonitorRenderer == null)
@@ -390,15 +434,10 @@ namespace OpenBodyCams
                 return;
 
             if (powered)
-            {
                 StartTargetTransition();
-                SetMonitorMaterial(MonitorOnMaterial);
-                MonitorIsOn = true;
-                return;
-            }
 
-            SetMonitorMaterial(MonitorOffMaterial);
-            MonitorIsOn = false;
+            UpdateScreenMaterial();
+            MonitorIsOn = powered;
         }
 
         public bool IsScreenPowered()
@@ -410,24 +449,10 @@ namespace OpenBodyCams
         {
             if (blanked != wasBlanked)
             {
-                if (blanked)
-                {
-                    if (MonitorNoTargetMaterial != null)
-                        SetMonitorMaterial(MonitorNoTargetMaterial);
-                    MonitorOnMaterial.color = Color.black;
-                }
-                else if (MonitorIsOn)
-                {
-                    SetMonitorMaterial(MonitorOnMaterial);
-                    MonitorOnMaterial.color = Color.white;
-                }
-                else
-                {
-                    SetMonitorMaterial(MonitorOffMaterial);
-                }
+                wasBlanked = blanked;
+                UpdateScreenMaterial();
                 OnBlankedSet?.Invoke(blanked);
             }
-            wasBlanked = blanked;
         }
 
         private bool ShouldHideOutput()
@@ -817,6 +842,17 @@ namespace OpenBodyCams
             {
                 Camera.enabled = true;
             }
+        }
+
+        void OnDisable()
+        {
+            UpdateScreenMaterial();
+            Camera.enabled = false;
+        }
+
+        void OnEnable()
+        {
+            UpdateScreenMaterial();
         }
 
         void OnDestroy()
