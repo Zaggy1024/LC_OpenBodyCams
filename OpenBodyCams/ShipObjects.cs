@@ -126,8 +126,8 @@ namespace OpenBodyCams
                 MainBodyCam.MonitorDisabledMaterial = renderer.sharedMaterials[materialIndex];
                 UpdateMainBodyCamNoTargetMaterial();
 
-                if (Plugin.BodyCamsShipUpgradeEnabled.Value)
-                    MainBodyCam.enabled = UnityEngine.Object.FindAnyObjectByType<EnableMainBodyCam>() != null;
+                if (Plugin.ShipUpgradeEnabled.Value)
+                    MainBodyCam.enabled = ShipUpgrades.BodyCamUnlockableIsPlaced;
             }
         }
 

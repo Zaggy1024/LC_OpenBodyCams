@@ -436,8 +436,8 @@ namespace OpenBodyCams
             if (powered)
                 StartTargetTransition();
 
-            UpdateScreenMaterial();
             MonitorIsOn = powered;
+            UpdateScreenMaterial();
         }
 
         public bool IsScreenPowered()
@@ -846,8 +846,10 @@ namespace OpenBodyCams
 
         void OnDisable()
         {
+            SetScreenBlanked(true);
             UpdateScreenMaterial();
-            Camera.enabled = false;
+            if (Camera != null)
+                Camera.enabled = false;
         }
 
         void OnEnable()

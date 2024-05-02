@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
         <TargetFramework>netstandard2.1</TargetFramework>
@@ -25,6 +25,10 @@
         </Reference>
         <Reference Include="Assembly-CSharp" Publicize="true">
             <HintPath>..\..\Libraries\Assembly-CSharp.dll</HintPath>
+            <Private>false</Private>
+        </Reference>
+        <Reference Include="LethalLib">
+            <HintPath>..\..\Libraries\LethalLib.dll</HintPath>
             <Private>false</Private>
         </Reference>
         <Reference Include="LethalVRM" Publicize="true">
@@ -55,6 +59,10 @@
             <HintPath>..\..\Libraries\UnityEngine.AnimationModule.dll</HintPath>
             <Private>false</Private>
         </Reference>
+        <Reference Include="UnityEngine.AssetBundleModule">
+            <HintPath>..\..\Libraries\UnityEngine.AssetBundleModule.dll</HintPath>
+            <Private>false</Private>
+        </Reference>
         <Reference Include="UnityEngine.CoreModule">
             <HintPath>..\..\Libraries\UnityEngine.CoreModule.dll</HintPath>
             <Private>false</Private>
@@ -81,7 +89,8 @@
         <PostBuildEvent>
             mkdir $(MSBuildProjectDirectory)\Package
             copy /Y $(SolutionDir)README.md $(MSBuildProjectDirectory)\Package
-            copy /Y $(OutDir)OpenBodyCams.dll $(MSBuildProjectDirectory)\Package\plugins
+            copy /Y $(OutDir)OpenBodyCams.dll $(MSBuildProjectDirectory)\Package
+            copy /Y $(SolutionDir)Assets\Bundles\openbodycams $(MSBuildProjectDirectory)\Package
         </PostBuildEvent>
     </PropertyGroup>
 

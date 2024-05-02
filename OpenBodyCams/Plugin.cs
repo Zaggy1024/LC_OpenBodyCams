@@ -1,3 +1,6 @@
+using System.IO;
+using System.Reflection;
+
 using BepInEx;
 using BepInEx.Configuration;
 using BepInEx.Logging;
@@ -18,6 +21,7 @@ namespace OpenBodyCams
 
     [BepInPlugin(MOD_UNIQUE_NAME, MOD_NAME, MOD_VERSION)]
     [BepInDependency(ModGUIDs.AdvancedCompany, BepInDependency.DependencyFlags.SoftDependency)]
+    [BepInDependency(ModGUIDs.LethalLib, BepInDependency.DependencyFlags.SoftDependency)]
     [BepInDependency(ModGUIDs.LethalVRM, BepInDependency.DependencyFlags.SoftDependency)]
     [BepInDependency(ModGUIDs.ModelReplacementAPI, BepInDependency.DependencyFlags.SoftDependency)]
     [BepInDependency(ModGUIDs.MoreCompany, BepInDependency.DependencyFlags.SoftDependency)]
@@ -51,6 +55,9 @@ namespace OpenBodyCams
         public static ConfigEntry<PiPPosition> TerminalPiPPosition;
         public static ConfigEntry<int> TerminalPiPWidth;
 
+        public static ConfigEntry<bool> ShipUpgradeEnabled;
+        public static ConfigEntry<int> ShipUpgradePrice;
+
         public static ConfigEntry<int> GeneralImprovementsBetterMonitorIndex;
         public static ConfigEntry<bool> EnableMoreCompanyCosmeticsCompatibility;
         public static ConfigEntry<bool> EnableAdvancedCompanyCosmeticsCompatibility;
@@ -66,11 +73,21 @@ namespace OpenBodyCams
 
         private static readonly Harmony DestructionDetectionPatch = new(MOD_UNIQUE_NAME + ".DestructionDetectionPatch");
 
+        internal static AssetBundle Assets;
+
         public new ManualLogSource Logger => base.Logger;
 
         void Awake()
         {
             Instance = this;
+
+            var assetBundlePath = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "openbodycams");
+            Assets = AssetBundle.LoadFromFile(assetBundlePath);
+
+            if (Assets != null)
+                Instance.Logger.LogInfo("Successfully loaded OpenBodyCams assets.");
+            else
+                Instance.Logger.LogError("Failed to load the asset bundle, some features may be missing.");
 
             harmony.PatchAll(typeof(PatchStartOfRound));
             harmony.PatchAll(typeof(PatchManualCameraRenderer));
@@ -107,6 +124,7 @@ namespace OpenBodyCams
             RadarBoosterPanRPM.SettingChanged += (_, _) => BodyCamComponent.UpdateAllCameraSettings();
             DisableCameraWhileTargetIsOnShip.SettingChanged += (_, _) => BodyCamComponent.UpdateAllCameraSettings();
             EnableCamera.SettingChanged += (_, _) => BodyCamComponent.UpdateAllCameraSettings();
+            DisplayOriginalScreenWhenDisabled.SettingChanged += (_, _) => ShipObjects.UpdateMainBodyCamNoTargetMaterial();
 
             // Terminal:
             TerminalPiPBodyCamEnabled = Config.Bind("Terminal", "EnablePiPBodyCam", false, "Adds a 'view bodycam' command to the terminal that places a picture-in-picture view of the bodycam in front of the radar map.");
@@ -118,6 +136,10 @@ namespace OpenBodyCams
             TerminalPiPWidth.SettingChanged += (_, _) => TerminalCommands.Initialize();
 
             harmony.PatchAll(typeof(TerminalCommands));
+
+            // Upgrades:
+            ShipUpgradeEnabled = Config.Bind("ShipUpgrade", "Enabled", false, "Adds a ship upgrade that enables the body cam on the main monitors only after it is bought.\n\nNOTE: The upgrade will only be available if LethalLib is installed. Without it, the main body cam will always be enabled.");
+            ShipUpgradePrice = Config.Bind("ShipUpgrade", "Price", 200, "The price at which the ship upgrade is sold in the store.");
 
             // Compatibility:
             GeneralImprovementsBetterMonitorIndex = Config.Bind("Compatibility", "GeneralImprovementsBetterMonitorIndex", 0, new ConfigDescription("Choose which of GeneralImprovements' extended monitor set to display the body cam on. A value of 0 will place it on the large monitor on the right, 1-14 goes left to right, top to bottom, skipping the large center monitor.", new AcceptableValueRange<int>(0, 14)));
@@ -146,6 +168,8 @@ namespace OpenBodyCams
             harmony.PatchAll(typeof(PatchFixItemDropping));
 
             BodyCamComponent.InitializeStatic();
+
+            ShipUpgrades.Initialize();
         }
 
         private void UpdateReferencedObjectDestructionDetectionEnabled()
