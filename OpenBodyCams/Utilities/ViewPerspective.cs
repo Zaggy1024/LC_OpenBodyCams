@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 
 using UnityEngine.Rendering;
 using UnityEngine;
@@ -98,8 +98,6 @@ namespace OpenBodyCams.Utilities
                         SetCosmeticHidden(cosmetic, true);
                     foreach (var cosmetic in state.firstPersonCosmetics)
                         SetCosmeticHidden(cosmetic, false);
-
-                    PatchFlowerSnakeEnemy.SetFirstPersonClingingAnimationPositionsForPlayer(player);
                     break;
                 case Perspective.ThirdPerson:
                     player.thisPlayerModel.shadowCastingMode = ShadowCastingMode.On;
@@ -115,13 +113,13 @@ namespace OpenBodyCams.Utilities
                         SetCosmeticHidden(cosmetic, false);
                     foreach (var cosmetic in state.firstPersonCosmetics)
                         SetCosmeticHidden(cosmetic, true);
-
-                    PatchFlowerSnakeEnemy.SetThirdPersonClingingAnimationPositionsForPlayer(player);
                     break;
             }
+
+            PatchFlowerSnakeEnemy.SetClingingAnimationPositionsForPlayer(player, perspective);
         }
 
-        internal static void Restore(PlayerControllerB player, PlayerModelState state)
+        public static void Restore(PlayerControllerB player, PlayerModelState state)
         {
             if (player is null)
                 return;
@@ -144,7 +142,7 @@ namespace OpenBodyCams.Utilities
                 player.currentlyHeldObjectServer.transform.rotation = state.heldItemRotation;
             }
 
-            PatchFlowerSnakeEnemy.ResetClingingAnimationPositionsForPlayer(player);
+            PatchFlowerSnakeEnemy.SetClingingAnimationPositionsForPlayer(player, Perspective.Original);
         }
     }
 

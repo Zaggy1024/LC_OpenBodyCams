@@ -7,6 +7,8 @@ using System.Reflection;
 using HarmonyLib;
 using GameNetcodeStuff;
 
+using OpenBodyCams.Utilities;
+
 namespace OpenBodyCams.Patches
 {
     [HarmonyPatch(typeof(FlowerSnakeEnemy))]
@@ -17,17 +19,17 @@ namespace OpenBodyCams.Patches
 
         internal static HashSet<FlowerSnakeEnemy>[] FlowerSnakesAttachedToPlayers;
 
-        public static void SetFirstPersonClingingAnimationPosition(FlowerSnakeEnemy flowerSnake)
+        internal static void SetFirstPersonClingingAnimationPosition(FlowerSnakeEnemy flowerSnake)
         {
             throw new NotImplementedException($"{nameof(SetFirstPersonClingingAnimationPosition)} stub was called, code was not copied successfully");
         }
 
-        public static void SetThirdPersonClingingAnimationPosition(FlowerSnakeEnemy flowerSnake)
+        internal static void SetThirdPersonClingingAnimationPosition(FlowerSnakeEnemy flowerSnake)
         {
             throw new NotImplementedException($"{nameof(SetFirstPersonClingingAnimationPosition)} stub was called, code was not copied successfully");
         }
 
-        public static void SetFirstPersonClingingAnimationPositionsForPlayer(PlayerControllerB player)
+        public static void SetClingingAnimationPositionsForPlayer(PlayerControllerB player, Perspective perspective)
         {
             if (FlowerSnakesAttachedToPlayers != null)
             {
@@ -35,33 +37,18 @@ namespace OpenBodyCams.Patches
                 {
                     if (clingingFlowerSnake == null)
                         continue;
-                    SetFirstPersonClingingAnimationPosition(clingingFlowerSnake);
-                }
-            }
-        }
-
-        public static void SetThirdPersonClingingAnimationPositionsForPlayer(PlayerControllerB player)
-        {
-            if (FlowerSnakesAttachedToPlayers != null)
-            {
-                foreach (var clingingFlowerSnake in FlowerSnakesAttachedToPlayers[player.playerClientId])
-                {
-                    if (clingingFlowerSnake == null)
-                        continue;
-                    SetThirdPersonClingingAnimationPosition(clingingFlowerSnake);
-                }
-            }
-        }
-
-        public static void ResetClingingAnimationPositionsForPlayer(PlayerControllerB player)
-        {
-            if (FlowerSnakesAttachedToPlayers != null)
-            {
-                foreach (var clingingFlowerSnake in FlowerSnakesAttachedToPlayers[player.playerClientId])
-                {
-                    if (clingingFlowerSnake == null)
-                        continue;
-                    clingingFlowerSnake.SetClingingAnimationPosition();
+                    switch (perspective)
+                    {
+                        case Perspective.Original:
+                            clingingFlowerSnake.SetClingingAnimationPosition();
+                            break;
+                        case Perspective.FirstPerson:
+                            SetFirstPersonClingingAnimationPosition(clingingFlowerSnake);
+                            break;
+                        case Perspective.ThirdPerson:
+                            SetThirdPersonClingingAnimationPosition(clingingFlowerSnake);
+                            break;
+                    }
                 }
             }
         }
@@ -124,18 +111,14 @@ namespace OpenBodyCams.Patches
         [HarmonyPatch(nameof(FlowerSnakeEnemy.StopClingingOnLocalClient))]
         private static void StopClingingToPlayerPrefix(FlowerSnakeEnemy __instance)
         {
-            EnsureFlowerSnakesAttachedToPlayersArrayIsCorrectSize();
-            if (__instance.clingingToPlayer != null)
-                FlowerSnakesAttachedToPlayers[__instance.clingingToPlayer.playerClientId].Remove(__instance);
+            FlowerSnakeStoppedClingingToPlayer(__instance);
         }
 
-        [HarmonyPrefix]
-        [HarmonyPatch(typeof(EnemyAI), nameof(EnemyAI.OnDestroy))]
-        private static void UnloadSceneObjectsEarly(EnemyAI __instance)
+        internal static void FlowerSnakeStoppedClingingToPlayer(FlowerSnakeEnemy flowerSnake)
         {
-            if (__instance is not FlowerSnakeEnemy flowerSnake)
-                return;
-            StopClingingToPlayerPrefix(flowerSnake);
+            EnsureFlowerSnakesAttachedToPlayersArrayIsCorrectSize();
+            if (flowerSnake.clingingToPlayer != null)
+                FlowerSnakesAttachedToPlayers[flowerSnake.clingingToPlayer.playerClientId].Remove(flowerSnake);
         }
     }
 

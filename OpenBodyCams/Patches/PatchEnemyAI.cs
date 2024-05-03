@@ -1,0 +1,19 @@
+﻿using HarmonyLib;
+
+namespace OpenBodyCams.Patches
+{
+    [HarmonyPatch(typeof(EnemyAI))]
+    internal static class PatchEnemyAI
+    {
+        [HarmonyPrefix]
+        [HarmonyPatch(typeof(EnemyAI), nameof(EnemyAI.OnDestroy))]
+        private static void UnloadSceneObjectsEarly(EnemyAI __instance)
+        {
+            if (__instance is FlowerSnakeEnemy flowerSnake)
+            {
+                PatchFlowerSnakeEnemy.FlowerSnakeStoppedClingingToPlayer(flowerSnake);
+                return;
+            }
+        }
+    }
+}
