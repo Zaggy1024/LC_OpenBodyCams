@@ -1,4 +1,5 @@
 ﻿using HarmonyLib;
+using OpenBodyCams.API;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -9,8 +10,11 @@ namespace OpenBodyCams
     public static class TerminalCommands
     {
         public static TerminalNode ViewMonitorNode;
+
         public static TerminalNode ViewBodyCamNode;
         public static TerminalKeyword BodyCamKeyword;
+        public static TerminalNode BodyCamFailedNode;
+        public static TerminalNode BodyCamLockedNode;
 
         public static RawImage PiPImage;
 
@@ -62,6 +66,8 @@ namespace OpenBodyCams
 
                 ShipObjects.MainBodyCam.OnBlankedSet += SetBodyCamBlanked;
 
+                BodyCam.OnBodyCamReceiverBecameDisabled += DisablePiPImage;
+
                 pipImageObject.SetActive(false);
             }
 
@@ -78,6 +84,11 @@ namespace OpenBodyCams
             PiPImage.color = blanked ? Color.black : Color.white;
         }
 
+        private static void DisablePiPImage()
+        {
+            PiPImage.gameObject.SetActive(false);
+        }
+
         static void InitializeCommands()
         {
             RemoveAddedKeywords();
@@ -88,7 +99,7 @@ namespace OpenBodyCams
             {
                 ViewBodyCamNode = ScriptableObject.CreateInstance<TerminalNode>();
                 ViewBodyCamNode.name = "ViewBodyCam";
-                ViewBodyCamNode.displayText = "Toggling body cam\n\n";
+                ViewBodyCamNode.displayText = "Toggling picture-in-picture body cam.\n\n";
                 ViewBodyCamNode.clearPreviousText = true;
 
                 BodyCamKeyword = FindOrCreateKeyword("BodyCam", "bodycam", verb: false);
@@ -101,6 +112,16 @@ namespace OpenBodyCams
                     ]);
 
                 ViewMonitorNode = viewKeyword.FindCompatibleNoun("monitor").result;
+
+                BodyCamFailedNode = ScriptableObject.CreateInstance<TerminalNode>();
+                BodyCamFailedNode.name = "BodyCamFailed";
+                BodyCamFailedNode.displayText = "Map view is currently disabled.\n\n";
+                BodyCamFailedNode.clearPreviousText = true;
+
+                BodyCamLockedNode = ScriptableObject.CreateInstance<TerminalNode>();
+                BodyCamLockedNode.name = "BodyCamFailed";
+                BodyCamLockedNode.displayText = "Please place a body cams receiver antenna on the ship.\n\n";
+                BodyCamLockedNode.clearPreviousText = true;
             }
 
             AddNewlyCreatedCommands();
@@ -112,24 +133,33 @@ namespace OpenBodyCams
         }
 
         [HarmonyPrefix]
-        [HarmonyPatch(typeof(Terminal), nameof(Terminal.RunTerminalEvents))]
-        static bool RunTerminalEventsPrefix(TerminalNode node)
+        [HarmonyPatch(typeof(Terminal), nameof(Terminal.LoadNewNode))]
+        static void LoadNewNodePrefix(ref TerminalNode node)
         {
             if (node == ViewBodyCamNode)
             {
                 if (PiPImage.gameObject.activeSelf)
                 {
                     PiPImage.gameObject.SetActive(false);
-                    return false;
+                    return;
+                }
+
+                if (!BodyCam.BodyCamsAreAvailable)
+                {
+                    node = BodyCamLockedNode;
+                    return;
                 }
 
                 if (!TerminalIsDisplayingMap())
                     ShipObjects.TerminalScript.LoadTerminalImage(ViewMonitorNode);
-                if (TerminalIsDisplayingMap())
-                    PiPImage.gameObject.SetActive(true);
-                return false;
+                if (!TerminalIsDisplayingMap())
+                {
+                    node = BodyCamFailedNode;
+                    return;
+                }
+
+                PiPImage.gameObject.SetActive(true);
             }
-            return true;
         }
 
         [HarmonyPostfix]
