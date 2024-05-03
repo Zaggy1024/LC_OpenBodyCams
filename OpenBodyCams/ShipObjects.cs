@@ -4,6 +4,7 @@ using System.Linq;
 using UnityEngine;
 
 using OpenBodyCams.Compatibility;
+using OpenBodyCams.API;
 
 namespace OpenBodyCams
 {
@@ -126,8 +127,10 @@ namespace OpenBodyCams
                 MainBodyCam.MonitorDisabledMaterial = renderer.sharedMaterials[materialIndex];
                 UpdateMainBodyCamNoTargetMaterial();
 
-                if (Plugin.ShipUpgradeEnabled.Value)
+                if (ShipUpgrades.BodyCamUnlockable != null)
                     MainBodyCam.enabled = ShipUpgrades.BodyCamUnlockableIsPlaced;
+                else
+                    BodyCam.BodyCamReceiverBecameEnabled();
             }
         }
 

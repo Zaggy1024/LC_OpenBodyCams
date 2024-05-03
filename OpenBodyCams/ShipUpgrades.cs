@@ -1,10 +1,11 @@
-using System.Runtime.CompilerServices;
+﻿using System.Runtime.CompilerServices;
 
 using BepInEx.Bootstrap;
 using LethalLib.Modules;
 using UnityEngine;
 
 using OpenBodyCams.Compatibility;
+using OpenBodyCams.API;
 
 namespace OpenBodyCams
 {
@@ -66,6 +67,7 @@ namespace OpenBodyCams
         private void OnEnable()
         {
             ShipUpgrades.BodyCamUnlockableIsPlaced = true;
+            BodyCam.BodyCamReceiverBecameEnabled();
 
             if (ShipObjects.MainBodyCam == null)
                 return;
@@ -75,6 +77,7 @@ namespace OpenBodyCams
         private void OnDisable()
         {
             ShipUpgrades.BodyCamUnlockableIsPlaced = false;
+            BodyCam.BodyCamReceiverBecameDisabled();
 
             if (ShipObjects.MainBodyCam == null)
                 return;

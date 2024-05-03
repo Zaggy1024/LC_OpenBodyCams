@@ -7,6 +7,21 @@ namespace OpenBodyCams.API
 {
     public static class BodyCam
     {
+        public delegate void MainBodyCamStatusUpdate();
+
+        public static event MainBodyCamStatusUpdate OnBodyCamReceiverBecameEnabled;
+        public static event MainBodyCamStatusUpdate OnBodyCamReceiverBecameDisabled;
+
+        public static bool BodyCamsAreAvailable
+        {
+            get
+            {
+                if (ShipUpgrades.BodyCamUnlockable == null)
+                    return true;
+                return ShipUpgrades.BodyCamUnlockableIsPlaced;
+            }
+        }
+
         public static BodyCamComponent CreateBodyCam(GameObject objectToAttachComponentTo, Renderer displayedOnRenderer, int displayMaterialIndex, ManualCameraRenderer mapRendererToSyncTo = null)
         {
             if (mapRendererToSyncTo != null && mapRendererToSyncTo.cam != mapRendererToSyncTo.mapCamera)
@@ -36,6 +51,16 @@ namespace OpenBodyCams.API
             var bodyCam = CreateBodyCam(objectToAttachComponentTo, null, -1, mapRendererToSyncTo);
             bodyCam.MonitorOnMaterial = screenMaterial;
             return bodyCam;
+        }
+
+        internal static void BodyCamReceiverBecameEnabled()
+        {
+            OnBodyCamReceiverBecameEnabled?.Invoke();
+        }
+
+        internal static void BodyCamReceiverBecameDisabled()
+        {
+            OnBodyCamReceiverBecameDisabled?.Invoke();
         }
     }
 }
