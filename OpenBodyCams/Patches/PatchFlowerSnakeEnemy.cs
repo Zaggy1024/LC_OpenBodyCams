@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection.Emit;
@@ -25,6 +25,45 @@ namespace OpenBodyCams.Patches
         public static void SetThirdPersonClingingAnimationPosition(FlowerSnakeEnemy flowerSnake)
         {
             throw new NotImplementedException($"{nameof(SetFirstPersonClingingAnimationPosition)} stub was called, code was not copied successfully");
+        }
+
+        public static void SetFirstPersonClingingAnimationPositionsForPlayer(PlayerControllerB player)
+        {
+            if (FlowerSnakesAttachedToPlayers != null)
+            {
+                foreach (var clingingFlowerSnake in FlowerSnakesAttachedToPlayers[player.playerClientId])
+                {
+                    if (clingingFlowerSnake == null)
+                        continue;
+                    SetFirstPersonClingingAnimationPosition(clingingFlowerSnake);
+                }
+            }
+        }
+
+        public static void SetThirdPersonClingingAnimationPositionsForPlayer(PlayerControllerB player)
+        {
+            if (FlowerSnakesAttachedToPlayers != null)
+            {
+                foreach (var clingingFlowerSnake in FlowerSnakesAttachedToPlayers[player.playerClientId])
+                {
+                    if (clingingFlowerSnake == null)
+                        continue;
+                    SetThirdPersonClingingAnimationPosition(clingingFlowerSnake);
+                }
+            }
+        }
+
+        public static void ResetClingingAnimationPositionsForPlayer(PlayerControllerB player)
+        {
+            if (FlowerSnakesAttachedToPlayers != null)
+            {
+                foreach (var clingingFlowerSnake in FlowerSnakesAttachedToPlayers[player.playerClientId])
+                {
+                    if (clingingFlowerSnake == null)
+                        continue;
+                    clingingFlowerSnake.SetClingingAnimationPosition();
+                }
+            }
         }
 
         [HarmonyTranspiler]
