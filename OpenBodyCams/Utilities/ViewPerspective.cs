@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 
 using UnityEngine.Rendering;
 using UnityEngine;
@@ -8,13 +8,14 @@ using OpenBodyCams.Patches;
 
 namespace OpenBodyCams.Utilities
 {
-    internal enum Perspective
+    public enum Perspective
     {
+        Original,
         FirstPerson,
         ThirdPerson,
     }
 
-    internal static class ViewPerspective
+    public static class ViewPerspective
     {
         public const int DEFAULT_LAYER = 0;
         public const int ENEMIES_LAYER = 19;
@@ -25,7 +26,7 @@ namespace OpenBodyCams.Utilities
             cosmetic.layer = hidden ? ENEMIES_NOT_RENDERED_LAYER : DEFAULT_LAYER;
         }
 
-        internal static void PrepareModelState(PlayerControllerB player, ref PlayerModelState state)
+        public static void PrepareModelState(PlayerControllerB player, ref PlayerModelState state)
         {
             if (player is null)
             {
@@ -44,9 +45,15 @@ namespace OpenBodyCams.Utilities
             state.firstPersonCosmeticsLayers = new int[state.firstPersonCosmetics.Length];
         }
 
-        internal static void Apply(PlayerControllerB player, ref PlayerModelState state, Perspective perspective)
+        public static void Apply(PlayerControllerB player, ref PlayerModelState state, Perspective perspective)
         {
             if (player is null)
+                return;
+
+            if (state.isValid)
+                Restore(player, state);
+
+            if (perspective == Perspective.Original)
                 return;
 
             // Save
@@ -141,22 +148,24 @@ namespace OpenBodyCams.Utilities
         }
     }
 
-    internal struct PlayerModelState
+    public struct PlayerModelState()
     {
-        public ShadowCastingMode thirdPersonBodyShadowMode;
-        public int thirdPersonBodyLayer;
+        internal bool isValid = false;
 
-        public bool firstPersonArmsEnabled;
-        public int firstPersonArmsLayer;
+        internal ShadowCastingMode thirdPersonBodyShadowMode;
+        internal int thirdPersonBodyLayer;
 
-        public GameObject[] thirdPersonCosmetics;
-        public int[] thirdPersonCosmeticsLayers;
+        internal bool firstPersonArmsEnabled;
+        internal int firstPersonArmsLayer;
 
-        public GameObject[] firstPersonCosmetics;
-        public int[] firstPersonCosmeticsLayers;
+        internal GameObject[] thirdPersonCosmetics;
+        internal int[] thirdPersonCosmeticsLayers;
 
-        public Vector3 heldItemPosition;
-        public Quaternion heldItemRotation;
+        internal GameObject[] firstPersonCosmetics;
+        internal int[] firstPersonCosmeticsLayers;
+
+        internal Vector3 heldItemPosition;
+        internal Quaternion heldItemRotation;
 
         private static bool AllObjectsExistInArray(GameObject[] objects)
         {
