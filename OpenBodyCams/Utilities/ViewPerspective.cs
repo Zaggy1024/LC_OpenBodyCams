@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 
 using UnityEngine.Rendering;
 using UnityEngine;
@@ -92,9 +92,9 @@ namespace OpenBodyCams.Utilities
                     foreach (var cosmetic in state.firstPersonCosmetics)
                         SetCosmeticHidden(cosmetic, false);
 
-                    if (PatchFlowerSnakeEnemy.PlayersClingedFlowerSnakes != null)
+                    if (PatchFlowerSnakeEnemy.FlowerSnakesAttachedToPlayers != null)
                     {
-                        foreach (var clingingFlowerSnake in PatchFlowerSnakeEnemy.PlayersClingedFlowerSnakes[player.playerClientId])
+                        foreach (var clingingFlowerSnake in PatchFlowerSnakeEnemy.FlowerSnakesAttachedToPlayers[player.playerClientId])
                         {
                             if (clingingFlowerSnake == null)
                                 continue;
@@ -117,9 +117,9 @@ namespace OpenBodyCams.Utilities
                     foreach (var cosmetic in state.firstPersonCosmetics)
                         SetCosmeticHidden(cosmetic, true);
 
-                    if (PatchFlowerSnakeEnemy.PlayersClingedFlowerSnakes != null)
+                    if (PatchFlowerSnakeEnemy.FlowerSnakesAttachedToPlayers != null)
                     {
-                        foreach (var clingingFlowerSnake in PatchFlowerSnakeEnemy.PlayersClingedFlowerSnakes[player.playerClientId])
+                        foreach (var clingingFlowerSnake in PatchFlowerSnakeEnemy.FlowerSnakesAttachedToPlayers[player.playerClientId])
                         {
                             if (clingingFlowerSnake == null)
                                 continue;
@@ -153,9 +153,9 @@ namespace OpenBodyCams.Utilities
                 player.currentlyHeldObjectServer.transform.rotation = state.heldItemRotation;
             }
 
-            if (PatchFlowerSnakeEnemy.PlayersClingedFlowerSnakes != null)
+            if (PatchFlowerSnakeEnemy.FlowerSnakesAttachedToPlayers != null)
             {
-                foreach (var clingingFlowerSnake in PatchFlowerSnakeEnemy.PlayersClingedFlowerSnakes[player.playerClientId])
+                foreach (var clingingFlowerSnake in PatchFlowerSnakeEnemy.FlowerSnakesAttachedToPlayers[player.playerClientId])
                 {
                     if (clingingFlowerSnake == null)
                         continue;

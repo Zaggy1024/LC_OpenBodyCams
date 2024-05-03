@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection.Emit;
@@ -15,7 +15,7 @@ namespace OpenBodyCams.Patches
         internal static List<CodeInstruction> FirstPersonClingingAnimationInstructions;
         internal static List<CodeInstruction> ThirdPersonClingingAnimationInstructions;
 
-        internal static HashSet<FlowerSnakeEnemy>[] PlayersClingedFlowerSnakes;
+        internal static HashSet<FlowerSnakeEnemy>[] FlowerSnakesAttachedToPlayers;
 
         public static void SetFirstPersonClingingAnimationPosition(FlowerSnakeEnemy flowerSnake)
         {
@@ -54,20 +54,20 @@ namespace OpenBodyCams.Patches
             return instructions;
         }
 
-        private static void EnsurePlayersClingedFlowerSnakesArray()
+        private static void EnsureFlowerSnakesAttachedToPlayersArrayIsCorrectSize()
         {
             var playerCount = StartOfRound.Instance.allPlayerScripts.Length;
-            if (PlayersClingedFlowerSnakes == null)
-                PlayersClingedFlowerSnakes = new HashSet<FlowerSnakeEnemy>[playerCount];
-            else if (PlayersClingedFlowerSnakes.Length != playerCount)
-                Array.Resize(ref PlayersClingedFlowerSnakes, playerCount);
+            if (FlowerSnakesAttachedToPlayers == null)
+                FlowerSnakesAttachedToPlayers = new HashSet<FlowerSnakeEnemy>[playerCount];
+            else if (FlowerSnakesAttachedToPlayers.Length != playerCount)
+                Array.Resize(ref FlowerSnakesAttachedToPlayers, playerCount);
             else
                 return;
 
             for (var i = 0; i < playerCount; i++)
             {
-                if (PlayersClingedFlowerSnakes[i] == null)
-                    PlayersClingedFlowerSnakes[i] = [];
+                if (FlowerSnakesAttachedToPlayers[i] == null)
+                    FlowerSnakesAttachedToPlayers[i] = [];
             }
         }
 
@@ -75,19 +75,19 @@ namespace OpenBodyCams.Patches
         [HarmonyPatch(nameof(FlowerSnakeEnemy.SetClingToPlayer))]
         private static void SetClingToPlayerPrefix(FlowerSnakeEnemy __instance, PlayerControllerB playerToCling)
         {
-            EnsurePlayersClingedFlowerSnakesArray();
+            EnsureFlowerSnakesAttachedToPlayersArrayIsCorrectSize();
             if (__instance.clingingToPlayer != null)
-                PlayersClingedFlowerSnakes[__instance.clingingToPlayer.playerClientId].Remove(__instance);
-            PlayersClingedFlowerSnakes[playerToCling.playerClientId].Add(__instance);
+                FlowerSnakesAttachedToPlayers[__instance.clingingToPlayer.playerClientId].Remove(__instance);
+            FlowerSnakesAttachedToPlayers[playerToCling.playerClientId].Add(__instance);
         }
 
         [HarmonyPrefix]
         [HarmonyPatch(nameof(FlowerSnakeEnemy.StopClingingOnLocalClient))]
         private static void StopClingingToPlayerPrefix(FlowerSnakeEnemy __instance)
         {
-            EnsurePlayersClingedFlowerSnakesArray();
+            EnsureFlowerSnakesAttachedToPlayersArrayIsCorrectSize();
             if (__instance.clingingToPlayer != null)
-                PlayersClingedFlowerSnakes[__instance.clingingToPlayer.playerClientId].Remove(__instance);
+                FlowerSnakesAttachedToPlayers[__instance.clingingToPlayer.playerClientId].Remove(__instance);
         }
 
         [HarmonyPrefix]
