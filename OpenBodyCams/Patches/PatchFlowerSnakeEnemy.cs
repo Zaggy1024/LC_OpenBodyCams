@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection.Emit;
@@ -26,7 +26,7 @@ namespace OpenBodyCams.Patches
 
         internal static void SetThirdPersonClingingAnimationPosition(FlowerSnakeEnemy flowerSnake)
         {
-            throw new NotImplementedException($"{nameof(SetFirstPersonClingingAnimationPosition)} stub was called, code was not copied successfully");
+            throw new NotImplementedException($"{nameof(SetThirdPersonClingingAnimationPosition)} stub was called, code was not copied successfully");
         }
 
         public static void SetClingingAnimationPositionsForPlayer(PlayerControllerB player, Perspective perspective)
