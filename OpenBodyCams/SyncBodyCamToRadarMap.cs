@@ -62,13 +62,16 @@ namespace OpenBodyCams
                 BodyCam = GetComponent<BodyCamComponent>();
         }
 
-        void Start()
+        private void OnEnable()
         {
             UpdateBodyCamTarget();
         }
 
         public void UpdateBodyCamTarget()
         {
+            if (!isActiveAndEnabled)
+                return;
+
             if (MapRenderer.targetedPlayer != null)
                 BodyCam.SetTargetToPlayer(MapRenderer.targetedPlayer);
             else
@@ -79,6 +82,9 @@ namespace OpenBodyCams
 
         public void StartTargetTransition()
         {
+            if (!isActiveAndEnabled)
+                return;
+
             BodyCam.StartTargetTransition();
         }
 
