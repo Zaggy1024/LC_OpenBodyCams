@@ -7,7 +7,7 @@ namespace OpenBodyCams.Utilities
         private static Camera[] allCameras = [];
         private static readonly Plane[] frustumPlanes = new Plane[6];
 
-        public static bool IsVisibleToAnyCameraExcept(this Renderer renderer, Camera cameraToSkip, bool debug = false)
+        public static bool IsVisibleToAnyCameraExcept(this Renderer renderer, Camera cameraToSkip)
         {
             if (allCameras.Length != Camera.allCamerasCount)
                 allCameras = new Camera[Camera.allCamerasCount];

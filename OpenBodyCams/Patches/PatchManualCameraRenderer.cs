@@ -66,7 +66,7 @@ namespace OpenBodyCams.Patches
                 if (!player.isInHangarShipRoom && StartOfRound.Instance.shipDoorsEnabled)
                     return;
 
-                __result = ShipObjects.DoorScreenRenderer.IsVisibleToAnyCameraExcept(__instance.cam, true);
+                __result = ShipObjects.DoorScreenRenderer.IsVisibleToAnyCameraExcept(__instance.cam);
             }
         }
 
