@@ -117,6 +117,7 @@ namespace OpenBodyCams.Utilities
             }
 
             PatchFlowerSnakeEnemy.SetClingingAnimationPositionsForPlayer(player, perspective);
+            PatchCentipedeAI.SetClingingAnimationPositionsForPlayer(player, perspective);
         }
 
         public static void Restore(PlayerControllerB player, PlayerModelState state)
@@ -143,6 +144,7 @@ namespace OpenBodyCams.Utilities
             }
 
             PatchFlowerSnakeEnemy.SetClingingAnimationPositionsForPlayer(player, Perspective.Original);
+            PatchCentipedeAI.SetClingingAnimationPositionsForPlayer(player, Perspective.Original);
         }
     }
 

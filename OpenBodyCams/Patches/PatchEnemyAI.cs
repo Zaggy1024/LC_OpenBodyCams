@@ -14,6 +14,11 @@ namespace OpenBodyCams.Patches
                 PatchFlowerSnakeEnemy.FlowerSnakeStoppedClingingToPlayer(flowerSnake);
                 return;
             }
+            if (__instance is CentipedeAI centipede)
+            {
+                PatchCentipedeAI.CentipedeStoppedClingingToPlayer(centipede);
+                return;
+            }
         }
     }
 }

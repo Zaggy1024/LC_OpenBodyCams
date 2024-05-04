@@ -95,6 +95,7 @@ namespace OpenBodyCams
             harmony.PatchAll(typeof(PatchHauntedMaskItem));
             harmony.PatchAll(typeof(PatchMaskedPlayerEnemy));
             harmony.PatchAll(typeof(PatchUnlockableSuit));
+            harmony.PatchAll(typeof(PatchCentipedeAI));
             harmony.PatchAll(typeof(PatchFlowerSnakeEnemy));
             harmony.PatchAll(typeof(PatchCopyVanillaFlowerSnakeEnemyCode));
 
