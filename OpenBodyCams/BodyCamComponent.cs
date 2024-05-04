@@ -311,7 +311,7 @@ namespace OpenBodyCams
 
             CameraObject = new GameObject("BodyCam");
             Camera = CameraObject.AddComponent<Camera>();
-            Camera.nearClipPlane = 0.05f;
+            Camera.nearClipPlane = 0.01f;
             Camera.cullingMask = bodyCamCullingMask;
 
             var cameraData = CameraObject.AddComponent<HDAdditionalCameraData>();
