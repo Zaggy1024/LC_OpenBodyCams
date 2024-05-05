@@ -266,18 +266,11 @@ namespace OpenBodyCams
             SyncBodyCamToRadarMap.UpdateBodyCamTarget(this);
         }
 
-        private static void SetMaterial(Renderer renderer, int index, Material material)
-        {
-            var materials = renderer.sharedMaterials;
-            materials[index] = material;
-            renderer.sharedMaterials = materials;
-        }
-
         private void SetMonitorMaterial(Material material)
         {
             if (MonitorRenderer == null)
                 return;
-            SetMaterial(MonitorRenderer, MonitorMaterialIndex, material);
+            MonitorRenderer.SetMaterial(MonitorMaterialIndex, material);
         }
 
         private void EnsureMaterialsExist()

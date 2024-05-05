@@ -30,5 +30,12 @@ namespace OpenBodyCams.Utilities
 
             return false;
         }
+
+        public static void SetMaterial(this Renderer renderer, int index, Material material)
+        {
+            var materials = renderer.sharedMaterials;
+            materials[index] = material;
+            renderer.sharedMaterials = materials;
+        }
     }
 }
