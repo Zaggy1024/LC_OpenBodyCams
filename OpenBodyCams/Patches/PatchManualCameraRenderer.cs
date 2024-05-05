@@ -39,6 +39,20 @@ namespace OpenBodyCams.Patches
         [HarmonyPatch("MeetsCameraEnabledConditions")]
         private static void MeetsCameraEnabledConditionsPostfix(ManualCameraRenderer __instance, ref bool __result, PlayerControllerB player)
         {
+            // The internal ship camera makes the monitors visible, and since it renders while the monitors are visible, it nevers tops rendering.
+            // This causes the map screen to by extension to never become invisible while the player is in the ship.
+
+            // To counteract this, implement a manual frustum test for the internal ship camera, excluding itself to prevent the loop.
+            if ((object)__instance == ShipObjects.ShipCameraRenderer)
+            {
+                if (!__result)
+                    return;
+
+                __result = __instance.mesh.IsVisibleToAnyCameraExcept(__instance.cam);
+            }
+
+            // By doing the above, we also cause the map screen to stop rendering when entering the terminal. Therefore, we need to test whether
+            // the terminal is in use and enable it if so.
             if ((object)__instance == StartOfRound.Instance.mapScreen)
             {
                 if (__result)
@@ -50,14 +64,9 @@ namespace OpenBodyCams.Patches
                 if (ShipObjects.TerminalScript.terminalUIScreen.isActiveAndEnabled)
                     __result = true;
             }
-            else if ((object)__instance == ShipObjects.ShipCameraRenderer)
-            {
-                if (!__result)
-                    return;
 
-                __result = __instance.mesh.IsVisibleToAnyCameraExcept(__instance.cam);
-            }
-            else if ((object)__instance == ShipObjects.ExternalCameraRenderer)
+            // The door screen also relies on this bug, so we need to test whether it is visible and enable it if so.
+            if ((object)__instance == ShipObjects.ExternalCameraRenderer)
             {
                 if (!ShipObjects.DoorScreenUsesExternalCamera)
                     return;
