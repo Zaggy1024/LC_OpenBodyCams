@@ -261,7 +261,8 @@ namespace OpenBodyCams
 
         void Start()
         {
-            EnsureCameraExists();
+            if (!EnsureCameraExists())
+                return;
 
             SyncBodyCamToRadarMap.UpdateBodyCamTarget(this);
         }
@@ -294,10 +295,12 @@ namespace OpenBodyCams
                 UpdateScreenMaterial();
         }
 
-        public void EnsureCameraExists()
+        public bool EnsureCameraExists()
         {
+            if (!hasFinishedStaticSetup)
+                return false;
             if (CameraObject != null)
-                return;
+                return true;
 
             Plugin.Instance.Logger.LogInfo("Camera has been destroyed, recreating it.");
             EnsureMaterialsExist();
@@ -354,6 +357,7 @@ namespace OpenBodyCams
             fogShaderPlaneRenderer.forceRenderingOff = true;
 
             OnCameraCreated?.Invoke(Camera);
+            return true;
         }
 
         public void UpdateSettings()
@@ -601,7 +605,8 @@ namespace OpenBodyCams
                 return;
             }
 
-            EnsureCameraExists();
+            if (!EnsureCameraExists())
+                return;
 
             ClearTargetDirtyImmediate();
 
@@ -692,7 +697,8 @@ namespace OpenBodyCams
                 return;
             }
 
-            EnsureCameraExists();
+            if (!EnsureCameraExists())
+                return;
 
             ClearTargetDirtyImmediate();
 
@@ -800,7 +806,8 @@ namespace OpenBodyCams
 
         void LateUpdate()
         {
-            EnsureCameraExists();
+            if (!EnsureCameraExists())
+                return;
 
             UpdateTargetStatusDuringUpdate();
 
