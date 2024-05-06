@@ -1,4 +1,7 @@
+using System;
+using System.Globalization;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 
 using BepInEx;
@@ -120,7 +123,7 @@ namespace OpenBodyCams
             RenderDistance.SettingChanged += (_, _) => BodyCamComponent.UpdateAllCameraSettings();
             Framerate.SettingChanged += (_, _) => BodyCamComponent.UpdateAllCameraSettings();
             NightVisionBrightness.SettingChanged += (_, _) => BodyCamComponent.UpdateAllCameraSettings();
-            MonitorEmissiveColor.SettingChanged += (_, _) => BodyCamComponent.UpdateAllCameraSettings();
+            MonitorEmissiveColor.SettingChanged += (_, _) => ShipObjects.MainBodyCam?.MonitorOnMaterial.SetColor("_EmissiveColor", GetEmissiveColor());
             MonitorTextureFiltering.SettingChanged += (_, _) => BodyCamComponent.UpdateAllCameraSettings();
             RadarBoosterPanRPM.SettingChanged += (_, _) => BodyCamComponent.UpdateAllCameraSettings();
             DisableCameraWhileTargetIsOnShip.SettingChanged += (_, _) => BodyCamComponent.UpdateAllCameraSettings();
@@ -179,6 +182,30 @@ namespace OpenBodyCams
                 DestructionDetectionPatch.PatchAll(typeof(PatchModelDestructionDebugging));
             else
                 DestructionDetectionPatch.UnpatchSelf();
+        }
+
+        private static Color ParseColor(string str)
+        {
+            var components = str
+                .Split(new char[] { ',', ' ' }, StringSplitOptions.RemoveEmptyEntries)
+                .Select(x => float.Parse(x.Trim(), CultureInfo.InvariantCulture))
+                .ToArray();
+            if (components.Length < 0 || components.Length > 4)
+                throw new ArgumentException("Too many color components");
+            return new Color(components[0], components[1], components[2], components.Length == 4 ? components[3] : 0);
+        }
+
+        internal static Color GetEmissiveColor()
+        {
+            try
+            {
+                return ParseColor(MonitorEmissiveColor.Value);
+            }
+            catch (Exception e)
+            {
+                Instance.Logger.LogWarning($"Failed to parse emissive color: {e}");
+                return ParseColor((string)MonitorEmissiveColor.DefaultValue);
+            }
         }
     }
 }

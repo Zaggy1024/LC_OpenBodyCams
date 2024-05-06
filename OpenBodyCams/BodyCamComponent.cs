@@ -43,7 +43,6 @@ namespace OpenBodyCams
         private static bool hasFinishedStaticSetup = false;
 
         private static bool disableCameraWhileTargetIsOnShip = false;
-        private static Color screenEmissiveColor;
 
         private static float radarBoosterPanSpeed;
 
@@ -153,33 +152,8 @@ namespace OpenBodyCams
                 bodyCam.UpdateSettings();
         }
 
-        private static Color ParseColor(string str)
-        {
-            var components = str
-                .Split(new char[] { ',', ' ' }, StringSplitOptions.RemoveEmptyEntries)
-                .Select(x => float.Parse(x.Trim(), CultureInfo.InvariantCulture))
-                .ToArray();
-            if (components.Length < 0 || components.Length > 4)
-                throw new ArgumentException("Too many color components");
-            return new Color(components[0], components[1], components[2], components.Length == 4 ? components[3] : 0);
-        }
-
-        private static Color GetEmissiveColor()
-        {
-            try
-            {
-                return ParseColor(Plugin.MonitorEmissiveColor.Value);
-            }
-            catch (Exception e)
-            {
-                Plugin.Instance.Logger.LogWarning($"Failed to parse emissive color: {e}");
-                return ParseColor((string)Plugin.MonitorEmissiveColor.DefaultValue);
-            }
-        }
-
         internal static void UpdateStaticSettings()
         {
-            screenEmissiveColor = GetEmissiveColor();
             disableCameraWhileTargetIsOnShip = Plugin.DisableCameraWhileTargetIsOnShip.Value;
 
             radarBoosterPanSpeed = Plugin.RadarBoosterPanRPM.Value * 360 / 60;
@@ -282,6 +256,7 @@ namespace OpenBodyCams
             {
                 MonitorOnMaterial = new(Shader.Find("HDRP/Unlit")) { name = "BodyCamMaterial" };
                 MonitorOnMaterial.SetFloat("_AlbedoAffectEmissive", 1);
+                MonitorOnMaterial.SetColor("_EmissiveColor", Plugin.GetEmissiveColor());
                 createdMaterial = true;
             }
 
@@ -384,10 +359,7 @@ namespace OpenBodyCams
             Camera.fieldOfView = Plugin.FieldOfView.Value;
 
             if (MonitorOnMaterial != null)
-            {
                 MonitorOnMaterial.mainTexture = Camera.targetTexture;
-                MonitorOnMaterial.SetColor("_EmissiveColor", screenEmissiveColor);
-            }
 
             Camera.farClipPlane = Plugin.RenderDistance.Value;
 
