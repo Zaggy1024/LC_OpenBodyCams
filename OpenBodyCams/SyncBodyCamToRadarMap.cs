@@ -12,8 +12,6 @@ namespace OpenBodyCams
         private static SyncBodyCamToRadarMap[] AllSynchronizedCams = new SyncBodyCamToRadarMap[0];
         public static SyncBodyCamToRadarMap[] GetAllSynchronizedCams() { return AllSynchronizedCams; }
 
-        public static readonly FieldInfo f_ManualCameraRenderer_isScreenOn = AccessTools.Field(typeof(ManualCameraRenderer), "isScreenOn");
-
         internal ManualCameraRenderer MapRenderer;
         public ManualCameraRenderer GetMapRenderer() { return MapRenderer; }
         internal BodyCamComponent BodyCam;
@@ -77,7 +75,7 @@ namespace OpenBodyCams
             else
                 BodyCam.SetTargetToTransform(MapRenderer.radarTargets[MapRenderer.targetTransformIndex].transform);
 
-            BodyCam.SetScreenPowered((bool)f_ManualCameraRenderer_isScreenOn.GetValue(MapRenderer));
+            BodyCam.SetScreenPowered(MapRenderer.isScreenOn);
         }
 
         public void StartTargetTransition()
