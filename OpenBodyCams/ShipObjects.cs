@@ -121,6 +121,7 @@ namespace OpenBodyCams
                 if (MainBodyCam.MonitorRenderer == null)
                 {
                     Plugin.Instance.Logger.LogError("Failed to find the monitor renderer.");
+                    UnityEngine.Object.DestroyImmediate(MainBodyCam);
                     return;
                 }
                 UpdateMainBodyCamNoTargetMaterial();
