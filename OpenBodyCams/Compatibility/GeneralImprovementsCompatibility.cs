@@ -1,49 +1,36 @@
-﻿using UnityEngine;
+using UnityEngine;
 
 namespace OpenBodyCams.Compatibility
 {
     public static class GeneralImprovementsCompatibility
     {
-        private static string getMonitorPath(int id)
-        {
-            switch (id)
-            {
-                case 0:
-                    return "Monitors/TopGroupL/Screen1";
-                case 1:
-                    return "Monitors/TopGroupL/Screen2";
-                case 2:
-                    return "Monitors/TopGroupM/Screen3";
-                case 3:
-                    return "Monitors/TopGroupM/Screen4";
-                case 4:
-                    return "Monitors/TopGroupR/Screen5";
-                case 5:
-                    return "Monitors/TopGroupR/Screen6";
-                case 6:
-                    return "Monitors/TopGroupL/Screen7";
-                case 7:
-                    return "Monitors/TopGroupL/Screen8";
-                case 8:
-                    return "Monitors/TopGroupM/Screen9";
-                case 9:
-                    return "Monitors/TopGroupM/Screen10";
-                case 10:
-                    return "Monitors/TopGroupR/Screen11";
-                case 11:
-                    return "Monitors/TopGroupR/Screen12";
-                case 12:
-                    return "Monitors/BigLeft/LScreen";
-                case 13:
-                    return "Monitors/BigRight/RScreen";
-            }
+        private const string MonitorGroupPath = "Environment/HangarShip/ShipModels2b/MonitorWall/MonitorGroup(Clone)";
 
-            return null;
+        private static string GetMonitorPath(int id)
+        {
+            return id switch
+            {
+                0 => $"{MonitorGroupPath}/Monitors/TopGroupL/Screen1",
+                1 => $"{MonitorGroupPath}/Monitors/TopGroupL/Screen2",
+                2 => $"{MonitorGroupPath}/Monitors/TopGroupM/Screen3",
+                3 => $"{MonitorGroupPath}/Monitors/TopGroupM/Screen4",
+                4 => $"{MonitorGroupPath}/Monitors/TopGroupR/Screen5",
+                5 => $"{MonitorGroupPath}/Monitors/TopGroupR/Screen6",
+                6 => $"{MonitorGroupPath}/Monitors/TopGroupL/Screen7",
+                7 => $"{MonitorGroupPath}/Monitors/TopGroupL/Screen8",
+                8 => $"{MonitorGroupPath}/Monitors/TopGroupM/Screen9",
+                9 => $"{MonitorGroupPath}/Monitors/TopGroupM/Screen10",
+                10 => $"{MonitorGroupPath}/Monitors/TopGroupR/Screen11",
+                11 => $"{MonitorGroupPath}/Monitors/TopGroupR/Screen12",
+                12 => $"{MonitorGroupPath}/Monitors/BigLeft/LScreen",
+                13 => $"{MonitorGroupPath}/Monitors/BigRight/RScreen",
+                _ => null,
+            };
         }
 
         public static MeshRenderer GetMonitorForID(int id)
         {
-            return GameObject.Find("Environment/HangarShip/ShipModels2b/MonitorWall/MonitorGroup(Clone)/" + getMonitorPath(id))?.GetComponent<MeshRenderer>();
+            return GameObject.Find(GetMonitorPath(id))?.GetComponent<MeshRenderer>();
         }
     }
 }
