@@ -49,6 +49,7 @@ namespace OpenBodyCams.Patches
                     return;
 
                 __result = __instance.mesh.IsVisibleToAnyCameraExcept(__instance.cam);
+                return;
             }
 
             // By doing the above, we also cause the map screen to stop rendering when entering the terminal. Therefore, we need to test whether
@@ -61,8 +62,8 @@ namespace OpenBodyCams.Patches
                 if (ShipObjects.TwoRadarCamsPresent)
                     return;
 
-                if (ShipObjects.TerminalScript.terminalUIScreen.isActiveAndEnabled)
-                    __result = true;
+                __result = ShipObjects.TerminalScript.terminalUIScreen.isActiveAndEnabled;
+                return;
             }
 
             // The door screen also relies on this bug, so we need to test whether it is visible and enable it if so.
@@ -76,6 +77,7 @@ namespace OpenBodyCams.Patches
                     return;
 
                 __result = ShipObjects.DoorScreenRenderer.IsVisibleToAnyCameraExcept(__instance.cam);
+                return;
             }
         }
 
