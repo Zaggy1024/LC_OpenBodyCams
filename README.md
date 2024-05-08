@@ -98,3 +98,6 @@ The body cam component will be attached to the provided `GameObject`, and use th
 The `displayMaterialIndex` argument indicates which of the shared materials on the renderer should be replaced by the body cam's render texture. The texture that is in that index originally will be stored by the body cam, and when `SetScreenPowered(false)` is called, it will replace the body cam's output on the display. The body cam's output can then be brought back with a `SetScreenPowered(true)` call.
 
 The `ManualCameraRenderer` argument must be a map renderer where its `cam` field is the same reference as its `mapCamera` field. However, the argument may be null, in which case the body cam's target may be controlled directly.
+
+# Credits
+- smxrez - Body cam antenna 3D model
