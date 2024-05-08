@@ -414,8 +414,11 @@ namespace OpenBodyCams
                     return;
                 }
             }
+            else
+            {
+                MonitorOnMaterial.color = Color.white;
+            }
 
-            MonitorOnMaterial.color = Color.white;
             SetMonitorMaterial(MonitorOnMaterial);
         }
 
