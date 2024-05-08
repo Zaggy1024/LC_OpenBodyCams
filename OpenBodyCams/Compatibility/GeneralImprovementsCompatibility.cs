@@ -1,3 +1,8 @@
+﻿using System;
+using System.Runtime.CompilerServices;
+
+using BepInEx.Bootstrap;
+using GeneralImprovements.Assets;
 using UnityEngine;
 
 namespace OpenBodyCams.Compatibility
@@ -5,6 +10,25 @@ namespace OpenBodyCams.Compatibility
     public static class GeneralImprovementsCompatibility
     {
         private const string MonitorGroupPath = "Environment/HangarShip/ShipModels2b/MonitorWall/MonitorGroup(Clone)";
+
+        internal static bool GeneralImprovementsEnabled => Chainloader.PluginInfos.ContainsKey(ModGUIDs.GeneralImprovements);
+        internal static MonoBehaviour BetterMonitorsComponent
+        {
+            get
+            {
+                if (betterMonitorsComponentCache == null && GeneralImprovementsEnabled)
+                    EmplaceBetterMonitorsComponent();
+                return betterMonitorsComponentCache;
+            }
+        }
+
+        private static MonoBehaviour betterMonitorsComponentCache;
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private static void EmplaceBetterMonitorsComponent()
+        {
+            betterMonitorsComponentCache = GameObject.Find(MonitorGroupPath)?.GetComponent<Monitors>();
+        }
 
         private static string GetMonitorPath(int id)
         {
@@ -31,6 +55,33 @@ namespace OpenBodyCams.Compatibility
         public static MeshRenderer GetMonitorForID(int id)
         {
             return GameObject.Find(GetMonitorPath(id))?.GetComponent<MeshRenderer>();
+        }
+
+        public static Material GetOriginalMonitorMaterial(int id)
+        {
+            if (!GeneralImprovementsEnabled)
+                return null;
+            try
+            {
+                return GetOriginalMonitorMaterialWithGI(id);
+            }
+            catch (Exception e)
+            {
+                Plugin.Instance.Logger.LogError($"Failed to get an original monitor material from GeneralImprovements\n{e}");
+                return null;
+            }
+        }
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private static Material GetOriginalMonitorMaterialWithGI(int id)
+        {
+            if (BetterMonitorsComponent is not Monitors monitors)
+                return null;
+            if (monitors._initialMaterialAssignments.TryGetValue(id, out var material))
+                return material;
+            if (GeneralImprovements.Plugin.ShowBackgroundOnAllScreens.Value || monitors._initialTextAssignments.ContainsKey(id))
+                return monitors._originalScreenMaterials[id].Value;
+            return null;
         }
     }
 }

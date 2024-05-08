@@ -27,6 +27,10 @@
             <HintPath>..\..\Libraries\Assembly-CSharp.dll</HintPath>
             <Private>false</Private>
         </Reference>
+        <Reference Include="GeneralImprovements" Publicize="true">
+            <HintPath>..\..\Libraries\GeneralImprovements.dll</HintPath>
+            <Private>false</Private>
+        </Reference>
         <Reference Include="LethalLib">
             <HintPath>..\..\Libraries\LethalLib.dll</HintPath>
             <Private>false</Private>
@@ -49,6 +53,10 @@
         </Reference>
         <Reference Include="Unity.RenderPipelines.HighDefinition.Runtime">
             <HintPath>..\..\Libraries\Unity.RenderPipelines.HighDefinition.Runtime.dll</HintPath>
+            <Private>false</Private>
+        </Reference>
+        <Reference Include="Unity.TextMeshPro">
+            <HintPath>..\..\Libraries\Unity.TextMeshPro.dll</HintPath>
             <Private>false</Private>
         </Reference>
         <Reference Include="UnityEngine">

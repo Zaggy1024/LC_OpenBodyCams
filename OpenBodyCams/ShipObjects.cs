@@ -103,8 +103,9 @@ namespace OpenBodyCams
 
                 bottomMonitors.AddComponent<SyncBodyCamToRadarMap>();
 
-                var renderer = bottomMonitors.GetComponent<MeshRenderer>();
-                var materialIndex = 2;
+                MainBodyCam.MonitorRenderer = bottomMonitors.GetComponent<MeshRenderer>();
+                MainBodyCam.MonitorMaterialIndex = 2;
+                MainBodyCam.MonitorDisabledMaterial = MainBodyCam.MonitorRenderer.sharedMaterials[MainBodyCam.MonitorMaterialIndex];
 
                 // GeneralImprovements BetterMonitors enabled:
                 int monitorID = Plugin.GeneralImprovementsBetterMonitorIndex.Value - 1;
@@ -112,19 +113,16 @@ namespace OpenBodyCams
                     monitorID = 13;
                 if (GeneralImprovementsCompatibility.GetMonitorForID(monitorID) is MeshRenderer giMonitorRenderer)
                 {
-                    renderer = giMonitorRenderer;
-                    materialIndex = 0;
+                    MainBodyCam.MonitorRenderer = giMonitorRenderer;
+                    MainBodyCam.MonitorMaterialIndex = 0;
+                    MainBodyCam.MonitorDisabledMaterial = GeneralImprovementsCompatibility.GetOriginalMonitorMaterial(monitorID);
                 }
 
-                if (renderer == null)
+                if (MainBodyCam.MonitorRenderer == null)
                 {
                     Plugin.Instance.Logger.LogError("Failed to find the monitor renderer.");
                     return;
                 }
-
-                MainBodyCam.MonitorRenderer = renderer;
-                MainBodyCam.MonitorMaterialIndex = materialIndex;
-                MainBodyCam.MonitorDisabledMaterial = renderer.sharedMaterials[materialIndex];
                 UpdateMainBodyCamNoTargetMaterial();
 
                 if (ShipUpgrades.BodyCamUnlockable != null)
