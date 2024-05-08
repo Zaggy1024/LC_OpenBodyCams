@@ -17,7 +17,7 @@ namespace OpenBodyCams
 
         public static BodyCamComponent MainBodyCam;
 
-        internal static ManualCameraRenderer ShipCameraRenderer;
+        internal static ManualCameraRenderer InternalCameraRenderer;
 
         internal static ManualCameraRenderer ExternalCameraRenderer;
         internal static MeshRenderer DoorScreenRenderer;
@@ -44,8 +44,8 @@ namespace OpenBodyCams
                 return;
             }
 
-            ShipCameraRenderer = shipCameraObject.GetComponent<ManualCameraRenderer>();
-            if (ShipCameraRenderer?.mesh == null)
+            InternalCameraRenderer = shipCameraObject.GetComponent<ManualCameraRenderer>();
+            if (InternalCameraRenderer?.mesh == null)
             {
                 Plugin.Instance.Logger.LogError("Internal ship camera does not have a camera renderer.");
                 return;
@@ -54,7 +54,7 @@ namespace OpenBodyCams
             if (!Plugin.DisableInternalShipCamera.Value)
                 return;
 
-            var shipScreenMaterialIndex = Array.FindIndex(ShipCameraRenderer.mesh.sharedMaterials, material => material.name.StartsWith("ShipScreen1Mat"));
+            var shipScreenMaterialIndex = Array.FindIndex(InternalCameraRenderer.mesh.sharedMaterials, material => material.name.StartsWith("ShipScreen1Mat"));
 
             if (BlackScreenMaterial == null || shipScreenMaterialIndex == -1)
             {
@@ -64,9 +64,9 @@ namespace OpenBodyCams
 
             shipCameraObject.SetActive(false);
 
-            var newMaterials = ShipCameraRenderer.mesh.sharedMaterials;
+            var newMaterials = InternalCameraRenderer.mesh.sharedMaterials;
             newMaterials[shipScreenMaterialIndex] = BlackScreenMaterial;
-            ShipCameraRenderer.mesh.sharedMaterials = newMaterials;
+            InternalCameraRenderer.mesh.sharedMaterials = newMaterials;
         }
 
         public static void LateInitialization()

@@ -43,7 +43,7 @@ namespace OpenBodyCams.Patches
             // This causes the map screen to by extension to never become invisible while the player is in the ship.
 
             // To counteract this, implement a manual frustum test for the internal ship camera, excluding itself to prevent the loop.
-            if ((object)__instance == ShipObjects.ShipCameraRenderer)
+            if ((object)__instance == ShipObjects.InternalCameraRenderer)
             {
                 if (!__result)
                     return;
