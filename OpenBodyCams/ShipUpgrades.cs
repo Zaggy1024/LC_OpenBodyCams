@@ -33,6 +33,8 @@ namespace OpenBodyCams
 
         private static void RegisterBodyCamShipUpgrade()
         {
+            if (Plugin.Assets == null)
+                return;
             if (!Plugin.ShipUpgradeEnabled.Value)
                 return;
 
