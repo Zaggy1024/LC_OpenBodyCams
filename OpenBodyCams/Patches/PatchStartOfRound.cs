@@ -6,7 +6,7 @@ namespace OpenBodyCams.Patches
     internal static class PatchStartOfRound
     {
         [HarmonyPostfix]
-        [HarmonyPatch("Start")]
+        [HarmonyPatch(nameof(StartOfRound.Start))]
         [HarmonyPriority(Priority.VeryHigh)]
         private static void StartPostfix()
         {
@@ -14,7 +14,7 @@ namespace OpenBodyCams.Patches
         }
 
         [HarmonyPostfix]
-        [HarmonyPatch("ReviveDeadPlayers")]
+        [HarmonyPatch(nameof(StartOfRound.ReviveDeadPlayers))]
         private static void ReviveDeadPlayersPostfix()
         {
             BodyCamComponent.MarkTargetStatusChangedForAllBodyCams();
