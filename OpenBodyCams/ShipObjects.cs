@@ -5,6 +5,7 @@ using UnityEngine;
 
 using OpenBodyCams.Compatibility;
 using OpenBodyCams.API;
+using OpenBodyCams.Utilities;
 
 namespace OpenBodyCams
 {
@@ -23,56 +24,27 @@ namespace OpenBodyCams
         internal static MeshRenderer DoorScreenRenderer;
         internal static bool DoorScreenUsesExternalCamera = false;
 
+        internal static ManualCameraRenderer ShipCameraOnSmallMonitor;
         internal static ManualCameraRenderer CameraReplacedByBodyCam;
 
         public static void EarlyInitialization()
         {
             BlackScreenMaterial = StartOfRound.Instance.mapScreen.offScreenMat;
 
+            InternalCameraRenderer = GameObject.Find("Environment/HangarShip/Cameras/ShipCamera")?.GetComponent<ManualCameraRenderer>();
+
             ExternalCameraRenderer = GameObject.Find("Environment/HangarShip/Cameras/FrontDoorSecurityCam/SecurityCamera")?.GetComponent<ManualCameraRenderer>();
             DoorScreenRenderer = GameObject.Find("Environment/HangarShip/ShipModels2b/MonitorWall/SingleScreen")?.GetComponent<MeshRenderer>();
 
-            GetAndMaybeDisableShipCamera();
+            ShipCameraOnSmallMonitor = InternalCameraRenderer;
 
             BodyCamComponent.InitializeAtStartOfGame();
         }
 
-        private static void GetAndMaybeDisableShipCamera()
-        {
-            var shipCameraObject = GameObject.Find("Environment/HangarShip/Cameras/ShipCamera");
-            if (shipCameraObject == null)
-            {
-                Plugin.Instance.Logger.LogError("Could not find the internal ship camera object.");
-                return;
-            }
-
-            InternalCameraRenderer = shipCameraObject.GetComponent<ManualCameraRenderer>();
-            if (InternalCameraRenderer?.mesh == null)
-            {
-                Plugin.Instance.Logger.LogError("Internal ship camera does not have a camera renderer.");
-                return;
-            }
-
-            if (!Plugin.DisableInternalShipCamera.Value)
-                return;
-
-            var shipScreenMaterialIndex = Array.FindIndex(InternalCameraRenderer.mesh.sharedMaterials, material => material.name.StartsWith("ShipScreen1Mat"));
-
-            if (BlackScreenMaterial == null || shipScreenMaterialIndex == -1)
-            {
-                Plugin.Instance.Logger.LogError("Internal ship camera monitor does not have the expected materials.");
-                return;
-            }
-
-            shipCameraObject.SetActive(false);
-
-            var newMaterials = InternalCameraRenderer.mesh.sharedMaterials;
-            newMaterials[shipScreenMaterialIndex] = BlackScreenMaterial;
-            InternalCameraRenderer.mesh.sharedMaterials = newMaterials;
-        }
-
         public static void LateInitialization()
         {
+            ManageShipCameras();
+
             TerminalScript = UnityEngine.Object.FindObjectOfType<Terminal>();
             TwoRadarCamsPresent = TerminalScript.GetComponent<ManualCameraRenderer>() != null;
 
@@ -88,6 +60,53 @@ namespace OpenBodyCams
                 var mainMap = StartOfRound.Instance.mapScreen;
                 mainMap.SwitchRadarTargetAndSync(Math.Min(mainMap.targetTransformIndex, mainMap.radarTargets.Count - 1));
             }
+        }
+
+        private static void ManageShipCameras()
+        {
+            if (GeneralImprovementsCompatibility.BetterMonitorsComponent == null)
+            {
+                if (Plugin.SwapInternalAndExternalShipCameras.Value)
+                    SwapShipCameras();
+                if (Plugin.DisableCameraOnSmallMonitor.Value)
+                    DisableCameraOnSmallMonitor();
+            }
+        }
+
+        private static int GetCameraMaterialIndex(ManualCameraRenderer shipCamera)
+        {
+            if (shipCamera == null)
+                return -1;
+            if (shipCamera.mesh == null)
+                return -1;
+            var texture = shipCamera.cam.targetTexture;
+            return Array.FindIndex(shipCamera.mesh.sharedMaterials, material => material.mainTexture == texture);
+        }
+
+        private static void SwapShipCameras()
+        {
+            var internalCameraMaterialIndex = GetCameraMaterialIndex(InternalCameraRenderer);
+            var externalCameraMaterialIndex = GetCameraMaterialIndex(ExternalCameraRenderer);
+
+            if (internalCameraMaterialIndex == -1 || externalCameraMaterialIndex == -1)
+            {
+                Plugin.Instance.Logger.LogError($"{Plugin.SwapInternalAndExternalShipCameras.Definition} is enabled, but one of the ship's cameras' materials was not found.");
+                return;
+            }
+
+            var internalCameraMaterial = InternalCameraRenderer.mesh.sharedMaterials[internalCameraMaterialIndex];
+            InternalCameraRenderer.mesh.SetMaterial(internalCameraMaterialIndex, ExternalCameraRenderer.mesh.sharedMaterials[externalCameraMaterialIndex]);
+            ExternalCameraRenderer.mesh.SetMaterial(externalCameraMaterialIndex, internalCameraMaterial);
+            (InternalCameraRenderer.mesh, ExternalCameraRenderer.mesh) = (ExternalCameraRenderer.mesh, InternalCameraRenderer.mesh);
+
+            ShipCameraOnSmallMonitor = ExternalCameraRenderer;
+        }
+
+        private static void DisableCameraOnSmallMonitor()
+        {
+            ShipCameraOnSmallMonitor.mesh.SetMaterial(GetCameraMaterialIndex(ShipCameraOnSmallMonitor), BlackScreenMaterial);
+            ShipCameraOnSmallMonitor.cam.enabled = false;
+            ShipCameraOnSmallMonitor.enabled = false;
         }
 
         private static void InitializeBodyCam()

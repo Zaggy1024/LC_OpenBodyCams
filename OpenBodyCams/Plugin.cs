@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -67,7 +68,9 @@ namespace OpenBodyCams
         public static ConfigEntry<bool> EnableModelReplacementAPICompatibility;
         public static ConfigEntry<bool> EnableLethalVRMCompatibility;
 
-        public static ConfigEntry<bool> DisableInternalShipCamera;
+        public static ConfigEntry<bool> SwapInternalAndExternalShipCameras;
+        public static ConfigEntry<bool> DisableCameraOnSmallMonitor;
+
         public static ConfigEntry<bool> FixDroppedItemRotation;
 
         public static ConfigEntry<bool> PrintCosmeticsDebugInfo;
@@ -77,6 +80,8 @@ namespace OpenBodyCams
         private static readonly Harmony DestructionDetectionPatch = new(MOD_UNIQUE_NAME + ".DestructionDetectionPatch");
 
         internal static AssetBundle Assets;
+
+        const string OptionDisabledWithBetterMonitors = "This has no effect when GeneralImprovements's UseBetterMonitors option is enabled.";
 
         public new ManualLogSource Logger => base.Logger;
 
@@ -152,8 +157,11 @@ namespace OpenBodyCams
             EnableModelReplacementAPICompatibility = Config.Bind("Compatibility", "EnableModelReplacementAPICompatibility", true, "When enabled, this will get the third person model replacement and hide/show it based on the camera's perspective.");
             EnableLethalVRMCompatibility = Config.Bind("Compatibility", "EnableLethalVRMCompatibility", true, "When enabled, any VRM model will be hidden/shown based on the camera's perspective.");
 
+            // Ship:
+            SwapInternalAndExternalShipCameras = Config.Bind("Ship", "SwapInternalAndExternalShipCameras", false, $"Causes the internal ship camera to be placed onto big monitor, and the external one to be placed onto the small monitor. {OptionDisabledWithBetterMonitors}");
+            DisableCameraOnSmallMonitor = Config.Bind("Ship", "DisableCameraOnSmallMonitor", false, $"Disables whichever camera is placed onto the small camera monitor. {OptionDisabledWithBetterMonitors}");
+
             // Misc:
-            DisableInternalShipCamera = Config.Bind("Misc", "DisableInternalShipCamera", false, "Whether to disable the internal ship camera displayed above the bodycam monitor.");
             FixDroppedItemRotation = Config.Bind("Misc", "FixDroppedItemRotation", true, "If enabled, the mod will patch a bug that causes the rotation of dropped items to be desynced between clients.");
 
             // Debug:
@@ -166,6 +174,8 @@ namespace OpenBodyCams
             BruteForcePreventFreezes.SettingChanged += (_, _) => BodyCamComponent.UpdateStaticSettings();
             ReferencedObjectDestructionDetectionEnabled.SettingChanged += (_, _) => UpdateReferencedObjectDestructionDetectionEnabled();
             UpdateReferencedObjectDestructionDetectionEnabled();
+
+            MigrateSettings();
 
             Cosmetics.Initialize(harmony);
 
@@ -182,6 +192,29 @@ namespace OpenBodyCams
                 DestructionDetectionPatch.PatchAll(typeof(PatchModelDestructionDebugging));
             else
                 DestructionDetectionPatch.UnpatchSelf();
+        }
+
+        private void MigrateSettings()
+        {
+            if (AccessTools.PropertyGetter(typeof(ConfigFile), "OrphanedEntries") is not MethodInfo orphansFieldGetter)
+            {
+                Logger.LogError("Failed to migrate config, orphaned entries property was not found.");
+                return;
+            }
+            if (orphansFieldGetter.Invoke(Config, []) is not Dictionary<ConfigDefinition, string> orphans)
+            {
+                Logger.LogError("Failed to migrate config, orphaned entries was not of the expected type.");
+                return;
+            }
+
+            var disableInternalShipCameraDefinition = new ConfigDefinition("Misc", "DisableInternalShipCamera");
+
+            if (orphans.TryGetValue(disableInternalShipCameraDefinition, out var disableInternalShipCameraValue))
+            {
+                Logger.LogInfo($"{disableInternalShipCameraDefinition} option was found set to '{disableInternalShipCameraValue}' in the config, migrating it over to {DisableCameraOnSmallMonitor.Definition}.");
+                orphans.Remove(disableInternalShipCameraDefinition);
+                DisableCameraOnSmallMonitor.Value = TomlTypeConverter.ConvertToValue<bool>(disableInternalShipCameraValue);
+            }
         }
 
         private static Color ParseColor(string str)
