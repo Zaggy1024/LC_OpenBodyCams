@@ -1,7 +1,5 @@
-﻿using GameNetcodeStuff;
+using GameNetcodeStuff;
 using HarmonyLib;
-
-using OpenBodyCams.Compatibility;
 
 namespace OpenBodyCams.Patches
 {
@@ -10,7 +8,7 @@ namespace OpenBodyCams.Patches
     {
         [HarmonyFinalizer]
         [HarmonyPatch(nameof(PlayerControllerB.ConnectClientToPlayerObject))]
-        [HarmonyAfter(ModGUIDs.GeneralImprovements)]
+        [HarmonyPriority(Priority.VeryLow)]
         private static void ConnectClientToPlayerObjectFinalizer()
         {
             ShipObjects.LateInitialization();
