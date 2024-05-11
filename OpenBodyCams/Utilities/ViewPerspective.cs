@@ -179,6 +179,9 @@ namespace OpenBodyCams.Utilities
 
         internal readonly bool VerifyCosmeticsExist(string name)
         {
+            if (!isValid)
+                return true;
+
             if (!AllObjectsExistInArray(thirdPersonCosmetics))
             {
                 Plugin.Instance.Logger.LogError($"A third-person cosmetic attached to {name} has been destroyed.");
@@ -195,6 +198,9 @@ namespace OpenBodyCams.Utilities
 
         internal readonly bool ReferencesObject(GameObject obj)
         {
+            if (!isValid)
+                return false;
+
             if (Array.IndexOf(thirdPersonCosmetics, obj) != -1)
                 return true;
             if (Array.IndexOf(firstPersonCosmetics, obj) != -1)
