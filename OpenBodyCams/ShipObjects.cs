@@ -23,6 +23,8 @@ namespace OpenBodyCams
         internal static MeshRenderer DoorScreenRenderer;
         internal static bool DoorScreenUsesExternalCamera = false;
 
+        internal static ManualCameraRenderer CameraReplacedByBodyCam;
+
         public static void EarlyInitialization()
         {
             BlackScreenMaterial = StartOfRound.Instance.mapScreen.offScreenMat;
@@ -124,12 +126,25 @@ namespace OpenBodyCams
                     UnityEngine.Object.DestroyImmediate(MainBodyCam);
                     return;
                 }
+
+                if (MainBodyCam.MonitorDisabledMaterial == null)
+                    MainBodyCam.MonitorDisabledMaterial = BlackScreenMaterial;
+
                 UpdateMainBodyCamNoTargetMaterial();
 
                 if (ShipUpgrades.BodyCamUnlockable != null)
                     MainBodyCam.enabled = ShipUpgrades.BodyCamUnlockableIsPlaced;
                 else
                     BodyCam.BodyCamReceiverBecameEnabled();
+
+                CameraReplacedByBodyCam = null;
+                if (MainBodyCam.MonitorDisabledMaterial.mainTexture is RenderTexture originalTexture)
+                {
+                    if (originalTexture == InternalCameraRenderer.cam.targetTexture)
+                        CameraReplacedByBodyCam = InternalCameraRenderer;
+                    else if (originalTexture == ExternalCameraRenderer.cam.targetTexture)
+                        CameraReplacedByBodyCam = ExternalCameraRenderer;
+                }
             }
         }
 

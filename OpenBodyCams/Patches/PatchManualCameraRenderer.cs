@@ -39,6 +39,9 @@ namespace OpenBodyCams.Patches
         [HarmonyPatch("MeetsCameraEnabledConditions")]
         private static void MeetsCameraEnabledConditionsPostfix(ManualCameraRenderer __instance, ref bool __result, PlayerControllerB player)
         {
+            if ((object)__instance == ShipObjects.CameraReplacedByBodyCam && __result && !ShipObjects.MainBodyCam.IsBlanked)
+                __result = false;
+
             // The internal ship camera makes the monitors visible, and since it renders while the monitors are visible, it nevers tops rendering.
             // This causes the map screen to by extension to never become invisible while the player is in the ship.
 
