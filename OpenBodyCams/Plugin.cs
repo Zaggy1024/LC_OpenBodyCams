@@ -70,6 +70,7 @@ namespace OpenBodyCams
 
         public static ConfigEntry<bool> SwapInternalAndExternalShipCameras;
         public static ConfigEntry<bool> DisableCameraOnSmallMonitor;
+        public static ConfigEntry<string> ExternalCameraEmissiveColor;
 
         public static ConfigEntry<bool> FixDroppedItemRotation;
 
@@ -160,6 +161,9 @@ namespace OpenBodyCams
             // Ship:
             SwapInternalAndExternalShipCameras = Config.Bind("Ship", "SwapInternalAndExternalShipCameras", false, $"Causes the internal ship camera to be placed onto big monitor, and the external one to be placed onto the small monitor. {OptionDisabledWithBetterMonitors}");
             DisableCameraOnSmallMonitor = Config.Bind("Ship", "DisableCameraOnSmallMonitor", false, $"Disables whichever camera is placed onto the small camera monitor. {OptionDisabledWithBetterMonitors}");
+            ExternalCameraEmissiveColor = Config.Bind("Ship", "ExternalCameraEmissiveColor", "", "Sets the color emitted by the external camera screen, using comma-separated decimal numbers for red, green and blue.");
+
+            ExternalCameraEmissiveColor.SettingChanged += (_, _) => ShipObjects.SetExternalCameraEmissiveColor();
 
             // Misc:
             FixDroppedItemRotation = Config.Bind("Misc", "FixDroppedItemRotation", true, "If enabled, the mod will patch a bug that causes the rotation of dropped items to be desynced between clients.");
@@ -238,6 +242,22 @@ namespace OpenBodyCams
             {
                 Instance.Logger.LogWarning($"Failed to parse the body cam screen's emissive color: {e}");
                 return ParseColor((string)MonitorEmissiveColor.DefaultValue);
+            }
+        }
+
+        internal static Color? GetExternalCameraEmissiveColor()
+        {
+            var colorAsString = ExternalCameraEmissiveColor.Value;
+            if (colorAsString == "")
+                return null;
+            try
+            {
+                return ParseColor(ExternalCameraEmissiveColor.Value);
+            }
+            catch (Exception e)
+            {
+                Instance.Logger.LogWarning($"Failed to parse the external camera screen's emissive color: {e}");
+                return null;
             }
         }
     }

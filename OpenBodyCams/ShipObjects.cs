@@ -21,6 +21,9 @@ namespace OpenBodyCams
         internal static ManualCameraRenderer InternalCameraRenderer;
 
         internal static ManualCameraRenderer ExternalCameraRenderer;
+        internal static Material ExternalCameraMaterial;
+        internal static Color OriginalExternalCameraEmissiveColor;
+
         internal static MeshRenderer DoorScreenRenderer;
         internal static bool DoorScreenUsesExternalCamera = false;
 
@@ -39,6 +42,19 @@ namespace OpenBodyCams
             ShipCameraOnSmallMonitor = InternalCameraRenderer;
 
             BodyCamComponent.InitializeAtStartOfGame();
+
+            // HACK: We have to get to the emissive color before GeneralImprovements (as of 1.2.5) can, since the material
+            //       gets re-instantiated every time it is assigned back to the screen's renderer, so any changes to it
+            //       will not be shared.
+            ExternalCameraMaterial = ExternalCameraRenderer.mesh.sharedMaterials[2];
+            OriginalExternalCameraEmissiveColor = ExternalCameraMaterial.GetColor("_EmissiveColor");
+            SetExternalCameraEmissiveColor();
+        }
+
+        internal static void SetExternalCameraEmissiveColor()
+        {
+            var externalCameraEmissive = Plugin.GetExternalCameraEmissiveColor().GetValueOrDefault(OriginalExternalCameraEmissiveColor);
+            ExternalCameraMaterial.SetColor("_EmissiveColor", externalCameraEmissive);
         }
 
         public static void LateInitialization()
