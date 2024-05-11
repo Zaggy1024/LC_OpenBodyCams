@@ -1,7 +1,7 @@
 ## Version 2.0.1
-- Switch the default value for the ship upgrade option to be true by default as it was intended to be in 2.0.0. Old values will be migrated.
-- Fix a compatibility issue with [darmuhsTerminalStuff](https://github.com/darmuh/TerminalStuff)'s minicams command.
-- Prevent errors that would occur when the debugging options are enabled.
+- Switched the default value for the ship upgrade option to be true by default as it was intended to be in 2.0.0. Old values will be migrated.
+- Fixed a compatibility issue with [darmuhsTerminalStuff](https://github.com/darmuh/TerminalStuff)'s minicams command.
+- Prevented errors that would occur when the debugging options are enabled.
 
 ## Version 2.0.0 (requires v50)
 - Added a ship upgrade to enable body cams for 200 credits which is enabled by default if LethalLib is installed.
