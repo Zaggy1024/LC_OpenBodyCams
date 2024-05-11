@@ -77,6 +77,7 @@ namespace OpenBodyCams
         public static ConfigEntry<bool> PrintCosmeticsDebugInfo;
         public static ConfigEntry<bool> BruteForcePreventFreezes;
         public static ConfigEntry<bool> ReferencedObjectDestructionDetectionEnabled;
+        public static ConfigEntry<string> LastConfigVersion;
 
         private static readonly Harmony DestructionDetectionPatch = new(MOD_UNIQUE_NAME + ".DestructionDetectionPatch");
 
@@ -148,7 +149,7 @@ namespace OpenBodyCams
             harmony.PatchAll(typeof(TerminalCommands));
 
             // Upgrades:
-            ShipUpgradeEnabled = Config.Bind("ShipUpgrade", "Enabled", false, "Adds a ship upgrade that enables the body cam on the main monitors only after it is bought.\n\nNOTE: The upgrade will only be available if LethalLib is installed. Without it, the main body cam will always be enabled.");
+            ShipUpgradeEnabled = Config.Bind("ShipUpgrade", "Enabled", true, "Adds a ship upgrade that enables the body cam on the main monitors only after it is bought.\n\nNOTE: The upgrade will only be available if LethalLib is installed. Without it, the main body cam will always be enabled.");
             ShipUpgradePrice = Config.Bind("ShipUpgrade", "Price", 200, "The price at which the ship upgrade is sold in the store.");
 
             // Compatibility:
@@ -172,6 +173,7 @@ namespace OpenBodyCams
             PrintCosmeticsDebugInfo = Config.Bind("Debug", "PrintCosmeticsDebugInfo", false, "Prints extra information about the cosmetics being collected for each player, as well as the code that is causing the collection.");
             BruteForcePreventFreezes = Config.Bind("Debug", "BruteForcePreventFreezes", false, "Enable a brute force approach to preventing errors in the camera setup callback that can cause the screen to freeze.");
             ReferencedObjectDestructionDetectionEnabled = Config.Bind("Debug", "ModelDestructionDebuggingPatchEnabled", false, "Enable this option when reproducing a camera freeze. This will cause a debug message to be printed when a model that a body cam is tracking is destroyed.");
+            LastConfigVersion = Config.Bind("Debug", "LastConfigVersion", "", "The last version of the mod that loaded/saved this config file. Used for setting migration.");
 
             PrintCosmeticsDebugInfo.SettingChanged += (_, _) => Cosmetics.PrintDebugInfo = PrintCosmeticsDebugInfo.Value;
             Cosmetics.PrintDebugInfo = PrintCosmeticsDebugInfo.Value;
@@ -211,6 +213,11 @@ namespace OpenBodyCams
                 return;
             }
 
+            if (!Version.TryParse(LastConfigVersion.Value, out var lastVersion))
+                lastVersion = new Version(2, 0, 0);
+
+            Logger.LogInfo($"Last config version is {lastVersion}.");
+
             var disableInternalShipCameraDefinition = new ConfigDefinition("Misc", "DisableInternalShipCamera");
 
             if (orphans.TryGetValue(disableInternalShipCameraDefinition, out var disableInternalShipCameraValue))
@@ -219,6 +226,14 @@ namespace OpenBodyCams
                 orphans.Remove(disableInternalShipCameraDefinition);
                 DisableCameraOnSmallMonitor.Value = TomlTypeConverter.ConvertToValue<bool>(disableInternalShipCameraValue);
             }
+
+            if (lastVersion < new Version(2, 0, 1) && !ShipUpgradeEnabled.Value)
+            {
+                Logger.LogInfo($"{ShipUpgradeEnabled.Definition} was set to its 2.0.0 default value 'false', resetting it to 'true'.");
+                ShipUpgradeEnabled.Value = true;
+            }
+
+            LastConfigVersion.Value = MOD_VERSION;
         }
 
         private static Color ParseColor(string str)
