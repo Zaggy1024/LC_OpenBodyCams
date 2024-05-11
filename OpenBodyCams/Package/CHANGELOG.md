@@ -1,3 +1,6 @@
+## Version 2.0.2
+- Fixed the antenna prefab not spawning on clients.
+
 ## Version 2.0.1
 - Switched the default value for the ship upgrade option to be true by default as it was intended to be in 2.0.0. Old values will be migrated.
 - Fixed a compatibility issue with [darmuhsTerminalStuff](https://github.com/darmuh/TerminalStuff)'s minicams command.
