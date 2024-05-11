@@ -1,3 +1,14 @@
+## Version 2.0.0 (requires v50)
+- Added a ship upgrade to enable body cams for 200 credits which is enabled by default if LethalLib is installed.
+- Added support for adjusting the position of tulip snakes and snare fleas based on the view perspective.
+- Added support for vanilla cosmetics (bunny ears, bee antennae).
+- The screen that the body cam occupies will now switch back to the camera that originally displayed when the body cam is invalid, when [GeneralImprovements](https://github.com/Shaosil/LethalCompanyMods-GeneralImprovements/)'s UseBetterMonitors is not enabled.
+- Added an option to swap the external and internal cameras' positions when [GeneralImprovements](https://github.com/Shaosil/LethalCompanyMods-GeneralImprovements/)'s UseBetterMonitors is not enabled.
+- Added an option to modify the external camera screen's emissive color.
+- Fixed an issue where the radar map's night vision light would be visible on body cams when CullFactory is enabled.
+- The camera that is replaced by the body cam will now be disabled to improve performance.
+- Allowed API users to override a body cam's resolution and DisableCameraWhileTargetIsOnShip option.
+
 ## Version 1.3.0
 - Fixed a long-standing issue where MoreCompany cosmetics being destroyed on a masked enemy would cause a freeze.
 - Significantly reworked how cosmetics are updated. These changes may introduce old or new bugs, please report them on GitHub.

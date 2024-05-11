@@ -1,7 +1,9 @@
 # OpenBodyCams
 An open-source implementation of a body/head camera that is displayed on the bottom right monitor in the ship, with the goal of appearing almost identical to the player's actual perspective while providing good performance.
 
-The camera view will display only the first person hands and hide the third person model as well as many mods' cosmetics to prevent obstructed vision.
+When LethalLib is installed, the body cam will not be available until an antenna is bought as a ship upgrade in the store.
+
+The camera view will display only the first person hands and hide the third person model as well as many mods' third-person cosmetics to prevent obstructed vision. Vanilla enemies that cling to the player are also supported.
 
 Please **report any issues [here](https://github.com/Zaggy1024/LC_OpenBodyCams/issues)**, and include any relevant information according to [the Debugging section](#debugging).
 
@@ -25,9 +27,11 @@ Please **report any issues [here](https://github.com/Zaggy1024/LC_OpenBodyCams/i
 
 # Screenshots
 
-![Player pointing at the body cam screen displaying them pointing at the screen](https://raw.githubusercontent.com/Zaggy1024/LC_OpenBodyCams/master/Media/screenshot_pointing.png)
+![The antenna used to connect to the body cams sits in front of the body cam monitor](https://raw.githubusercontent.com/Zaggy1024/LC_OpenBodyCams/master/Media/screenshot_upgrade.png)
 
-![Watching a player being eaten by a giant on the body cam](https://raw.githubusercontent.com/Zaggy1024/LC_OpenBodyCams/master/Media/screenshot_captured.png)
+![Body cam displaying two tulip snakes clinging to a player](https://raw.githubusercontent.com/Zaggy1024/LC_OpenBodyCams/master/Media/screenshot_tulip_snakes.png)
+
+![Body cam watching a player being eaten by a giant on the body cam](https://raw.githubusercontent.com/Zaggy1024/LC_OpenBodyCams/master/Media/screenshot_captured.png)
 
 ![Nutcracker and Blob inside the mansion on the body cam](https://raw.githubusercontent.com/Zaggy1024/LC_OpenBodyCams/master/Media/screenshot_mansion.png)
 
@@ -46,14 +50,23 @@ Please **report any issues [here](https://github.com/Zaggy1024/LC_OpenBodyCams/i
 - `UseTargetTransitionAnimation`: If enabled, the body cam will display a green flash animation when changing targets to mirror the behavior of the radar map.
 - `DisableCameraWhileTargetIsOnShip`: This will cause the screen to turn off while the camera's target is onboard the ship. This can be used to avoid the load of rendering large numbers of items on the ship in long runs.
 - `EnableCamera`: When this is enabled, the screen will be powered off. This can be changed in-game with LethalConfig or any similar mod.
+- `DisplayOriginalScreenWhenDisabled`: When enabled, whatever was on the screen that the main body cam replaced will be displayed when the body cam has no valid target, or when disabled by the `DisableCameraWhileTargetIsOnShip` option. This currently has no effect when GeneralImprovements's UseBetterMonitors option is enabled.
 
 ## Terminal
 - `EnablePiPBodyCam`: Off by default, this adds a `view bodycam` command to the terminal that displays the body cam in one corner of the radar map. When the radar map is hidden, the body cam will be hidden as well.
 - `PiPPosition`: Selects the corner of the radar map that the body cam view in the terminal should reside in.
 - `PiPWidth`: Sets the horizontal size of the body cam view in the terminal. This does not affect the render resolution of the camera.
 
+## Ship Upgrade
+- `Enabled`: On by default, but only active when LethalLib is found, this causes the main body cam to only be available when an antenna prop is bought in the store. Note that this prop is only available with LethalLib.
+- `Price`: The price of the body cam upgrade in the store, with the default cost being 200 credits.
+
+## Ship
+- `SwapInternalAndExternalShipCameras`: Swaps the external and internal cameras which are displayed on the right side of the screen array. This has no effect when GeneralImprovements's UseBetterMonitors option is enabled.
+- `DisableCameraOnSmallMonitor`: Disables the camera that is displayed on the small monitor, which will be the internal camera if `SwapInternalAndExternalShipCameras` is not enabled. This may improve performance inside the ship slightly. This has no effect when GeneralImprovements's UseBetterMonitors option is enabled.
+- `ExternalCameraEmissiveColor`: Sets the color emitted from the screen that displays the external camera.
+
 ## Miscellaneous
-- `DisableInternalShipCamera`: Disables the camera at the front of the ship facing towards the center. This may improve performance inside the ship slightly.
 - `FixDroppedItemRotation`: Defaulted to `true`, this fixes a desync of items' rotations when dropping them. See [Notes/Item rotations](#item-rotations).
 
 ## Debug
