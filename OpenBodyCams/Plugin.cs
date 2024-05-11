@@ -114,7 +114,7 @@ namespace OpenBodyCams
             RenderDistance = Config.Bind("Camera", "RenderDistance", 25f, "The far clip plane for the body cam. Lowering may improve framerates.");
             Framerate = Config.Bind("Camera", "Framerate", 0f, "The number of frames to render per second. A value of 0 will render at the game's framerate and results in best performance. Higher framerates will negatively affect performance, values between 0 and 30 are recommended.");
             NightVisionBrightness = Config.Bind("Camera", "NightVisionBrightness", 1f, "A multiplier for the intensity of the area light used to brighten dark areas. A value of 1 is identical to the player's actual vision.");
-            MonitorEmissiveColor = Config.Bind("Camera", "MonitorEmissiveColor", "0.05, 0.13, 0.05", "Adjust the color that is emitted from the body cam monitor.");
+            MonitorEmissiveColor = Config.Bind("Camera", "MonitorEmissiveColor", "0.05, 0.13, 0.05", "Adjust the color that is emitted from the body cam monitor, using comma-separated decimal numbers for red, green and blue.");
             MonitorTextureFiltering = Config.Bind("Camera", "MonitorTextureFiltering", FilterMode.Bilinear, "The texture filtering to use for the body cam on the monitor. Bilinear and Trilinear will result in a smooth image, while Point will result in sharp square edges. If Point is used, a fairly high resolution is recommended.");
             RadarBoosterPanRPM = Config.Bind("Camera", "RadarBoosterPanRPM", 9f, "The rotations per minute to turn the camera when a radar booster is selected. If the value is set to 0, the radar booster camera will face in the direction player faces when it is placed.");
             UseTargetTransitionAnimation = Config.Bind("Camera", "UseTargetTransitionAnimation", true, "Enables a green flash animation on the body cam screen mirroring the one that the radar map shows when switching targets.");
@@ -128,7 +128,7 @@ namespace OpenBodyCams
             RenderDistance.SettingChanged += (_, _) => BodyCamComponent.UpdateAllCameraSettings();
             Framerate.SettingChanged += (_, _) => BodyCamComponent.UpdateAllCameraSettings();
             NightVisionBrightness.SettingChanged += (_, _) => BodyCamComponent.UpdateAllCameraSettings();
-            MonitorEmissiveColor.SettingChanged += (_, _) => ShipObjects.MainBodyCam?.MonitorOnMaterial.SetColor("_EmissiveColor", GetEmissiveColor());
+            MonitorEmissiveColor.SettingChanged += (_, _) => ShipObjects.MainBodyCam?.MonitorOnMaterial.SetColor("_EmissiveColor", GetBodyCamEmissiveColor());
             MonitorTextureFiltering.SettingChanged += (_, _) => BodyCamComponent.UpdateAllCameraSettings();
             RadarBoosterPanRPM.SettingChanged += (_, _) => BodyCamComponent.UpdateAllCameraSettings();
             DisableCameraWhileTargetIsOnShip.SettingChanged += (_, _) => BodyCamComponent.UpdateAllCameraSettings();
@@ -228,7 +228,7 @@ namespace OpenBodyCams
             return new Color(components[0], components[1], components[2], components.Length == 4 ? components[3] : 0);
         }
 
-        internal static Color GetEmissiveColor()
+        internal static Color GetBodyCamEmissiveColor()
         {
             try
             {
@@ -236,7 +236,7 @@ namespace OpenBodyCams
             }
             catch (Exception e)
             {
-                Instance.Logger.LogWarning($"Failed to parse emissive color: {e}");
+                Instance.Logger.LogWarning($"Failed to parse the body cam screen's emissive color: {e}");
                 return ParseColor((string)MonitorEmissiveColor.DefaultValue);
             }
         }
