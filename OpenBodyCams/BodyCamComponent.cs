@@ -235,7 +235,7 @@ namespace OpenBodyCams
 
         void Start()
         {
-            if (!EnsureCameraExists())
+            if (!EnsureCameraExistsOrReturnFalse())
                 return;
 
             SyncBodyCamToRadarMap.UpdateBodyCamTarget(this);
@@ -270,7 +270,7 @@ namespace OpenBodyCams
                 UpdateScreenMaterial();
         }
 
-        public bool EnsureCameraExists()
+        private bool EnsureCameraExistsOrReturnFalse()
         {
             if (!hasFinishedStaticSetup)
                 return false;
@@ -333,6 +333,12 @@ namespace OpenBodyCams
 
             OnCameraCreated?.Invoke(Camera);
             return true;
+        }
+
+        // This method was public before, but is kept as a private method to prevent compatibility issues with existing API users.
+        private void EnsureCameraExists()
+        {
+            EnsureCameraExistsOrReturnFalse();
         }
 
         public void UpdateSettings()
@@ -580,7 +586,7 @@ namespace OpenBodyCams
                 return;
             }
 
-            if (!EnsureCameraExists())
+            if (!EnsureCameraExistsOrReturnFalse())
                 return;
 
             ClearTargetDirtyImmediate();
@@ -672,7 +678,7 @@ namespace OpenBodyCams
                 return;
             }
 
-            if (!EnsureCameraExists())
+            if (!EnsureCameraExistsOrReturnFalse())
                 return;
 
             ClearTargetDirtyImmediate();
@@ -781,7 +787,7 @@ namespace OpenBodyCams
 
         void LateUpdate()
         {
-            if (!EnsureCameraExists())
+            if (!EnsureCameraExistsOrReturnFalse())
                 return;
 
             UpdateTargetStatusDuringUpdate();
