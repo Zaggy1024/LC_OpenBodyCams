@@ -59,6 +59,9 @@ namespace OpenBodyCams
 
             var price = Plugin.ShipUpgradePrice.Value;
             Unlockables.RegisterUnlockable(bodyCamUnlockable, price, StoreType.ShipUpgrade);
+            NetworkPrefabs.RegisterNetworkPrefab(bodyCamUnlockablePrefab);
+            LethalLib.Modules.Utilities.FixMixerGroups(bodyCamUnlockablePrefab);
+
             BodyCamUnlockable = bodyCamUnlockable;
             Plugin.Instance.Logger.LogInfo($"Registered body cam unlockable for {price} credits.");
         }
