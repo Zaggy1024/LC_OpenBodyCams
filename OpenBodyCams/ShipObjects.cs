@@ -64,7 +64,7 @@ namespace OpenBodyCams
 
         private static void ManageShipCameras()
         {
-            if (GeneralImprovementsCompatibility.BetterMonitorsComponent == null)
+            if (!GeneralImprovementsCompatibility.BetterMonitorsEnabled)
             {
                 if (Plugin.SwapInternalAndExternalShipCameras.Value)
                     SwapShipCameras();
@@ -136,7 +136,7 @@ namespace OpenBodyCams
                 {
                     MainBodyCam.MonitorRenderer = giMonitorRenderer;
                     MainBodyCam.MonitorMaterialIndex = 0;
-                    MainBodyCam.MonitorDisabledMaterial = GeneralImprovementsCompatibility.GetOriginalMonitorMaterial(monitorID);
+                    MainBodyCam.MonitorDisabledMaterial = null;
                 }
 
                 if (MainBodyCam.MonitorRenderer == null)
