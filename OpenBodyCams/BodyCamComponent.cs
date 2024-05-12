@@ -806,7 +806,7 @@ namespace OpenBodyCams
             if (enableCamera)
             {
                 var disable = ShouldHideOutput(out var targetIsOnShip);
-                if (disableCameraWhileTargetIsOnShip && !keepCameraOn)
+                if (!disable && disableCameraWhileTargetIsOnShip && !keepCameraOn)
                     disable = targetIsOnShip;
                 enableCamera = !disable;
                 SetScreenBlanked(disable);
