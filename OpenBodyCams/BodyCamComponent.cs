@@ -660,12 +660,6 @@ namespace OpenBodyCams
                 currentlyViewedMeshes = CollectModelsToHide(obstructingMeshParent);
             }
 
-            if (attachmentPoint == null)
-            {
-                SetTargetToNone();
-                return;
-            }
-
             CameraObject.transform.SetParent(attachmentPoint, false);
             CameraObject.transform.localPosition = offset;
             CameraObject.transform.localRotation = Quaternion.identity;
