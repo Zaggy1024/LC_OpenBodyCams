@@ -792,22 +792,22 @@ namespace OpenBodyCams
                 return;
             if (spectatedPlayer.spectatedPlayerScript != null)
                 spectatedPlayer = spectatedPlayer.spectatedPlayerScript;
-            bool enableCamera = keepCameraOn ||
+            bool enableCameraThisFrame = keepCameraOn ||
                 (MonitorRenderer != null
                 && MonitorRenderer.isVisible
                 && spectatedPlayer.isInHangarShipRoom
                 && IsScreenPowered());
 
-            if (enableCamera)
+            if (enableCameraThisFrame)
             {
                 var disable = ShouldHideOutput(out var targetIsOnShip);
                 if (!disable && disableCameraWhileTargetIsOnShip && !keepCameraOn)
                     disable = targetIsOnShip;
-                enableCamera = !disable;
+                enableCameraThisFrame = !disable;
                 SetScreenBlanked(disable);
             }
 
-            if (enableCamera && bruteForcePreventNullModels)
+            if (enableCameraThisFrame && bruteForcePreventNullModels)
             {
                 // Brute force check if all models are still valid to prevent rendering from failing and
                 // causing a frozen screen.
@@ -833,7 +833,7 @@ namespace OpenBodyCams
                     UpdateTargetStatus();
             }
 
-            if (!enableCamera)
+            if (!enableCameraThisFrame)
             {
                 Camera.enabled = false;
                 return;
