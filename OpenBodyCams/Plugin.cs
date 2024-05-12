@@ -227,7 +227,7 @@ namespace OpenBodyCams
                 DisableCameraOnSmallMonitor.Value = TomlTypeConverter.ConvertToValue<bool>(disableInternalShipCameraValue);
             }
 
-            if (lastVersion < new Version(2, 0, 1) && !ShipUpgradeEnabled.Value)
+            if (lastVersion < new Version(2, 0, 2) && !ShipUpgradeEnabled.Value)
             {
                 Logger.LogInfo($"{ShipUpgradeEnabled.Definition} was set to its 2.0.0 default value 'false', resetting it to 'true'.");
                 ShipUpgradeEnabled.Value = true;
