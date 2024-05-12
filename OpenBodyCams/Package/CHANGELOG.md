@@ -1,3 +1,7 @@
+## Version 2.0.4
+- Fixed an error that could occur when darmuhsTerminalStuff tried to create a body cam, caused by some debug logging that is now removed.
+- Added a tip upon the first load into a game on 2.0.4 to notify users that the body cams are a ship upgrade now.
+
 ## Version 2.0.3
 - Prevented error spam that would occur when a body cam switches from targeting a solo player to targeting nothing.
 - Fixed a long-standing issue where the body cam would not switch back on if it was targeting a dead player with no corpse while players respawned.
