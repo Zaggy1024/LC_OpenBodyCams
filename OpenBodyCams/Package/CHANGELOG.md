@@ -2,7 +2,7 @@
 - Prevented error spam that would occur when a body cam switches from targeting a solo player to targeting nothing.
 - Fixed a long-standing issue where the body cam would not switch back on if it was targeting a dead player with no corpse while players respawned.
 - Fixed invalid targets sometimes displaying on the body cam after the 2.0.0 update.
-- The EnableCamera option will now only act on the main body cam, and not any body cams created by API users.
+- Only disable the main body cam based on the EnableCamera option, and exclude any body cams created by API users.
 
 ## Version 2.0.2
 - Fixed the antenna prefab not spawning on clients.
