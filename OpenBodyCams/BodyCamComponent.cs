@@ -78,7 +78,8 @@ namespace OpenBodyCams
             }
         }
 
-        private bool enableCamera = true;
+        internal bool EnableCamera = true;
+
         private bool wasBlanked = false;
         public bool IsBlanked { get => wasBlanked; }
 
@@ -382,8 +383,6 @@ namespace OpenBodyCams
 
             nightVisionLight.intensity = Plugin.NightVisionIntensityBase * Plugin.NightVisionBrightness.Value;
             nightVisionLight.range = Plugin.NightVisionRangeBase * Plugin.NightVisionBrightness.Value;
-
-            enableCamera = Plugin.EnableCamera.Value;
 
             OnRenderTextureCreated?.Invoke(Camera.targetTexture);
         }

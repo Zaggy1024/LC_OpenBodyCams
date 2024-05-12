@@ -140,6 +140,8 @@ namespace OpenBodyCams
 
                 bottomMonitors.AddComponent<SyncBodyCamToRadarMap>();
 
+                MainBodyCam.EnableCamera = Plugin.EnableCamera.Value;
+
                 MainBodyCam.MonitorRenderer = bottomMonitors.GetComponent<MeshRenderer>();
                 MainBodyCam.MonitorMaterialIndex = 2;
                 MainBodyCam.MonitorDisabledMaterial = MainBodyCam.MonitorRenderer.sharedMaterials[MainBodyCam.MonitorMaterialIndex];
