@@ -570,6 +570,7 @@ namespace OpenBodyCams
             currentPlayer = null;
             currentActualTarget = null;
             currentlyViewedMeshes = [];
+            UpdateModelReferences();
 
             if (CameraObject == null)
                 return;
