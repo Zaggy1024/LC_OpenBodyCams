@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 
 using UnityEngine.Rendering;
 using UnityEngine;
@@ -158,11 +158,11 @@ namespace OpenBodyCams.Utilities
         internal bool firstPersonArmsEnabled;
         internal int firstPersonArmsLayer;
 
-        internal GameObject[] thirdPersonCosmetics;
-        internal int[] thirdPersonCosmeticsLayers;
+        internal GameObject[] thirdPersonCosmetics = [];
+        internal int[] thirdPersonCosmeticsLayers = [];
 
-        internal GameObject[] firstPersonCosmetics;
-        internal int[] firstPersonCosmeticsLayers;
+        internal GameObject[] firstPersonCosmetics = [];
+        internal int[] firstPersonCosmeticsLayers = [];
 
         internal Vector3 heldItemPosition;
         internal Quaternion heldItemRotation;
