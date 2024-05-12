@@ -461,7 +461,7 @@ namespace OpenBodyCams
         {
             targetIsOnShip = false;
 
-            if (!enableCamera)
+            if (!EnableCamera)
                 return true;
 
             if (currentActualTarget == null)
