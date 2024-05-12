@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Linq;
 
 using UnityEngine;
@@ -183,6 +184,9 @@ namespace OpenBodyCams
                         CameraReplacedByBodyCam = ExternalCameraRenderer;
                 }
             }
+
+            if (Plugin.DisplayBodyCamUpgradeTip && ShipUpgrades.BodyCamUnlockable != null && !ShipUpgrades.BodyCamUnlockableIsPlaced)
+                HUDManager.Instance.StartCoroutine(DisplayShipUpgradeTip());
         }
 
         internal static void UpdateMainBodyCamNoTargetMaterial()
@@ -192,6 +196,15 @@ namespace OpenBodyCams
             else
                 MainBodyCam.MonitorNoTargetMaterial = null;
             MainBodyCam.UpdateScreenMaterial();
+        }
+
+        private static IEnumerator DisplayShipUpgradeTip()
+        {
+            yield return new WaitForSeconds(1);
+            HUDManager.Instance.DisplayTip("Body Cam Ship Upgrade",
+                "Body cams are now a ship upgrade purchaseable in the terminal. " +
+                "This can be disabled in the config.");
+            Plugin.DisplayBodyCamUpgradeTip = false;
         }
     }
 }
