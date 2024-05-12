@@ -33,7 +33,7 @@ namespace OpenBodyCams
     {
         public const string MOD_NAME = "OpenBodyCams";
         public const string MOD_UNIQUE_NAME = "Zaggy1024." + MOD_NAME;
-        public const string MOD_VERSION = "2.0.2";
+        public const string MOD_VERSION = "2.0.3";
 
         private readonly Harmony harmony = new(MOD_UNIQUE_NAME);
 
