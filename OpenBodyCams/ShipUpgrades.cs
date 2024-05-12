@@ -1,4 +1,4 @@
-﻿using System.Runtime.CompilerServices;
+using System.Runtime.CompilerServices;
 
 using BepInEx.Bootstrap;
 using LethalLib.Modules;
@@ -50,7 +50,7 @@ namespace OpenBodyCams
 
             var bodyCamUnlockable = new UnlockableItem
             {
-                unlockableName = "BodyCam",
+                unlockableName = "Bodycam",
                 unlockableType = 1,
                 prefabObject = bodyCamUnlockablePrefab,
                 IsPlaceable = true,
