@@ -1,9 +1,9 @@
 ## Version 2.0.5
-- Added support for falling back to GeneralImprovements's monitor assignments when the body cam is disabled.
-- Fixed the monitor index ordering with GeneralImprovements's UseBetterMonitors on and AddMoreBetterMonitors off.
+- Added support for falling back to [GeneralImprovements](https://github.com/Shaosil/LethalCompanyMods-GeneralImprovements/)'s monitor assignments when the body cam is disabled.
+- Fixed the monitor index ordering with [GeneralImprovements](https://github.com/Shaosil/LethalCompanyMods-GeneralImprovements/)'s `UseBetterMonitors` on and `AddMoreBetterMonitors` off.
 
 ## Version 2.0.4
-- Fixed an error that could occur when darmuhsTerminalStuff tried to create a body cam, caused by some debug logging that is now removed.
+- Fixed an error that could occur when [darmuhsTerminalStuff](https://github.com/darmuh/TerminalStuff) tried to create a body cam, caused by some debug logging that is now removed.
 - Added a tip upon the first load into a game on 2.0.4 to notify users that the body cams are a ship upgrade now.
 
 ## Version 2.0.3
