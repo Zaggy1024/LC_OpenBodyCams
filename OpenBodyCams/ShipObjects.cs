@@ -201,6 +201,7 @@ namespace OpenBodyCams
         private static IEnumerator DisplayShipUpgradeTip()
         {
             yield return new WaitForSeconds(1);
+            yield return new WaitUntil(() => HUDManager.Instance.CanTipDisplay(false, false, null));
             HUDManager.Instance.DisplayTip("Body Cam Ship Upgrade",
                 "Body cams are now a ship upgrade purchaseable in the terminal. " +
                 "This can be disabled in the config.");
