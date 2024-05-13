@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Linq;
 
 using UnityEngine;
@@ -50,7 +50,7 @@ namespace OpenBodyCams
 
         void Awake()
         {
-            AllSynchronizedCams = AllSynchronizedCams.Append(this).ToArray();
+            AllSynchronizedCams = [.. AllSynchronizedCams, this];
 
             if (MapRenderer == null)
                 MapRenderer = GetComponentsInChildren<ManualCameraRenderer>()?.FirstOrDefault(renderer => renderer.cam == renderer.mapCamera);
@@ -97,7 +97,7 @@ namespace OpenBodyCams
 
         void OnDestroy()
         {
-            AllSynchronizedCams = AllSynchronizedCams.Where(syncedCam => (object)syncedCam != this).ToArray();
+            AllSynchronizedCams = [.. AllSynchronizedCams.Where(syncedCam => (object)syncedCam != this)];
         }
     }
 }
