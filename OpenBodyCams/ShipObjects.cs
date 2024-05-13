@@ -143,19 +143,22 @@ namespace OpenBodyCams
 
                 MainBodyCam.EnableCamera = Plugin.EnableCamera.Value;
 
-                MainBodyCam.MonitorRenderer = bottomMonitors.GetComponent<MeshRenderer>();
-                MainBodyCam.MonitorMaterialIndex = 2;
-                MainBodyCam.MonitorDisabledMaterial = MainBodyCam.MonitorRenderer.sharedMaterials[MainBodyCam.MonitorMaterialIndex];
-
-                // GeneralImprovements BetterMonitors enabled:
-                int monitorID = Plugin.GeneralImprovementsBetterMonitorIndex.Value - 1;
-                if (monitorID < 0)
-                    monitorID = 13;
-                if (GeneralImprovementsCompatibility.GetMonitorForID(monitorID) is MeshRenderer giMonitorRenderer)
+                if (!GeneralImprovementsCompatibility.BetterMonitorsEnabled)
                 {
-                    MainBodyCam.MonitorRenderer = giMonitorRenderer;
-                    MainBodyCam.MonitorMaterialIndex = 0;
-                    MainBodyCam.MonitorDisabledMaterial = null;
+                    MainBodyCam.MonitorRenderer = bottomMonitors.GetComponent<MeshRenderer>();
+                    MainBodyCam.MonitorMaterialIndex = 2;
+                    MainBodyCam.MonitorDisabledMaterial = MainBodyCam.MonitorRenderer.sharedMaterials[MainBodyCam.MonitorMaterialIndex];
+                }
+                else
+                {
+                    int monitorID = Plugin.GeneralImprovementsBetterMonitorIndex.Value - 1;
+                    var giMonitor = GeneralImprovementsCompatibility.GetMonitorForID(monitorID);
+                    if (giMonitor.HasValue)
+                    {
+                        MainBodyCam.MonitorRenderer = giMonitor.Value.Renderer;
+                        MainBodyCam.MonitorMaterialIndex = giMonitor.Value.MaterialIndex;
+                        MainBodyCam.MonitorDisabledMaterial = giMonitor.Value.OriginalMaterial;
+                    }
                 }
 
                 if (MainBodyCam.MonitorRenderer == null)

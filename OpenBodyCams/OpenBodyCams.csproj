@@ -27,7 +27,7 @@
             <HintPath>..\..\Libraries\Assembly-CSharp.dll</HintPath>
             <Private>false</Private>
         </Reference>
-        <Reference Include="GeneralImprovements" Publicize="true">
+        <Reference Include="GeneralImprovements">
             <HintPath>..\..\Libraries\GeneralImprovements.dll</HintPath>
             <Private>false</Private>
         </Reference>

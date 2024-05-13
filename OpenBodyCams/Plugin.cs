@@ -155,7 +155,11 @@ namespace OpenBodyCams
             ShipUpgradePrice = Config.Bind("ShipUpgrade", "Price", 200, "The price at which the ship upgrade is sold in the store.");
 
             // Compatibility:
-            GeneralImprovementsBetterMonitorIndex = Config.Bind("Compatibility", "GeneralImprovementsBetterMonitorIndex", 0, new ConfigDescription("Choose which of GeneralImprovements' extended monitor set to display the body cam on. A value of 0 will place it on the large monitor on the right, 1-14 goes left to right, top to bottom, skipping the large center monitor.", new AcceptableValueRange<int>(0, 14)));
+            GeneralImprovementsBetterMonitorIndex = Config.Bind("Compatibility", "GeneralImprovementsBetterMonitorIndex", 0,
+                new ConfigDescription(
+                    "With GeneralImprovements's UseBetterMonitors enabled, choose which monitor to display the body cam on.\n" +
+                    "A value of 0 will place it on the large monitor on the right.\n" +
+                    "Values greater than 0 go left to right, top to bottom, skipping the large center monitor. Without AddMoreBetterMonitors, the maximum value is 9, rather than 14.", new AcceptableValueRange<int>(0, 14)));
             EnableMoreCompanyCosmeticsCompatibility = Config.Bind("Compatibility", "EnableMoreCompanyCosmeticsCompatibility", true, "If this is enabled, a patch will be applied to MoreCompany to spawn cosmetics for the local player, and all cosmetics will be shown and hidden based on the camera's perspective.");
             EnableAdvancedCompanyCosmeticsCompatibility = Config.Bind("Compatibility", "EnableAdvancedCompanyCosmeticsCompatibility", true, "When this is enabled and AdvancedCompany is installed, all cosmetics will be shown and hidden based on the camera's perspective.");
             EnableModelReplacementAPICompatibility = Config.Bind("Compatibility", "EnableModelReplacementAPICompatibility", true, "When enabled, this will get the third person model replacement and hide/show it based on the camera's perspective.");
