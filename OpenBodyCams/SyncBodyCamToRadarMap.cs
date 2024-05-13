@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Linq;
 
 using UnityEngine;
@@ -58,9 +58,15 @@ namespace OpenBodyCams
                 BodyCam = GetComponent<BodyCamComponent>();
         }
 
-        private void OnEnable()
+        void Start()
         {
             UpdateBodyCamTarget();
+        }
+
+        private void OnEnable()
+        {
+            if (BodyCam != null && MapRenderer != null)
+                UpdateBodyCamTarget();
         }
 
         public void UpdateBodyCamTarget()
