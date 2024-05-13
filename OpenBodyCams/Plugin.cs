@@ -124,7 +124,7 @@ namespace OpenBodyCams
             UseTargetTransitionAnimation = Config.Bind("Camera", "UseTargetTransitionAnimation", true, "Enables a green flash animation on the body cam screen mirroring the one that the radar map shows when switching targets.");
             DisableCameraWhileTargetIsOnShip = Config.Bind("Camera", "DisableCameraWhileTargetIsOnShip", false, "With this option enabled, the camera will stop rendering when the target is onboard the ship to reduce the performance hit of rendering a large number of items on the ship twice.");
             EnableCamera = Config.Bind("Camera", "EnableCamera", true, "Enables/disables rendering of the body cam, and can be enabled/disabled during a game with LethalConfig.");
-            DisplayOriginalScreenWhenDisabled = Config.Bind("Camera", "DisplayOriginalScreenWhenDisabled", true, $"When enabled, the screen that the body cam replaces will be displayed when it is disabled due to invalid targets. {OptionDisabledWithBetterMonitors}");
+            DisplayOriginalScreenWhenDisabled = Config.Bind("Camera", "DisplayOriginalScreenWhenDisabled", true, $"When enabled, the screen that the body cam replaces will be displayed when it is disabled due to invalid targets.");
 
             CameraMode.SettingChanged += (_, _) => BodyCamComponent.MarkTargetStatusChangedForAllBodyCams();
             HorizontalResolution.SettingChanged += (_, _) => BodyCamComponent.UpdateAllCameraSettings();
