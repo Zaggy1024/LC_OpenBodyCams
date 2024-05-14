@@ -136,7 +136,11 @@ namespace OpenBodyCams
             MonitorTextureFiltering.SettingChanged += (_, _) => BodyCamComponent.UpdateAllCameraSettings();
             RadarBoosterPanRPM.SettingChanged += (_, _) => BodyCamComponent.UpdateAllCameraSettings();
             DisableCameraWhileTargetIsOnShip.SettingChanged += (_, _) => BodyCamComponent.UpdateAllCameraSettings();
-            EnableCamera.SettingChanged += (_, _) => ShipObjects.MainBodyCam.EnableCamera = EnableCamera.Value;
+            EnableCamera.SettingChanged += (_, _) =>
+            {
+                if (ShipObjects.MainBodyCam != null)
+                    ShipObjects.MainBodyCam.EnableCamera = EnableCamera.Value;
+            };
             DisplayOriginalScreenWhenDisabled.SettingChanged += (_, _) => ShipObjects.UpdateMainBodyCamNoTargetMaterial();
 
             // Terminal:
