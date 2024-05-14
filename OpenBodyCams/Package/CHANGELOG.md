@@ -1,3 +1,6 @@
+## Version 2.1.0
+- Modified the HorizontalResolution option to only affect the main body cam. API users can now set the `Resolution` property to override the default resolution of 160x120.
+
 ## Version 2.0.6
 - Prevented a NullReferenceException when API users ([TwoRadarMaps](https://github.com/Zaggy1024/LC_TwoRadarMaps/), [darmuhsTerminalStuff](https://github.com/darmuh/TerminalStuff)) create a body cam that is synchronized with a radar map.
 - Removed the warning that `DisplayOriginalScreenWhenDisabled` will not work when GeneralImprovements's UseBetterMonitors is enabled.
