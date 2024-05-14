@@ -848,11 +848,8 @@ namespace OpenBodyCams
             if (timePerFrame > 0)
             {
                 elapsedSinceLastFrame += Time.deltaTime;
-                if (elapsedSinceLastFrame >= timePerFrame)
-                {
-                    Camera.Render();
-                    elapsedSinceLastFrame %= timePerFrame;
-                }
+                Camera.enabled = elapsedSinceLastFrame >= timePerFrame;
+                elapsedSinceLastFrame %= timePerFrame;
             }
             else
             {
