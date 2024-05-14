@@ -141,8 +141,6 @@ namespace OpenBodyCams
 
                 bottomMonitors.AddComponent<SyncBodyCamToRadarMap>();
 
-                MainBodyCam.EnableCamera = Plugin.EnableCamera.Value;
-
                 if (!GeneralImprovementsCompatibility.BetterMonitorsEnabled)
                 {
                     MainBodyCam.MonitorRenderer = bottomMonitors.GetComponent<MeshRenderer>();
@@ -186,6 +184,8 @@ namespace OpenBodyCams
                     else if (originalTexture == ExternalCameraRenderer.cam.targetTexture)
                         CameraReplacedByBodyCam = ExternalCameraRenderer;
                 }
+
+                UpdateMainBodyCamSettings();
             }
 
             if (Plugin.DisplayBodyCamUpgradeTip && ShipUpgrades.BodyCamUnlockable != null && !ShipUpgrades.BodyCamUnlockableIsPlaced)
@@ -209,6 +209,19 @@ namespace OpenBodyCams
                 "Body cams are now a ship upgrade purchaseable in the terminal. " +
                 "This can be disabled in the config.");
             Plugin.DisplayBodyCamUpgradeTip = false;
+        }
+
+        internal static void UpdateMainBodyCamSettings()
+        {
+            if (MainBodyCam == null)
+                return;
+
+            MainBodyCam.Framerate = Plugin.Framerate.Value;
+
+            MainBodyCam.EnableCamera = Plugin.EnableCamera.Value;
+
+            MainBodyCam.UpdateScreenMaterial();
+            MainBodyCam.MonitorOnMaterial.SetColor("_EmissiveColor", Plugin.GetBodyCamEmissiveColor());
         }
     }
 }

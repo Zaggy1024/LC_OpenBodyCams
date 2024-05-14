@@ -269,7 +269,7 @@ namespace OpenBodyCams
             {
                 MonitorOnMaterial = new(Shader.Find("HDRP/Unlit")) { name = "BodyCamMaterial" };
                 MonitorOnMaterial.SetFloat("_AlbedoAffectEmissive", 1);
-                MonitorOnMaterial.SetColor("_EmissiveColor", Plugin.GetBodyCamEmissiveColor());
+                MonitorOnMaterial.SetColor("_EmissiveColor", Color.white);
                 createdMaterial = true;
             }
 

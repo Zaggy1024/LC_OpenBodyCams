@@ -130,22 +130,15 @@ namespace OpenBodyCams
             HorizontalResolution.SettingChanged += (_, _) => BodyCamComponent.UpdateAllCameraSettings();
             FieldOfView.SettingChanged += (_, _) => BodyCamComponent.UpdateAllCameraSettings();
             RenderDistance.SettingChanged += (_, _) => BodyCamComponent.UpdateAllCameraSettings();
-            Framerate.SettingChanged += (_, _) =>
-            {
-                if (ShipObjects.MainBodyCam != null)
-                    ShipObjects.MainBodyCam.Framerate = Framerate.Value;
-            };
             NightVisionBrightness.SettingChanged += (_, _) => BodyCamComponent.UpdateAllCameraSettings();
-            MonitorEmissiveColor.SettingChanged += (_, _) => ShipObjects.MainBodyCam?.MonitorOnMaterial.SetColor("_EmissiveColor", GetBodyCamEmissiveColor());
             MonitorTextureFiltering.SettingChanged += (_, _) => BodyCamComponent.UpdateAllCameraSettings();
             RadarBoosterPanRPM.SettingChanged += (_, _) => BodyCamComponent.UpdateAllCameraSettings();
             DisableCameraWhileTargetIsOnShip.SettingChanged += (_, _) => BodyCamComponent.UpdateAllCameraSettings();
-            EnableCamera.SettingChanged += (_, _) =>
-            {
-                if (ShipObjects.MainBodyCam != null)
-                    ShipObjects.MainBodyCam.EnableCamera = EnableCamera.Value;
-            };
             DisplayOriginalScreenWhenDisabled.SettingChanged += (_, _) => ShipObjects.UpdateMainBodyCamNoTargetMaterial();
+
+            Framerate.SettingChanged += (_, _) => ShipObjects.UpdateMainBodyCamSettings();
+            MonitorEmissiveColor.SettingChanged += (_, _) => ShipObjects.UpdateMainBodyCamSettings();
+            EnableCamera.SettingChanged += (_, _) => ShipObjects.UpdateMainBodyCamSettings();
 
             // Terminal:
             TerminalPiPBodyCamEnabled = Config.Bind("Terminal", "EnablePiPBodyCam", false, "Adds a 'view bodycam' command to the terminal that places a picture-in-picture view of the bodycam in front of the radar map.");
