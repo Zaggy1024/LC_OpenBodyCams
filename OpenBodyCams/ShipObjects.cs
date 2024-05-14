@@ -216,6 +216,7 @@ namespace OpenBodyCams
             if (MainBodyCam == null)
                 return;
 
+            MainBodyCam.Resolution = new Vector2Int(Plugin.HorizontalResolution.Value, Plugin.HorizontalResolution.Value * 3 / 4);
             MainBodyCam.Framerate = Plugin.Framerate.Value;
 
             MainBodyCam.EnableCamera = Plugin.EnableCamera.Value;

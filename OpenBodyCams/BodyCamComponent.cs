@@ -67,14 +67,27 @@ namespace OpenBodyCams
         private bool keepCameraOn = false;
         public bool ForceEnableCamera { get => keepCameraOn; set => keepCameraOn = value; }
 
-        private Vector2Int? resolution;
-        public Vector2Int? ResolutionOverride
+        private static readonly Vector2Int DefaultResolution = new(160, 120);
+        private Vector2Int resolution = DefaultResolution;
+        public Vector2Int Resolution
         {
             get => resolution;
             set
             {
                 resolution = value;
                 UpdateSettings();
+            }
+        }
+        [Obsolete]
+        private Vector2Int? ResolutionOverride
+        {
+            get => Resolution;
+            set
+            {
+                if (value.HasValue)
+                    Resolution = value.Value;
+                else
+                    Resolution = DefaultResolution;
             }
         }
 
@@ -357,19 +370,8 @@ namespace OpenBodyCams
 
         public void UpdateSettings()
         {
-            int horizontalResolution;
-            int verticalResolution;
-
-            if (resolution.HasValue)
-            {
-                horizontalResolution = resolution.Value.x;
-                verticalResolution = resolution.Value.y;
-            }
-            else
-            {
-                horizontalResolution = Plugin.HorizontalResolution.Value;
-                verticalResolution = horizontalResolution * 3 / 4;
-            }
+            var horizontalResolution = resolution.x;
+            var verticalResolution = resolution.y;
 
             Camera.targetTexture = new RenderTexture(horizontalResolution, verticalResolution, 32)
             {
