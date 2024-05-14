@@ -251,8 +251,10 @@ namespace OpenBodyCams
                 .Split(new char[] { ',', ' ' }, StringSplitOptions.RemoveEmptyEntries)
                 .Select(x => float.Parse(x.Trim(), CultureInfo.InvariantCulture))
                 .ToArray();
-            if (components.Length < 0 || components.Length > 4)
-                throw new ArgumentException("Too many color components");
+            if (components.Length < 3)
+                throw new FormatException("Not enough color components");
+            if (components.Length > 4)
+                throw new FormatException("Too many color components");
             return new Color(components[0], components[1], components[2], components.Length == 4 ? components[3] : 0);
         }
 
