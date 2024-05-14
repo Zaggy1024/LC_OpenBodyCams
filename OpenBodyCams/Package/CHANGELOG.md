@@ -1,6 +1,6 @@
 ## Version 2.0.6
 - Prevented a NullReferenceException when API users ([TwoRadarMaps](https://github.com/Zaggy1024/LC_TwoRadarMaps/), [darmuhsTerminalStuff](https://github.com/darmuh/TerminalStuff)) create a body cam that is synchronized with a radar map.
-- Removed the warning that `DisplayOriginalScreenWhenDisabled` will not work when GeneralImprovements's
+- Removed the warning that `DisplayOriginalScreenWhenDisabled` will not work when GeneralImprovements's UseBetterMonitors is enabled.
 
 ## Version 2.0.5
 - Added support for falling back to [GeneralImprovements](https://github.com/Shaosil/LethalCompanyMods-GeneralImprovements/)'s monitor assignments when the body cam is disabled.
