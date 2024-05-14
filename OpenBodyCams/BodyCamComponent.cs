@@ -349,6 +349,7 @@ namespace OpenBodyCams
         }
 
         // This method was public before, but is kept as a private method to prevent compatibility issues with existing API users.
+        [Obsolete]
         private void EnsureCameraExists()
         {
             EnsureCameraExistsOrReturnFalse();
