@@ -98,6 +98,18 @@ namespace OpenBodyCams
         private float elapsedSinceLastFrame = 0;
         private float timePerFrame = 0;
 
+        public float Framerate
+        {
+            get => 1f / timePerFrame;
+            set
+            {
+                if (value != 0)
+                    timePerFrame = 1.0f / value;
+                else
+                    timePerFrame = 0;
+            }
+        }
+
         private bool panCamera = false;
         private float panAngle = RADAR_BOOSTER_INITIAL_PAN;
 
@@ -369,17 +381,6 @@ namespace OpenBodyCams
                 MonitorOnMaterial.mainTexture = Camera.targetTexture;
 
             Camera.farClipPlane = Plugin.RenderDistance.Value;
-
-            if (Plugin.Framerate.Value != 0)
-            {
-                timePerFrame = 1.0f / Plugin.Framerate.Value;
-                Camera.enabled = false;
-            }
-            else
-            {
-                timePerFrame = 0;
-                Camera.enabled = false;
-            }
 
             nightVisionLight.intensity = Plugin.NightVisionIntensityBase * Plugin.NightVisionBrightness.Value;
             nightVisionLight.range = Plugin.NightVisionRangeBase * Plugin.NightVisionBrightness.Value;

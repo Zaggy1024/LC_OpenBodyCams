@@ -130,7 +130,11 @@ namespace OpenBodyCams
             HorizontalResolution.SettingChanged += (_, _) => BodyCamComponent.UpdateAllCameraSettings();
             FieldOfView.SettingChanged += (_, _) => BodyCamComponent.UpdateAllCameraSettings();
             RenderDistance.SettingChanged += (_, _) => BodyCamComponent.UpdateAllCameraSettings();
-            Framerate.SettingChanged += (_, _) => BodyCamComponent.UpdateAllCameraSettings();
+            Framerate.SettingChanged += (_, _) =>
+            {
+                if (ShipObjects.MainBodyCam != null)
+                    ShipObjects.MainBodyCam.Framerate = Framerate.Value;
+            };
             NightVisionBrightness.SettingChanged += (_, _) => BodyCamComponent.UpdateAllCameraSettings();
             MonitorEmissiveColor.SettingChanged += (_, _) => ShipObjects.MainBodyCam?.MonitorOnMaterial.SetColor("_EmissiveColor", GetBodyCamEmissiveColor());
             MonitorTextureFiltering.SettingChanged += (_, _) => BodyCamComponent.UpdateAllCameraSettings();
