@@ -112,10 +112,15 @@ namespace OpenBodyCams.Patches
         [HarmonyPatch(nameof(FlowerSnakeEnemy.SetClingToPlayer))]
         private static void SetClingToPlayerPrefix(FlowerSnakeEnemy __instance, PlayerControllerB playerToCling)
         {
+            FlowerSnakeStartedClingingToPlayer(__instance, playerToCling);
+        }
+
+        internal static void FlowerSnakeStartedClingingToPlayer(FlowerSnakeEnemy flowerSnake, PlayerControllerB player)
+        {
             EnsureFlowerSnakesAttachedToPlayersArrayIsCorrectSize();
-            if (__instance.clingingToPlayer != null)
-                FlowerSnakesAttachedToPlayers[__instance.clingingToPlayer.playerClientId].Remove(__instance);
-            FlowerSnakesAttachedToPlayers[playerToCling.playerClientId].Add(__instance);
+            if (flowerSnake.clingingToPlayer != null)
+                FlowerSnakesAttachedToPlayers[flowerSnake.clingingToPlayer.playerClientId].Remove(flowerSnake);
+            FlowerSnakesAttachedToPlayers[player.playerClientId].Add(flowerSnake);
         }
 
         [HarmonyPrefix]
