@@ -1,5 +1,8 @@
+## Version 2.1.2
+- Fixed centipede tracking thinking a centiped was clinged to two players at once if two clients send messages that they are being clinged at the same time. This is likely the cause of the issue that was worked around in 2.1.1.
+
 ## Version 2.1.1
-- Tentatively fixed NullReferenceExceptions which could occur when a centipede clings to a player's head, likely caused by mods changing its behavior.
+- Tentatively fixed NullReferenceExceptions which could occur when a centipede clings to a player's head.
 - Prevented NullReferenceExceptions when running LethalPipeRemoval to destroy the door screen.
 
 ## Version 2.1.0
