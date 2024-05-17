@@ -44,18 +44,21 @@ namespace OpenBodyCams
 
             BodyCamComponent.InitializeAtStartOfGame();
 
-            // HACK: We have to get to the emissive color before GeneralImprovements (as of 1.2.5) can, since the material
-            //       gets re-instantiated every time it is assigned back to the screen's renderer, so any changes to it
-            //       will not be shared.
-            ExternalCameraMaterial = ExternalCameraRenderer.mesh.sharedMaterials[2];
-            OriginalExternalCameraEmissiveColor = ExternalCameraMaterial.GetColor("_EmissiveColor");
-            SetExternalCameraEmissiveColor();
+            if (ExternalCameraRenderer != null)
+            {
+                // HACK: We have to get to the emissive color before GeneralImprovements (as of 1.2.5) can, since the material
+                //       gets re-instantiated every time it is assigned back to the screen's renderer, so any changes to it
+                //       will not be shared.
+                ExternalCameraMaterial = ExternalCameraRenderer.mesh.sharedMaterials[2];
+                OriginalExternalCameraEmissiveColor = ExternalCameraMaterial.GetColor("_EmissiveColor");
+                SetExternalCameraEmissiveColor();
+            }
         }
 
         internal static void SetExternalCameraEmissiveColor()
         {
             var externalCameraEmissive = Plugin.GetExternalCameraEmissiveColor().GetValueOrDefault(OriginalExternalCameraEmissiveColor);
-            ExternalCameraMaterial.SetColor("_EmissiveColor", externalCameraEmissive);
+            ExternalCameraMaterial?.SetColor("_EmissiveColor", externalCameraEmissive);
         }
 
         public static void LateInitialization()
@@ -65,8 +68,8 @@ namespace OpenBodyCams
             TerminalScript = UnityEngine.Object.FindObjectOfType<Terminal>();
             TwoRadarCamsPresent = TerminalScript.GetComponent<ManualCameraRenderer>() != null;
 
-            if (DoorScreenRenderer != null)
-                DoorScreenUsesExternalCamera = DoorScreenRenderer.sharedMaterials.Any(mat => mat.mainTexture == ExternalCameraRenderer.cam.targetTexture) == true;
+            if (DoorScreenRenderer != null && ExternalCameraRenderer?.cam != null)
+                DoorScreenUsesExternalCamera = DoorScreenRenderer.sharedMaterials.Any(mat => mat.mainTexture == ExternalCameraRenderer.cam.targetTexture);
 
             InitializeBodyCam();
             TerminalCommands.Initialize();
@@ -179,9 +182,9 @@ namespace OpenBodyCams
                 CameraReplacedByBodyCam = null;
                 if (MainBodyCam.MonitorDisabledMaterial.mainTexture is RenderTexture originalTexture)
                 {
-                    if (originalTexture == InternalCameraRenderer.cam.targetTexture)
+                    if (originalTexture == InternalCameraRenderer?.cam?.targetTexture)
                         CameraReplacedByBodyCam = InternalCameraRenderer;
-                    else if (originalTexture == ExternalCameraRenderer.cam.targetTexture)
+                    else if (originalTexture == ExternalCameraRenderer?.cam?.targetTexture)
                         CameraReplacedByBodyCam = ExternalCameraRenderer;
                 }
 
