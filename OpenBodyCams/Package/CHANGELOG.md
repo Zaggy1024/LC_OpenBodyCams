@@ -1,3 +1,7 @@
+## Version 2.1.1
+- Tentatively fixed NullReferenceExceptions which could occur when a centipede clings to a player's head, likely caused by mods changing its behavior.
+- Prevented NullReferenceExceptions when running LethalPipeRemoval to destroy the door screen.
+
 ## Version 2.1.0
 - Modified the HorizontalResolution option to only affect the main body cam. API users can now set the `Resolution` property to override the default resolution of 160x120.
 
