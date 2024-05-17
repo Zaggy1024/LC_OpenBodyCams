@@ -24,6 +24,10 @@ namespace OpenBodyCams.Patches
                 {
                     if (clingingCentipede == null)
                         continue;
+                    if (clingingCentipede.isEnemyDead)
+                        continue;
+                    if (clingingCentipede.clingingToDeadBody)
+                        continue;
                     if (clingingCentipede.clingingToPlayer == null)
                     {
                         if (!HasWarnedClingingMismatch)
