@@ -76,14 +76,19 @@ namespace OpenBodyCams.Patches
             }
         }
 
-        [HarmonyPostfix]
+        [HarmonyPrefix]
         [HarmonyPatch(nameof(CentipedeAI.ClingToPlayer))]
-        private static void ClingToPlayerPostfix(CentipedeAI __instance, PlayerControllerB playerScript)
+        private static void ClingToPlayerPrefix(CentipedeAI __instance, PlayerControllerB playerScript)
+        {
+            CentipedeStartedClingingToPlayer(__instance, playerScript);
+        }
+
+        internal static void CentipedeStartedClingingToPlayer(CentipedeAI centipede, PlayerControllerB player)
         {
             EnsureCentipedesAttachedToPlayersArrayIsCorrectSize();
-            if (__instance.clingingToPlayer != null)
-                CentipedesAttachedToPlayers[__instance.clingingToPlayer.playerClientId].Remove(__instance);
-            CentipedesAttachedToPlayers[playerScript.playerClientId].Add(__instance);
+            if (centipede.clingingToPlayer != null)
+                CentipedesAttachedToPlayers[centipede.clingingToPlayer.playerClientId].Remove(centipede);
+            CentipedesAttachedToPlayers[player.playerClientId].Add(centipede);
         }
 
         [HarmonyTranspiler]
