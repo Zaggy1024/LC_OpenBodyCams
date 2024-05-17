@@ -18,6 +18,7 @@ namespace OpenBodyCams.Patches
         internal static List<CodeInstruction> ThirdPersonClingingAnimationInstructions;
 
         internal static HashSet<FlowerSnakeEnemy>[] FlowerSnakesAttachedToPlayers;
+        internal static bool HasWarnedClingingMismatch = false;
 
         internal static void SetFirstPersonClingingAnimationPosition(FlowerSnakeEnemy flowerSnake)
         {
@@ -37,6 +38,16 @@ namespace OpenBodyCams.Patches
                 {
                     if (clingingFlowerSnake == null)
                         continue;
+                    if (clingingFlowerSnake.clingingToPlayer == null)
+                    {
+                        if (!HasWarnedClingingMismatch)
+                        {
+                            Plugin.Instance.Logger.LogWarning($"{clingingFlowerSnake} should be clinging to a player according to our hooks, but it is not.");
+                            HasWarnedClingingMismatch = true;
+                        }
+                        continue;
+                    }
+
                     switch (perspective)
                     {
                         case Perspective.Original:

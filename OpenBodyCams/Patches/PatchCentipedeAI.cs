@@ -14,6 +14,7 @@ namespace OpenBodyCams.Patches
     internal class PatchCentipedeAI
     {
         internal static HashSet<CentipedeAI>[] CentipedesAttachedToPlayers;
+        internal static bool HasWarnedClingingMismatch = false;
 
         public static void SetClingingAnimationPositionsForPlayer(PlayerControllerB player, Perspective perspective)
         {
@@ -23,6 +24,15 @@ namespace OpenBodyCams.Patches
                 {
                     if (clingingCentipede == null)
                         continue;
+                    if (clingingCentipede.clingingToPlayer == null)
+                    {
+                        if (!HasWarnedClingingMismatch)
+                        {
+                            Plugin.Instance.Logger.LogWarning($"{clingingCentipede} should be clinging to a player according to our hooks, but it is not.");
+                            HasWarnedClingingMismatch = true;
+                        }
+                        continue;
+                    }
 
                     var originallyClingedToLocalPlayer = clingingCentipede.clingingToLocalClient;
 
