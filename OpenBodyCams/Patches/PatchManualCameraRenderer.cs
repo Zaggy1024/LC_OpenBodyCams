@@ -76,6 +76,8 @@ namespace OpenBodyCams.Patches
                     return;
                 if (__result)
                     return;
+                if (!ShipObjects.DoorScreenRenderer.isVisible)
+                    return;
                 if (!player.isInHangarShipRoom && StartOfRound.Instance.shipDoorsEnabled)
                     return;
 
