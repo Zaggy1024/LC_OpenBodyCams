@@ -67,6 +67,12 @@ namespace OpenBodyCams.Utilities
             {
                 state.heldItemPosition = player.currentlyHeldObjectServer.transform.position;
                 state.heldItemRotation = player.currentlyHeldObjectServer.transform.rotation;
+
+                if (player.currentlyHeldObjectServer is FlashlightItem flashlight)
+                {
+                    state.helmetLightEnabled = player.helmetLight.enabled;
+                    state.heldLightEnabled = flashlight.flashlightBulb.enabled;
+                }
             }
 
             for (int i = 0; i < state.thirdPersonCosmetics.Length; i++)
@@ -91,7 +97,16 @@ namespace OpenBodyCams.Utilities
                 player.thisPlayerModelArms.gameObject.layer = DEFAULT_LAYER;
 
                 if (player.currentlyHeldObjectServer != null)
+                {
                     AttachItem(player.currentlyHeldObjectServer, player.localItemHolder);
+
+                    if (player.currentlyHeldObjectServer is FlashlightItem flashlight)
+                    {
+                        player.helmetLight.enabled = false;
+                        flashlight.flashlightBulb.enabled = flashlight.isBeingUsed;
+                        flashlight.flashlightBulbGlow.enabled = flashlight.isBeingUsed;
+                    }
+                }
 
                 foreach (var cosmetic in state.thirdPersonCosmetics)
                     SetCosmeticHidden(cosmetic, true);
@@ -107,7 +122,16 @@ namespace OpenBodyCams.Utilities
                 player.thisPlayerModelArms.gameObject.layer = ENEMIES_NOT_RENDERED_LAYER;
 
                 if (player.currentlyHeldObjectServer != null)
+                {
                     AttachItem(player.currentlyHeldObjectServer, player.serverItemHolder);
+
+                    if (player.currentlyHeldObjectServer is FlashlightItem flashlight)
+                    {
+                        player.helmetLight.enabled = flashlight.isBeingUsed;
+                        flashlight.flashlightBulb.enabled = false;
+                        flashlight.flashlightBulbGlow.enabled = false;
+                    }
+                }
 
                 foreach (var cosmetic in state.thirdPersonCosmetics)
                     SetCosmeticHidden(cosmetic, false);
@@ -140,6 +164,13 @@ namespace OpenBodyCams.Utilities
             {
                 player.currentlyHeldObjectServer.transform.position = state.heldItemPosition;
                 player.currentlyHeldObjectServer.transform.rotation = state.heldItemRotation;
+
+                if (player.currentlyHeldObjectServer is FlashlightItem flashlight)
+                {
+                    player.helmetLight.enabled = state.helmetLightEnabled;
+                    flashlight.flashlightBulb.enabled = state.heldLightEnabled;
+                    flashlight.flashlightBulbGlow.enabled = state.heldLightEnabled;
+                }
             }
 
             PatchFlowerSnakeEnemy.SetClingingAnimationPositionsForPlayer(player, Perspective.Original);
@@ -165,6 +196,9 @@ namespace OpenBodyCams.Utilities
 
         internal Vector3 heldItemPosition;
         internal Quaternion heldItemRotation;
+
+        internal bool helmetLightEnabled;
+        internal bool heldLightEnabled;
 
         private static bool AllObjectsExistInArray(GameObject[] objects)
         {
