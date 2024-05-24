@@ -82,38 +82,37 @@ namespace OpenBodyCams.Utilities
                 item.transform.position = holder.position + holder.rotation * item.itemProperties.positionOffset;
             }
 
-            switch (perspective)
+            if (perspective == Perspective.FirstPerson)
             {
-                case Perspective.FirstPerson:
-                    player.thisPlayerModel.shadowCastingMode = ShadowCastingMode.ShadowsOnly;
-                    player.thisPlayerModel.gameObject.layer = ENEMIES_NOT_RENDERED_LAYER;
+                player.thisPlayerModel.shadowCastingMode = ShadowCastingMode.ShadowsOnly;
+                player.thisPlayerModel.gameObject.layer = ENEMIES_NOT_RENDERED_LAYER;
 
-                    player.thisPlayerModelArms.enabled = true;
-                    player.thisPlayerModelArms.gameObject.layer = DEFAULT_LAYER;
+                player.thisPlayerModelArms.enabled = true;
+                player.thisPlayerModelArms.gameObject.layer = DEFAULT_LAYER;
 
-                    if (player.currentlyHeldObjectServer != null)
-                        AttachItem(player.currentlyHeldObjectServer, player.localItemHolder);
+                if (player.currentlyHeldObjectServer != null)
+                    AttachItem(player.currentlyHeldObjectServer, player.localItemHolder);
 
-                    foreach (var cosmetic in state.thirdPersonCosmetics)
-                        SetCosmeticHidden(cosmetic, true);
-                    foreach (var cosmetic in state.firstPersonCosmetics)
-                        SetCosmeticHidden(cosmetic, false);
-                    break;
-                case Perspective.ThirdPerson:
-                    player.thisPlayerModel.shadowCastingMode = ShadowCastingMode.On;
-                    player.thisPlayerModel.gameObject.layer = DEFAULT_LAYER;
+                foreach (var cosmetic in state.thirdPersonCosmetics)
+                    SetCosmeticHidden(cosmetic, true);
+                foreach (var cosmetic in state.firstPersonCosmetics)
+                    SetCosmeticHidden(cosmetic, false);
+            }
+            else if (perspective == Perspective.ThirdPerson)
+            {
+                player.thisPlayerModel.shadowCastingMode = ShadowCastingMode.On;
+                player.thisPlayerModel.gameObject.layer = DEFAULT_LAYER;
 
-                    player.thisPlayerModelArms.enabled = false;
-                    player.thisPlayerModelArms.gameObject.layer = ENEMIES_NOT_RENDERED_LAYER;
+                player.thisPlayerModelArms.enabled = false;
+                player.thisPlayerModelArms.gameObject.layer = ENEMIES_NOT_RENDERED_LAYER;
 
-                    if (player.currentlyHeldObjectServer != null)
-                        AttachItem(player.currentlyHeldObjectServer, player.serverItemHolder);
+                if (player.currentlyHeldObjectServer != null)
+                    AttachItem(player.currentlyHeldObjectServer, player.serverItemHolder);
 
-                    foreach (var cosmetic in state.thirdPersonCosmetics)
-                        SetCosmeticHidden(cosmetic, false);
-                    foreach (var cosmetic in state.firstPersonCosmetics)
-                        SetCosmeticHidden(cosmetic, true);
-                    break;
+                foreach (var cosmetic in state.thirdPersonCosmetics)
+                    SetCosmeticHidden(cosmetic, false);
+                foreach (var cosmetic in state.firstPersonCosmetics)
+                    SetCosmeticHidden(cosmetic, true);
             }
 
             PatchFlowerSnakeEnemy.SetClingingAnimationPositionsForPlayer(player, perspective);
