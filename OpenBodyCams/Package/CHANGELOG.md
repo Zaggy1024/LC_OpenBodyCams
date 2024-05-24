@@ -1,3 +1,6 @@
+## Version 2.2.0
+- Implemented switching perspectives for flashlights held by players viewed by body cams. Flashlights that are in the view player's hand will now emit light from the item instead of the helmet light that is used in third person.
+
 ## Version 2.1.2
 - Fixed centipede tracking thinking a centiped was clinged to two players at once if two clients send messages that they are being clinged at the same time. This is likely the cause of the issue that was worked around in 2.1.1.
 
