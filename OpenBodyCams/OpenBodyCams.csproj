@@ -93,13 +93,10 @@
         <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     </PropertyGroup>
 
-    <PropertyGroup>
-        <PostBuildEvent>
-            mkdir $(MSBuildProjectDirectory)\Package
-            copy /Y $(SolutionDir)README.md $(MSBuildProjectDirectory)\Package
-            copy /Y $(OutDir)OpenBodyCams.dll $(MSBuildProjectDirectory)\Package
-            copy /Y $(SolutionDir)Assets\Bundles\openbodycams $(MSBuildProjectDirectory)\Package
-        </PostBuildEvent>
-    </PropertyGroup>
+    <Target Name="CopyToPackage" AfterTargets="AfterBuild">
+        <Copy SourceFiles="$(SolutionDir)README.md" DestinationFolder="$(MSBuildProjectDirectory)\Package" />
+        <Copy SourceFiles="$(OutDir)OpenBodyCams.dll" DestinationFolder="$(MSBuildProjectDirectory)\Package" />
+        <Copy SourceFiles="$(SolutionDir)Assets\Bundles\openbodycams" DestinationFolder="$(MSBuildProjectDirectory)\Package" />
+    </Target>
 
 </Project>
