@@ -64,6 +64,15 @@ namespace OpenBodyCams
         // event is ignored, then frozen or invalid video may display on your materials.
         public event Action<bool> OnBlankedSet;
 
+        public delegate Renderer[] GetRenderersToHide(Renderer[] renderers);
+        // This can be used to append to or override the renderers that are hidden for non-player
+        // targets. Any renderers in the list returned by this event's handler will be hidden when
+        // the body cam this component controls is rendered.
+        //
+        // The list provided to the event will be empty for players, but the renderers returned
+        // will still be hidden, along with all the player models that are hidden/shown by default.
+        public event GetRenderersToHide OnRenderersToHideChanged;
+
         internal Renderer MonitorRenderer;
         internal int MonitorMaterialIndex = -1;
         internal Material MonitorOnMaterial;
@@ -112,7 +121,7 @@ namespace OpenBodyCams
         private PlayerModelState currentPlayerModelState;
 
         private Transform currentActualTarget;
-        internal Renderer[] currentlyViewedMeshes = [];
+        private Renderer[] currentRenderersToHide = [];
 
         private TargetDirtyStatus targetDirtyStatus = TargetDirtyStatus.None;
 
@@ -574,13 +583,24 @@ namespace OpenBodyCams
             targetDirtyStatus &= ~TargetDirtyStatus.Immediate;
         }
 
+        private void SetRenderersToHide(Renderer[] renderers)
+        {
+            if (currentActualTarget != null && OnRenderersToHideChanged != null)
+            {
+                currentRenderersToHide = OnRenderersToHideChanged(renderers);
+                return;
+            }
+
+            currentRenderersToHide = renderers;
+        }
+
         public void SetTargetToNone()
         {
             ClearTargetDirtyImmediate();
 
             currentPlayer = null;
             currentActualTarget = null;
-            currentlyViewedMeshes = [];
+            SetRenderersToHide([]);
             UpdateModelReferences();
 
             if (CameraObject == null)
@@ -626,7 +646,7 @@ namespace OpenBodyCams
                 }
 
                 currentActualTarget = currentPlayer.transform;
-                currentlyViewedMeshes = [];
+                SetRenderersToHide([]);
             }
             else if (currentPlayer.redirectToEnemy != null)
             {
@@ -649,7 +669,7 @@ namespace OpenBodyCams
                 }
 
                 currentActualTarget = currentPlayer.redirectToEnemy.transform;
-                currentlyViewedMeshes = CollectModelsToHide(currentActualTarget);
+                SetRenderersToHide(CollectModelsToHide(currentActualTarget));
             }
             else if (currentPlayer.deadBody != null)
             {
@@ -668,7 +688,7 @@ namespace OpenBodyCams
                 }
 
                 currentActualTarget = currentPlayer.deadBody.transform;
-                currentlyViewedMeshes = CollectModelsToHide(obstructingMeshParent);
+                SetRenderersToHide(CollectModelsToHide(obstructingMeshParent));
             }
 
             CameraObject.transform.SetParent(attachmentPoint, false);
@@ -698,7 +718,7 @@ namespace OpenBodyCams
 
             if (currentActualTarget.GetComponent<RadarBoosterItem>() != null)
             {
-                currentlyViewedMeshes = [currentActualTarget.transform.Find("AnimContainer/Rod").GetComponent<Renderer>()];
+                SetRenderersToHide([currentActualTarget.transform.Find("AnimContainer/Rod").GetComponent<Renderer>()]);
                 offset = new Vector3(0, 1.5f, 0);
                 panCamera = true;
             }
@@ -750,7 +770,7 @@ namespace OpenBodyCams
                 ViewPerspective.Apply(localPlayer, ref localPlayerModelState, Perspective.ThirdPerson);
 
             bool warnedNullMesh = false;
-            foreach (var mesh in currentlyViewedMeshes)
+            foreach (var mesh in currentRenderersToHide)
             {
                 if (mesh == null)
                 {
@@ -777,7 +797,7 @@ namespace OpenBodyCams
             if ((object)currentPlayer != localPlayer)
                 ViewPerspective.Restore(localPlayer, localPlayerModelState);
 
-            foreach (var mesh in currentlyViewedMeshes)
+            foreach (var mesh in currentRenderersToHide)
             {
                 if (mesh == null)
                     continue;
@@ -830,7 +850,7 @@ namespace OpenBodyCams
                 if ((object)currentPlayer != localPlayer && !localPlayerModelState.VerifyCosmeticsExist(localPlayer.playerUsername))
                     foundNull = true;
 
-                foreach (var renderer in currentlyViewedMeshes)
+                foreach (var renderer in currentRenderersToHide)
                 {
                     if (renderer == null)
                     {
@@ -913,7 +933,7 @@ namespace OpenBodyCams
                 return true;
             if (PlayerContainsRenderer(StartOfRound.Instance?.localPlayerController, renderer))
                 return true;
-            if (Array.IndexOf(currentlyViewedMeshes, renderer) != -1)
+            if (Array.IndexOf(currentRenderersToHide, renderer) != -1)
                 return true;
             return false;
         }
