@@ -507,7 +507,7 @@ namespace OpenBodyCams
                 return false;
             }
 
-            return true;
+            return false;
         }
 
         private static void CollectDescendentModelsToHide(Transform parent, List<Renderer> list)
