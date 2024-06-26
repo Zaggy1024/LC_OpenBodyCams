@@ -884,6 +884,8 @@ namespace OpenBodyCams
 
         void OnDestroy()
         {
+            Destroy(CameraObject);
+
             AllBodyCams = AllBodyCams.Where(bodyCam => (object)bodyCam != this).ToArray();
 
             SyncBodyCamToRadarMap.OnBodyCamDestroyed(this);
