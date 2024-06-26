@@ -52,8 +52,16 @@ namespace OpenBodyCams
         internal Camera Camera;
         public Camera GetCamera() { return Camera; }
 
+        // This event is fired whenever the camera is created/recreated. No settings from the old
+        // camera instances will carry over to a new camera, so this should be used to apply any
+        // necessary settings to the new camera instance.
         public event Action<Camera> OnCameraCreated;
+        // This event will fire any time the render texture is created/recreated. The texture may
+        // change when settings in the OpenBodyCams config are changed, or when any of this
+        // component's properties that affect camera or texture settings are changed.
         public event Action<RenderTexture> OnRenderTextureCreated;
+        // Use this event to hide/show the output of the body cam wherever it is used. If this'
+        // event is ignored, then frozen or invalid video may display on your materials.
         public event Action<bool> OnBlankedSet;
 
         internal Renderer MonitorRenderer;
