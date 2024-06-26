@@ -1,3 +1,7 @@
+## Version 2.2.1
+- Fixed an issue that prevented body cams created by API users from displaying output when attached to arbitrary objects.
+- Added a feature to allow API users to hide any set of renderers they choose.
+
 ## Version 2.2.0
 - Implemented switching perspectives for flashlights held by players viewed by body cams. Flashlights that are in the view player's hand will now emit light from the item instead of the helmet light that is used in third person.
 
