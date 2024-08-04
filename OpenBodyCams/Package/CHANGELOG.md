@@ -1,3 +1,7 @@
+## Version 2.2.2
+- Fixed visibility issues when viewing a dead player's perspective through a body cam.
+- Prevented a NullReferenceException that could occur if the terminal tried to load a null node.
+
 ## Version 2.2.1
 - Fixed an issue that prevented body cams created by API users from displaying output when attached to arbitrary objects.
 - Added a feature to allow API users to hide any set of renderers they choose.
