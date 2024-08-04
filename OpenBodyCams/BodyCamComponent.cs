@@ -33,6 +33,8 @@ namespace OpenBodyCams
 
         private static BodyCamComponent lastBodyCamRendered;
 
+        private static readonly int CullModeProperty = Shader.PropertyToID("_CullMode");
+
         private static int bodyCamCullingMask;
         private static FrameSettings mainCameraCustomFrameSettings;
         private static FrameSettingsOverrideMask mainCameraCustomFrameSettingsMask;
@@ -121,6 +123,9 @@ namespace OpenBodyCams
 
         private Transform currentActualTarget;
         private Renderer[] currentRenderersToHide = [];
+
+        private Material currentObstructingMaterial;
+        private float currentObstructingMaterialCullMode;
 
         private TargetDirtyStatus targetDirtyStatus = TargetDirtyStatus.None;
 
@@ -631,6 +636,10 @@ namespace OpenBodyCams
             currentActualTarget = null;
             Transform attachmentPoint = null;
 
+            currentRenderersToHide = [];
+
+            currentObstructingMaterial = null;
+
             if (!currentPlayer.isPlayerDead)
             {
                 if (Plugin.CameraMode.Value == CameraModeOptions.Head)
@@ -688,6 +697,7 @@ namespace OpenBodyCams
 
                 currentActualTarget = currentPlayer.deadBody.transform;
                 SetRenderersToHide(CollectModelsToHide(obstructingMeshParent));
+                currentObstructingMaterial = currentActualTarget.GetComponent<Renderer>()?.sharedMaterial;
             }
 
             CameraObject.transform.SetParent(attachmentPoint, false);
@@ -780,6 +790,12 @@ namespace OpenBodyCams
                 }
                 mesh.forceRenderingOff = true;
             }
+
+            if (currentObstructingMaterial != null)
+            {
+                currentObstructingMaterialCullMode = currentObstructingMaterial.GetFloat(CullModeProperty);
+                currentObstructingMaterial.SetFloat(CullModeProperty, (float)CullMode.Back);
+            }
         }
 
         private void ResetCameraRendering()
@@ -802,6 +818,8 @@ namespace OpenBodyCams
                     continue;
                 mesh.forceRenderingOff = false;
             }
+
+            currentObstructingMaterial?.SetFloat(CullModeProperty, currentObstructingMaterialCullMode);
         }
 
         private void UpdateTargetStatusDuringUpdate()
