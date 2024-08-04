@@ -1,4 +1,4 @@
-﻿using HarmonyLib;
+using HarmonyLib;
 using OpenBodyCams.API;
 using System.Collections.Generic;
 using System.Linq;
@@ -136,6 +136,9 @@ namespace OpenBodyCams
         [HarmonyPatch(typeof(Terminal), nameof(Terminal.LoadNewNode))]
         static void LoadNewNodePrefix(ref TerminalNode node)
         {
+            if (node == null)
+                return;
+
             if (node == ViewBodyCamNode)
             {
                 if (PiPImage.gameObject.activeSelf)
