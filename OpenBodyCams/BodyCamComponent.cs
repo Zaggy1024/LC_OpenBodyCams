@@ -26,7 +26,7 @@ namespace OpenBodyCams
 
         private const float RADAR_BOOSTER_INITIAL_PAN = 270;
 
-        private static readonly Vector3 BODY_CAM_OFFSET = new(0.07f, 0, 0.15f);
+        private static readonly Vector3 BODY_CAM_OFFSET = new(0.07f, 0, 0.16f);
         private static readonly Vector3 CAMERA_CONTAINER_OFFSET = new(0.07f, 0, 0.125f);
 
         private static BodyCamComponent[] AllBodyCams = [];
@@ -678,7 +678,7 @@ namespace OpenBodyCams
                 {
                     attachmentPoint = currentPlayer.deadBody.transform.Find("spine.001/spine.002/spine.003/spine.004/spine.004_end");
                     obstructingMeshParent = attachmentPoint.parent;
-                    offset = CAMERA_CONTAINER_OFFSET - new Vector3(0, 0.15f, 0);
+                    offset = CAMERA_CONTAINER_OFFSET;
                 }
                 else
                 {
