@@ -97,21 +97,30 @@ namespace OpenBodyCams
 
             if (Plugin.TerminalPiPBodyCamEnabled.Value)
             {
+                var viewKeyword = FindKeyword("view", verb: true);
+                ViewMonitorNode = viewKeyword?.FindCompatibleNoun("monitor")?.result;
+                if (ViewMonitorNode == null)
+                {
+                    Plugin.Instance.Logger.LogWarning("'view monitor' command does not exist, terminal PiP body cam view will be disabled.");
+                    return;
+                }
+
+
                 ViewBodyCamNode = ScriptableObject.CreateInstance<TerminalNode>();
                 ViewBodyCamNode.name = "ViewBodyCam";
                 ViewBodyCamNode.displayText = "Toggling picture-in-picture body cam.\n\n";
                 ViewBodyCamNode.clearPreviousText = true;
 
                 BodyCamKeyword = FindOrCreateKeyword("BodyCam", "bodycam", verb: false);
-                var viewKeyword = FindOrCreateKeyword("View", "view", verb: true,
-                    [
-                        new CompatibleNoun() {
-                            noun = BodyCamKeyword,
-                            result = ViewBodyCamNode,
-                        },
-                    ]);
 
-                ViewMonitorNode = viewKeyword.FindCompatibleNoun("monitor").result;
+                viewKeyword.compatibleNouns = [
+                    .. viewKeyword.compatibleNouns ?? [],
+                    new CompatibleNoun()
+                    {
+                        noun = BodyCamKeyword,
+                        result = ViewBodyCamNode,
+                    }
+                ];
 
                 BodyCamFailedNode = ScriptableObject.CreateInstance<TerminalNode>();
                 BodyCamFailedNode.name = "BodyCamFailed";
