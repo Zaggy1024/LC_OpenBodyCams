@@ -1,3 +1,6 @@
+## Version 2.2.3
+- Prevented an error that could occur when creating the terminal PiP body cam command alongside [darmuhsTerminalStuff](https://github.com/darmuh/TerminalStuff) v3.5.0.
+
 ## Version 2.2.2
 - Fixed visibility issues when viewing a dead player's perspective through a body cam.
 - Prevented a NullReferenceException that could occur if the terminal tried to load a null node.
