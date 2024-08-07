@@ -94,6 +94,7 @@
     </PropertyGroup>
 
     <Target Name="CopyToPackage" AfterTargets="AfterBuild">
+        <Copy SourceFiles="$(SolutionDir)LICENSE" DestinationFolder="$(MSBuildProjectDirectory)\Package" />
         <Copy SourceFiles="$(SolutionDir)README.md" DestinationFolder="$(MSBuildProjectDirectory)\Package" />
         <Copy SourceFiles="$(OutDir)OpenBodyCams.dll" DestinationFolder="$(MSBuildProjectDirectory)\Package" />
         <Copy SourceFiles="$(SolutionDir)Assets\Bundles\openbodycams" DestinationFolder="$(MSBuildProjectDirectory)\Package" />
