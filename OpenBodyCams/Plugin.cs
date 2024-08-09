@@ -127,7 +127,6 @@ namespace OpenBodyCams
             DisplayOriginalScreenWhenDisabled = Config.Bind("Camera", "DisplayOriginalScreenWhenDisabled", true, $"When enabled, the screen that the body cam replaces will be displayed when it is disabled due to invalid targets.");
 
             CameraMode.SettingChanged += (_, _) => BodyCamComponent.MarkTargetStatusChangedForAllBodyCams();
-            HorizontalResolution.SettingChanged += (_, _) => BodyCamComponent.UpdateAllCameraSettings();
             FieldOfView.SettingChanged += (_, _) => BodyCamComponent.UpdateAllCameraSettings();
             RenderDistance.SettingChanged += (_, _) => BodyCamComponent.UpdateAllCameraSettings();
             NightVisionBrightness.SettingChanged += (_, _) => BodyCamComponent.UpdateAllCameraSettings();
@@ -136,6 +135,7 @@ namespace OpenBodyCams
             DisableCameraWhileTargetIsOnShip.SettingChanged += (_, _) => BodyCamComponent.UpdateAllCameraSettings();
             DisplayOriginalScreenWhenDisabled.SettingChanged += (_, _) => ShipObjects.UpdateMainBodyCamNoTargetMaterial();
 
+            HorizontalResolution.SettingChanged += (_, _) => ShipObjects.UpdateMainBodyCamSettings();
             Framerate.SettingChanged += (_, _) => ShipObjects.UpdateMainBodyCamSettings();
             MonitorEmissiveColor.SettingChanged += (_, _) => ShipObjects.UpdateMainBodyCamSettings();
             EnableCamera.SettingChanged += (_, _) => ShipObjects.UpdateMainBodyCamSettings();
