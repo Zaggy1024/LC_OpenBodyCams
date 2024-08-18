@@ -38,10 +38,8 @@ namespace OpenBodyCams.Utilities
                 return;
             }
 
-            state.thirdPersonCosmetics = Cosmetics.CollectThirdPersonCosmetics(player);
+            Cosmetics.CollectCosmetics(player, out state.thirdPersonCosmetics, out state.firstPersonCosmetics, out state.hasViewmodelReplacement);
             state.thirdPersonCosmeticsLayers = new int[state.thirdPersonCosmetics.Length];
-
-            state.firstPersonCosmetics = Cosmetics.CollectFirstPersonCosmetics(player);
             state.firstPersonCosmeticsLayers = new int[state.firstPersonCosmetics.Length];
         }
 
@@ -93,8 +91,11 @@ namespace OpenBodyCams.Utilities
                 player.thisPlayerModel.shadowCastingMode = ShadowCastingMode.ShadowsOnly;
                 player.thisPlayerModel.gameObject.layer = ENEMIES_NOT_RENDERED_LAYER;
 
-                player.thisPlayerModelArms.enabled = true;
-                player.thisPlayerModelArms.gameObject.layer = DEFAULT_LAYER;
+                if (!state.hasViewmodelReplacement)
+                {
+                    player.thisPlayerModelArms.enabled = true;
+                    player.thisPlayerModelArms.gameObject.layer = DEFAULT_LAYER;
+                }
 
                 if (player.currentlyHeldObjectServer != null)
                 {
@@ -118,8 +119,11 @@ namespace OpenBodyCams.Utilities
                 player.thisPlayerModel.shadowCastingMode = ShadowCastingMode.On;
                 player.thisPlayerModel.gameObject.layer = DEFAULT_LAYER;
 
-                player.thisPlayerModelArms.enabled = false;
-                player.thisPlayerModelArms.gameObject.layer = ENEMIES_NOT_RENDERED_LAYER;
+                if (!state.hasViewmodelReplacement)
+                {
+                    player.thisPlayerModelArms.enabled = false;
+                    player.thisPlayerModelArms.gameObject.layer = ENEMIES_NOT_RENDERED_LAYER;
+                }
 
                 if (player.currentlyHeldObjectServer != null)
                 {
@@ -193,6 +197,8 @@ namespace OpenBodyCams.Utilities
 
         internal GameObject[] firstPersonCosmetics = [];
         internal int[] firstPersonCosmeticsLayers = [];
+
+        internal bool hasViewmodelReplacement = false;
 
         internal Vector3 heldItemPosition;
         internal Quaternion heldItemRotation;

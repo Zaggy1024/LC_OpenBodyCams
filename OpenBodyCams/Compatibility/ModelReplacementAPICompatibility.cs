@@ -48,14 +48,21 @@ namespace OpenBodyCams.Compatibility
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
-        public static GameObject[] CollectCosmetics(PlayerControllerB player)
+        public static void CollectCosmetics(PlayerControllerB player, ref GameObject[] thirdPersonCosmetics, ref GameObject[] firstPersonCosmetics, ref bool hasViewmodelReplacement)
         {
             var bodyReplacement = player.GetComponent<ViewStateManager>()?.bodyReplacement;
 
-            if (bodyReplacement?.replacementModel == null)
-                return [];
+            if (bodyReplacement == null)
+                return;
 
-            return bodyReplacement.replacementModel.GetComponentsInChildren<Transform>().Select(cosmeticObject => cosmeticObject.gameObject).ToArray();
+            if (bodyReplacement.replacementModel != null)
+                thirdPersonCosmetics = [.. thirdPersonCosmetics, .. bodyReplacement.replacementModel.GetComponentsInChildren<Transform>().Select(cosmeticObject => cosmeticObject.gameObject).ToArray()];
+
+            if (bodyReplacement.replacementViewModel != null)
+            {
+                firstPersonCosmetics = [.. firstPersonCosmetics, .. bodyReplacement.replacementViewModel.GetComponentsInChildren<Transform>().Select(cosmeticObject => cosmeticObject.gameObject).ToArray()];
+                hasViewmodelReplacement = true;
+            }
         }
 
         public static void UpdateModelReplacement(ViewStateManager __instance)

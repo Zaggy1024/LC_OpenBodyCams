@@ -115,43 +115,44 @@ namespace OpenBodyCams.Utilities
             return childrenObjects;
         }
 
-        private static GameObject[] DoCollectThirdPersonCosmetics(PlayerControllerB player)
+        private static void DoCollectCosmetics(PlayerControllerB player, out GameObject[] thirdPersonCosmetics, out GameObject[] firstPersonCosmetics, out bool hasViewmodelReplacement)
         {
             if (player == null)
-                return [];
+            {
+                thirdPersonCosmetics = [];
+                firstPersonCosmetics = [];
+                hasViewmodelReplacement = false;
+                return;
+            }
 
-            DebugLog($"Collecting third-person cosmetics for {player.playerUsername}.");
-            GameObject[] result = CollectVanillaThirdPersonCosmetics(player);
+            DebugLog($"Collecting cosmetics for {player.playerUsername}.");
+
+            thirdPersonCosmetics = CollectVanillaThirdPersonCosmetics(player);
+            firstPersonCosmetics = CollectVanillaFirstPersonCosmetics(player);
+            hasViewmodelReplacement = false;
 
             if (compatibilityMode.HasFlag(CompatibilityMode.MoreCompany))
             {
                 var mcCosmetics = MoreCompanyCompatibility.CollectCosmetics(player);
-                result = [.. result, .. mcCosmetics];
-                DebugLog($"Collected {mcCosmetics.Length} MoreCompany third-person cosmetics objects.");
+                thirdPersonCosmetics = [.. thirdPersonCosmetics, .. mcCosmetics];
             }
 
             if (compatibilityMode.HasFlag(CompatibilityMode.AdvancedCompany))
             {
                 var acCosmetics = AdvancedCompanyCompatibility.CollectCosmetics(player);
-                result = [.. result, .. acCosmetics];
-                DebugLog($"Collected {acCosmetics.Length} AdvancedCompany third-person cosmetics objects.");
-            }
-
-            if (compatibilityMode.HasFlag(CompatibilityMode.ModelReplacementAPI))
-            {
-                var mrCosmetics = ModelReplacementAPICompatibility.CollectCosmetics(player);
-                result = [.. result, .. mrCosmetics];
-                DebugLog($"Collected {mrCosmetics.Length} ModelReplacementAPI third-person cosmetics objects.");
+                thirdPersonCosmetics = [.. thirdPersonCosmetics, .. acCosmetics];
             }
 
             if (compatibilityMode.HasFlag(CompatibilityMode.LethalVRM))
             {
                 var vrmCosmetics = LethalVRMCompatibility.CollectCosmetics(player);
-                result = [.. result, .. vrmCosmetics];
-                DebugLog($"Collected {vrmCosmetics.Length} LethalVRM cosmetics objects.");
+                thirdPersonCosmetics = [.. thirdPersonCosmetics, .. vrmCosmetics];
             }
 
-            Plugin.Instance.Logger.LogInfo($"Collected {result.Length} third-person cosmetics objects for {player.playerUsername}.");
+            if (compatibilityMode.HasFlag(CompatibilityMode.ModelReplacementAPI))
+                ModelReplacementAPICompatibility.CollectCosmetics(player, ref thirdPersonCosmetics, ref firstPersonCosmetics, ref hasViewmodelReplacement);
+
+            Plugin.Instance.Logger.LogInfo($"Collected {thirdPersonCosmetics.Length} third-person and {firstPersonCosmetics.Length} cosmetics for {player.playerUsername} with {(hasViewmodelReplacement ? "" : "no ")} viewmodel replacement.");
 
             if (PrintDebugInfo)
             {
@@ -163,48 +164,21 @@ namespace OpenBodyCams.Utilities
                     Plugin.Instance.Logger.LogInfo($"  {frame.GetMethod().DeclaringType.Name}.{frame.GetMethod().Name}()");
                 }
             }
-
-            return result;
         }
 
-        private static GameObject[] DoCollectFirstPersonCosmetics(PlayerControllerB player)
-        {
-            if (player == null)
-                return [];
-            DebugLog($"Collecting first-person cosmetics for {player.playerUsername}.");
-
-            var result = CollectVanillaFirstPersonCosmetics(player);
-
-            Plugin.Instance.Logger.LogInfo($"Collected {result.Length} first-person cosmetics objects for {player.playerUsername}.");
-
-            return result;
-        }
-
-        public static GameObject[] CollectThirdPersonCosmetics(PlayerControllerB player)
+        public static void CollectCosmetics(PlayerControllerB player, out GameObject[] thirdPersonCosmetics, out GameObject[] firstPersonCosmetics, out bool hasViewmodelReplacement)
         {
             try
             {
-                return DoCollectThirdPersonCosmetics(player);
+                DoCollectCosmetics(player, out thirdPersonCosmetics, out firstPersonCosmetics, out hasViewmodelReplacement);
             }
             catch (Exception e)
             {
                 Plugin.Instance.Logger.LogError($"Failed to get third-person cosmetics for player {player.playerUsername}:");
                 Plugin.Instance.Logger.LogError(e);
-                return [];
-            }
-        }
-
-        public static GameObject[] CollectFirstPersonCosmetics(PlayerControllerB player)
-        {
-            try
-            {
-                return DoCollectFirstPersonCosmetics(player);
-            }
-            catch (Exception e)
-            {
-                Plugin.Instance.Logger.LogError($"Failed to get first-person cosmetics for player {player.playerUsername}:");
-                Plugin.Instance.Logger.LogError(e);
-                return [];
+                thirdPersonCosmetics = [];
+                firstPersonCosmetics = [];
+                hasViewmodelReplacement = false;
             }
         }
     }
