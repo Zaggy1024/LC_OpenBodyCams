@@ -1,3 +1,6 @@
+## Version 2.2.4
+- Prevented the vanilla first person arms from showing in body cams when using a viewmodel replacement through [ModelReplacementAPI](https://github.com/BunyaPineTree/LethalCompany_ModelReplacementAPI).
+
 ## Version 2.2.3
 - Prevented an error that could occur when creating the terminal PiP body cam command alongside [darmuhsTerminalStuff](https://github.com/darmuh/TerminalStuff) v3.5.0.
 
@@ -117,7 +120,7 @@
 - Fixed compatibility for MoreCompany versions greater than 1.8.0. Note that there appears to be an issue where upon joining a server, cosmetics may appear blocking the view of the body cam, which may be caused by an error in MoreCompany.
 
 ## Version 1.1.2
-- Fixed error spam that could occur when changing models with ModelReplacementAPI.
+- Fixed error spam that could occur when changing models with [ModelReplacementAPI](https://github.com/BunyaPineTree/LethalCompany_ModelReplacementAPI).
 - Added a debug option that prints extra information about which cosmetics are being collected for each player, and the reason they are being collected. If you have issues with cosmetics/model replacements, I may ask for you to enable this to get new logs.
 
 ## Version 1.1.1
@@ -130,7 +133,7 @@
 - Note: Due to refactoring much of the code that reacts to the events in the game, I'm anticipating there may be regressions in the way the body cam tracks its target's status changes (death, masking, respawning). If the camera gets stuck displaying something unexpected, please report that (preferably through a GitHub issue) with steps to reproduce the problem.
 
 ## Version 1.0.24
-- Added support for ModelReplacementAPI's third person model replacements.
+- Added support for [ModelReplacementAPI](https://github.com/BunyaPineTree/LethalCompany_ModelReplacementAPI)'s third person model replacements.
 - Added support for LethalVRM's third person model replacements.
 
 ## Version 1.0.23
