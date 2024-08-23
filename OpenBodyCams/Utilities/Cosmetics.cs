@@ -152,7 +152,7 @@ namespace OpenBodyCams.Utilities
             if (compatibilityMode.HasFlag(CompatibilityMode.ModelReplacementAPI))
                 ModelReplacementAPICompatibility.CollectCosmetics(player, ref thirdPersonCosmetics, ref firstPersonCosmetics, ref hasViewmodelReplacement);
 
-            Plugin.Instance.Logger.LogInfo($"Collected {thirdPersonCosmetics.Length} third-person and {firstPersonCosmetics.Length} cosmetics for {player.playerUsername} with {(hasViewmodelReplacement ? "" : "no ")} viewmodel replacement.");
+            Plugin.Instance.Logger.LogInfo($"Collected {thirdPersonCosmetics.Length} third-person and {firstPersonCosmetics.Length} cosmetics for {player.playerUsername} with{(hasViewmodelReplacement ? "" : "out")} a viewmodel replacement.");
 
             if (PrintDebugInfo)
             {
