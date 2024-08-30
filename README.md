@@ -42,7 +42,7 @@ Please **report any issues [here](https://github.com/Zaggy1024/LC_OpenBodyCams/i
 - `HorizontalResolution`: The horizontal resolution of the rendered view.
 - `FieldOfView`: The vertical FOV of the body cam's view.
 - `RenderDistance`: The far clip plane of the camera.
-- `Framerate`: The number of frames to render per second. The default setting renders at the game's framerate and has the least impact on performance.
+- `Framerate`: The number of frames to render per second. The default setting renders the body cam at the game's framerate. Setting this to a value below approximately 75% of the game's average framerate with the body cam disabled will improve performance significantly.
 - `NightVisionBrightness`: A multiplier for the brightness and range of the night vision light. A value of 1 matches the vision of the player being viewed.
 - `MonitorEmissiveColor`: The color to emit from the screen displaying the body cam. Represented as comma-separated numbers to avoid losing precision by using a 32-bit color.
 - `MonitorTextureFiltering`: Changes the texture filtering applied to the screen for the body cam. Point will result in sharp edges on the pixels, while bilinear and trilinear should both smooth out colors between them.
@@ -73,9 +73,6 @@ Please **report any issues [here](https://github.com/Zaggy1024/LC_OpenBodyCams/i
 See [Debugging](#debugging).
 
 # Notes
-
-## Framerate limits
-As mentioned above, using no framerate limit results in the best performance. Forcing the camera to render at certain intervals outside of the render pipeline seems to cause a lot of overhead, so setting the framerate limit to anything above 30fps may cause a severe dip in the game's framerate.
 
 ## Item rotations
 An optional fix is included for items' rotations being desynced between the player dropping them and all other clients, which is caused by an ignored rotation parameter in the function handling dropped items. This is included to allow the radar boosters to face in a consistent direction for all clients in a game. The patch is designed to fail gracefully and allow the mod to still run, in case any other mods apply the same fix, but if problems arise, it can be disabled with the `FixDroppedItemRotation` config option.

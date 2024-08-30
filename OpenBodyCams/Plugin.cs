@@ -33,7 +33,7 @@ namespace OpenBodyCams
     {
         public const string MOD_NAME = "OpenBodyCams";
         public const string MOD_UNIQUE_NAME = "Zaggy1024." + MOD_NAME;
-        public const string MOD_VERSION = "2.2.4";
+        public const string MOD_VERSION = "2.3.0";
 
         private readonly Harmony harmony = new(MOD_UNIQUE_NAME);
 
@@ -116,7 +116,7 @@ namespace OpenBodyCams
             HorizontalResolution = Config.Bind("Camera", "HorizontalResolution", 160, "The horizontal resolution of the rendering. The vertical resolution is calculated based on the aspect ratio of the monitor.");
             FieldOfView = Config.Bind("Camera", "FieldOfView", 65f, "The vertical FOV of the camera in degrees.");
             RenderDistance = Config.Bind("Camera", "RenderDistance", 25f, "The far clip plane for the body cam. Lowering may improve framerates.");
-            Framerate = Config.Bind("Camera", "Framerate", 0f, "The number of frames to render per second. A value of 0 will render at the game's framerate and results in best performance. Higher framerates will negatively affect performance, values between 0 and 30 are recommended.");
+            Framerate = Config.Bind("Camera", "Framerate", 0f, "The number of frames to render per second. A value of 0 will render at the game's framerate. Setting this significantly below the average framerate on the ship will improve performance.");
             NightVisionBrightness = Config.Bind("Camera", "NightVisionBrightness", 1f, "A multiplier for the intensity of the area light used to brighten dark areas. A value of 1 is identical to the player's actual vision.");
             MonitorEmissiveColor = Config.Bind("Camera", "MonitorEmissiveColor", "0.05, 0.13, 0.05", "Adjust the color that is emitted from the body cam monitor, using comma-separated decimal numbers for red, green and blue.");
             MonitorTextureFiltering = Config.Bind("Camera", "MonitorTextureFiltering", FilterMode.Bilinear, "The texture filtering to use for the body cam on the monitor. Bilinear and Trilinear will result in a smooth image, while Point will result in sharp square edges. If Point is used, a fairly high resolution is recommended.");

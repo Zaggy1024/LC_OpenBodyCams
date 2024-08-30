@@ -1,3 +1,9 @@
+## Version 2.3.0
+- Reduced overhead when applying framerate limit to the body cam. There is no longer a downside to setting a framerate limit instead of letting the camera render every frame, and performance will scale as expected.
+- Fixed light flickering that could occur on body cams when their framerate is limited.
+- Added API functionality to track when body cams are created and destroyed.
+- Added an API flag to body cams to determine whether they should be considered wirelessly connected to the ship.
+
 ## Version 2.2.4
 - Prevented the vanilla first person arms from showing in body cams when using a viewmodel replacement through [ModelReplacementAPI](https://github.com/BunyaPineTree/LethalCompany_ModelReplacementAPI).
 
