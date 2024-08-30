@@ -12,6 +12,11 @@ namespace OpenBodyCams.API
         public static event MainBodyCamStatusUpdate OnBodyCamReceiverBecameEnabled;
         public static event MainBodyCamStatusUpdate OnBodyCamReceiverBecameDisabled;
 
+        public delegate void BodyCamStatusUpdate(BodyCamComponent bodyCam);
+
+        public static event BodyCamStatusUpdate OnBodyCamInstantiated;
+        public static event BodyCamStatusUpdate OnBodyCamDestroyed;
+
         public static bool BodyCamsAreAvailable
         {
             get
@@ -61,6 +66,16 @@ namespace OpenBodyCams.API
         internal static void BodyCamReceiverBecameDisabled()
         {
             OnBodyCamReceiverBecameDisabled?.Invoke();
+        }
+
+        internal static void BodyCamInstantiated(BodyCamComponent bodyCam)
+        {
+            OnBodyCamInstantiated?.Invoke(bodyCam);
+        }
+
+        internal static void BodyCamDestroyed(BodyCamComponent bodyCam)
+        {
+            OnBodyCamDestroyed?.Invoke(bodyCam);
         }
     }
 }

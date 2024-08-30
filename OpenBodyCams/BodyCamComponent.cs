@@ -10,6 +10,7 @@ using UnityEngine.Rendering;
 using UnityEngine.Rendering.HighDefinition;
 
 using OpenBodyCams.Utilities;
+using OpenBodyCams.API;
 
 namespace OpenBodyCams
 {
@@ -278,6 +279,8 @@ namespace OpenBodyCams
             }
 
             AllBodyCams = [.. AllBodyCams, this];
+
+            BodyCam.BodyCamInstantiated(this);
         }
 
         void Start()
@@ -932,6 +935,8 @@ namespace OpenBodyCams
             AllBodyCams = AllBodyCams.Where(bodyCam => (object)bodyCam != this).ToArray();
 
             SyncBodyCamToRadarMap.OnBodyCamDestroyed(this);
+
+            BodyCam.BodyCamDestroyed(this);
         }
 
         private static bool PlayerContainsRenderer(PlayerControllerB player, Renderer renderer)
