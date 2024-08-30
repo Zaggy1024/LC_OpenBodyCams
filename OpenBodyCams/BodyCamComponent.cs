@@ -77,6 +77,23 @@ namespace OpenBodyCams
 
         public event BodyCam.BodyCamStatusUpdate OnTargetChanged;
 
+        private bool isRemoteCamera = true;
+        // Used by API users to indicate whether the camera this component controls is remote, i.e.
+        // wirelessly connected to the ship. This is intended to be used by other mods to incorporate
+        // effects like static based on gameplay events.
+        public bool IsRemoteCamera
+        {
+            get { return isRemoteCamera; }
+            set
+            {
+                if (isRemoteCamera != value)
+                {
+                    isRemoteCamera = value;
+                    TargetHasChanged();
+                }
+            }
+        }
+
         internal Renderer MonitorRenderer;
         internal int MonitorMaterialIndex = -1;
         internal Material MonitorOnMaterial;
