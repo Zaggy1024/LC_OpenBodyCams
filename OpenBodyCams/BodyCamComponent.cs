@@ -75,6 +75,8 @@ namespace OpenBodyCams
         // will still be hidden, along with all the player models that are hidden/shown by default.
         public event GetRenderersToHide OnRenderersToHideChanged;
 
+        public event BodyCam.BodyCamStatusUpdate OnTargetChanged;
+
         internal Renderer MonitorRenderer;
         internal int MonitorMaterialIndex = -1;
         internal Material MonitorOnMaterial;
@@ -607,6 +609,11 @@ namespace OpenBodyCams
             currentRenderersToHide = renderers;
         }
 
+        private void TargetHasChanged()
+        {
+            OnTargetChanged?.Invoke(this);
+        }
+
         public void SetTargetToNone()
         {
             ClearTargetDirtyImmediate();
@@ -616,11 +623,14 @@ namespace OpenBodyCams
             SetRenderersToHide([]);
             UpdateModelReferences();
 
-            if (CameraObject == null)
-                return;
-            CameraObject.transform.SetParent(null, false);
-            CameraObject.transform.localPosition = Vector3.zero;
-            CameraObject.transform.localRotation = Quaternion.identity;
+            if (CameraObject != null)
+            {
+                CameraObject.transform.SetParent(null, false);
+                CameraObject.transform.localPosition = Vector3.zero;
+                CameraObject.transform.localRotation = Quaternion.identity;
+            }
+
+            TargetHasChanged();
         }
 
         public void SetTargetToPlayer(PlayerControllerB player)
@@ -712,6 +722,8 @@ namespace OpenBodyCams
             CameraObject.transform.SetParent(attachmentPoint, false);
             CameraObject.transform.localPosition = offset;
             CameraObject.transform.localRotation = Quaternion.identity;
+
+            TargetHasChanged();
         }
 
         public void SetTargetToTransform(Transform transform)
@@ -744,6 +756,8 @@ namespace OpenBodyCams
             CameraObject.transform.SetParent(currentActualTarget.transform, false);
             CameraObject.transform.localPosition = offset;
             CameraObject.transform.localRotation = Quaternion.identity;
+
+            TargetHasChanged();
         }
 
         private void UpdateTargetStatus()
