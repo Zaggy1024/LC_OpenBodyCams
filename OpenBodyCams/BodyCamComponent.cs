@@ -341,6 +341,12 @@ namespace OpenBodyCams
                 cameraData.renderingPathCustomFrameSettingsOverrideMask = mainCameraCustomFrameSettingsMask;
             }
 
+            // Make camera data persistent so that by setting Camera.enabled we don't incur
+            // unnecessary overhead in the render pass.
+            // This also prevents a flickering effect in the custom pass that occurs when
+            // running a framerate limit.
+            cameraData.hasPersistentHistory = true;
+
             var nightVision = Instantiate(nightVisionPrefab);
             nightVision.transform.SetParent(CameraObject.transform, false);
             nightVision.SetActive(true);
