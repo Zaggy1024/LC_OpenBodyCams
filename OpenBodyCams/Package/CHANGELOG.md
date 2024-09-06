@@ -1,3 +1,7 @@
+## Version 2.3.1
+- Fixed some issues that could cause breakage or crashes upon loading a corrupted save.
+- Fixed an issue preventing the body cam from functioning if another mod removes the camera from the small monitor with `DisableCameraOnSmallMonitor` enabled.
+
 ## Version 2.3.0
 - Reduced overhead when applying framerate limit to the body cam. There is no longer a downside to setting a framerate limit instead of letting the camera render every frame, and performance will scale as expected.
 - Fixed light flickering that could occur on body cams when their framerate is limited.
