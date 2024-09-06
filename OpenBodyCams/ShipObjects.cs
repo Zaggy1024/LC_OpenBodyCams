@@ -124,7 +124,15 @@ namespace OpenBodyCams
 
         private static void DisableCameraOnSmallMonitor()
         {
-            ShipCameraOnSmallMonitor.mesh.SetMaterial(GetCameraMaterialIndex(ShipCameraOnSmallMonitor), BlackScreenMaterial);
+            var cameraMaterialIndex = GetCameraMaterialIndex(ShipCameraOnSmallMonitor);
+
+            if (cameraMaterialIndex == -1)
+            {
+                Plugin.Instance.Logger.LogError($"{Plugin.DisableCameraOnSmallMonitor.Definition} is enabled, but the small monitor's camera material was not found.");
+                return;
+            }
+
+            ShipCameraOnSmallMonitor.mesh.SetMaterial(cameraMaterialIndex, BlackScreenMaterial);
             ShipCameraOnSmallMonitor.cam.enabled = false;
             ShipCameraOnSmallMonitor.enabled = false;
         }
