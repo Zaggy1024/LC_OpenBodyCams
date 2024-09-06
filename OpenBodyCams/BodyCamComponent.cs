@@ -319,24 +319,15 @@ namespace OpenBodyCams
 
         private void EnsureMaterialsExist()
         {
-            bool createdMaterial = false;
-
             if (MonitorOnMaterial == null)
             {
                 MonitorOnMaterial = new(Shader.Find("HDRP/Unlit")) { name = "BodyCamMaterial" };
                 MonitorOnMaterial.SetFloat("_AlbedoAffectEmissive", 1);
                 MonitorOnMaterial.SetColor("_EmissiveColor", Color.white);
-                createdMaterial = true;
             }
 
             if (MonitorOffMaterial == null)
-            {
                 MonitorOffMaterial = ShipObjects.BlackScreenMaterial;
-                createdMaterial = true;
-            }
-
-            if (createdMaterial)
-                UpdateScreenMaterial();
         }
 
         private bool EnsureCameraExistsOrReturnFalse()
@@ -347,7 +338,7 @@ namespace OpenBodyCams
                 return true;
 
             Plugin.Instance.Logger.LogInfo("Camera has been destroyed, recreating it.");
-            EnsureMaterialsExist();
+            UpdateScreenMaterial();
 
             CameraObject = new GameObject("BodyCam");
             Camera = CameraObject.AddComponent<Camera>();
@@ -448,11 +439,15 @@ namespace OpenBodyCams
 
         public void UpdateScreenMaterial()
         {
+            if (!hasFinishedStaticSetup)
+                return;
+
             EnsureMaterialsExist();
 
             if (!MonitorIsOn)
             {
-                SetMonitorMaterial(MonitorOffMaterial);
+                if (MonitorOffMaterial  != null)
+                    SetMonitorMaterial(MonitorOffMaterial);
                 return;
             }
 
