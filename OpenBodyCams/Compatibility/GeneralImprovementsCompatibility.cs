@@ -1,5 +1,4 @@
-﻿using System;
-using System.Runtime.CompilerServices;
+﻿using System.Runtime.CompilerServices;
 
 using BepInEx.Bootstrap;
 using GeneralImprovements.API;
@@ -9,24 +8,6 @@ namespace OpenBodyCams.Compatibility
 {
     public static class GeneralImprovementsCompatibility
     {
-        private const string MonitorGroupPath = "Environment/HangarShip/ShipModels2b/MonitorWall/MonitorGroup(Clone)";
-        private static readonly string[] MonitorPaths = [
-            $"{MonitorGroupPath}/Monitors/TopGroupL/Screen1",
-            $"{MonitorGroupPath}/Monitors/TopGroupL/Screen2",
-            $"{MonitorGroupPath}/Monitors/TopGroupM/Screen3",
-            $"{MonitorGroupPath}/Monitors/TopGroupM/Screen4",
-            $"{MonitorGroupPath}/Monitors/TopGroupR/Screen5",
-            $"{MonitorGroupPath}/Monitors/TopGroupR/Screen6",
-            $"{MonitorGroupPath}/Monitors/TopGroupL/Screen7",
-            $"{MonitorGroupPath}/Monitors/TopGroupL/Screen8",
-            $"{MonitorGroupPath}/Monitors/TopGroupM/Screen9",
-            $"{MonitorGroupPath}/Monitors/TopGroupM/Screen10",
-            $"{MonitorGroupPath}/Monitors/TopGroupR/Screen11",
-            $"{MonitorGroupPath}/Monitors/TopGroupR/Screen12",
-            $"{MonitorGroupPath}/Monitors/BigLeft/LScreen",
-            $"{MonitorGroupPath}/Monitors/BigRight/RScreen",
-        ];
-
         internal static bool GeneralImprovementsEnabled => Chainloader.PluginInfos.ContainsKey(ModGUIDs.GeneralImprovements);
         internal static bool BetterMonitorsEnabled
         {
@@ -34,24 +15,22 @@ namespace OpenBodyCams.Compatibility
             {
                 if (GeneralImprovementsEnabled)
                 {
-                    try
-                    {
-                        // As of 1.2.7, this API is not hooked up properly yet, so it won't be accurate.
-                        // Check manually as well.
-                        if (BetterMonitorsEnabledWithAPI())
-                            return true;
-                    }
-                    catch { }
+                    if (BetterMonitorsEnabledWithAPI())
+                        return true;
                 }
 
-                return GameObject.Find(MonitorGroupPath) != null;
+                return false;
             }
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
         private static bool BetterMonitorsEnabledWithAPI()
         {
-            return MonitorsAPI.NewMonitorMeshActive;
+            if (MonitorsAPI.NewMonitorMeshActive)
+                return true;
+
+            // Versions up to and including 1.4.3 don't set NewMonitorMeshActive.
+            return MonitorsAPI.GetMonitorAtIndex(0) != null;
         }
 
         public readonly struct GeneralImprovementsMonitorSpecification(Renderer renderer, int materialIndex, Material originalMaterial)
@@ -68,48 +47,21 @@ namespace OpenBodyCams.Compatibility
 
             if (id < 0)
             {
-                for (var i = MonitorPaths.Length; i-- > 0;)
+                GeneralImprovementsMonitorSpecification? monitor = null;
+                var i = 0;
+                while (true)
                 {
-                    var monitor = GetMonitorForIDImpl(i);
-                    if (monitor != null)
-                        return monitor;
+                    var nextMonitor = GetMonitorForIDWithAPI(i);
+                    if (nextMonitor == null)
+                        break;
+                    monitor = nextMonitor;
+                    i++;
                 }
-            }
-            else
-            {
-                return GetMonitorForIDImpl(id);
+
+                return monitor;
             }
 
-            return null;
-        }
-
-        private static GeneralImprovementsMonitorSpecification? GetMonitorForIDImpl(int id)
-        {
-            if (!BetterMonitorsEnabled)
-                return null;
-
-            try
-            {
-                return GetMonitorForIDWithAPI(id);
-            }
-            catch { }
-
-            if (id < MonitorPaths.Length)
-            {
-                var currentID = 0;
-                for (var i = 0; i < MonitorPaths.Length; i++)
-                {
-                    var renderer = GameObject.Find(MonitorPaths[i])?.GetComponent<MeshRenderer>();
-                    if (renderer != null && renderer.enabled && renderer.gameObject.activeInHierarchy)
-                    {
-                        if (currentID == id)
-                            return new GeneralImprovementsMonitorSpecification(renderer, 0, null);
-                        currentID++;
-                    }
-                }
-            }
-
-            return null;
+            return GetMonitorForIDWithAPI(id);
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
