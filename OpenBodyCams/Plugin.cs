@@ -209,17 +209,17 @@ namespace OpenBodyCams
 
         private void MigrateSettings()
         {
-            if (AccessTools.PropertyGetter(typeof(ConfigFile), "OrphanedEntries") is not MethodInfo orphansFieldGetter)
+            Dictionary<ConfigDefinition, string> orphans;
+            try
+            {
+                orphans = Config.OrphanedEntries;
+            }
+            catch (MissingFieldException)
             {
                 Logger.LogError("Failed to migrate config, orphaned entries property was not found.");
                 return;
             }
-            if (orphansFieldGetter.Invoke(Config, []) is not Dictionary<ConfigDefinition, string> orphans)
-            {
-                Logger.LogError("Failed to migrate config, orphaned entries was not of the expected type.");
-                return;
-            }
-
+            
             if (!Version.TryParse(LastConfigVersion.Value, out var lastVersion))
                 lastVersion = new Version(2, 0, 0);
 

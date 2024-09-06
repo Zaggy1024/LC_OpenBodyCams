@@ -9,7 +9,7 @@
 
     <ItemGroup>
         <PackageReference Include="Mono.Cecil" Version="0.11.5.0"/>
-        <PackageReference Include="BepInEx.BaseLib" Version="5.4.21.0"/>
+        <PackageReference Include="BepInEx.BaseLib" Version="5.4.21.0" Publicize="true"/>
         <PackageReference Include="BepInEx.Core" Version="5.4.21.0"/>
         <PackageReference Include="BepInEx.AssemblyPublicizer.MSBuild" Version="0.4.1" PrivateAssets="all"/>
     </ItemGroup>
