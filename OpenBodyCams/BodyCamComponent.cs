@@ -75,18 +75,6 @@ namespace OpenBodyCams
                 UpdateSettings();
             }
         }
-        [Obsolete("Use Resolution")]
-        private Vector2Int? ResolutionOverride
-        {
-            get => Resolution;
-            set
-            {
-                if (value.HasValue)
-                    Resolution = value.Value;
-                else
-                    Resolution = DefaultResolution;
-            }
-        }
 
         // Whether the camera is currently rendering to the texture.
         public bool IsBlanked { get => wasBlanked; }
