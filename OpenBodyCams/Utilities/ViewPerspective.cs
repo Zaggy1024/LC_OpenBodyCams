@@ -79,7 +79,7 @@ namespace OpenBodyCams.Utilities
                 state.firstPersonCosmeticsLayers[i] = state.firstPersonCosmetics[i].layer;
 
             // Modify
-            void AttachItem(GrabbableObject item, Transform holder)
+            static void AttachItem(GrabbableObject item, Transform holder)
             {
                 item.transform.rotation = holder.rotation;
                 item.transform.Rotate(item.itemProperties.rotationOffset);
