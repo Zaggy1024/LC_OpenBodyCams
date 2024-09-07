@@ -540,7 +540,9 @@ namespace OpenBodyCams
             if (radarBooster is not null)
             {
                 targetIsOnShip = radarBooster.isInShipRoom;
-                return false;
+
+                var beltBagPosition = new Vector3(3000, -400, 3000);
+                return radarBooster.targetFloorPosition.Equals(beltBagPosition);
             }
 
             return false;
