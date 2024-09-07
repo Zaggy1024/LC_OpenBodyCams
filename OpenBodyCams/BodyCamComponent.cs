@@ -16,42 +16,9 @@ namespace OpenBodyCams
 {
     public class BodyCamComponent : MonoBehaviour
     {
-        [Flags]
-        private enum TargetDirtyStatus
-        {
-            None = 0,
-            Immediate = 1,
-            UntilRender = 2,
-        }
-
-        private const float RADAR_BOOSTER_INITIAL_PAN = 270;
-
-        private static readonly Vector3 BODY_CAM_OFFSET = new(0.07f, 0, 0.16f);
-        private static readonly Vector3 CAMERA_CONTAINER_OFFSET = new(0.07f, 0, 0.125f);
-
-        private static BodyCamComponent[] AllBodyCams = [];
+        #region Public API
         public static BodyCamComponent[] GetAllBodyCams() { return [.. AllBodyCams]; }
 
-        private static BodyCamComponent lastBodyCamRendered;
-
-        private static readonly int CullModeProperty = Shader.PropertyToID("_CullMode");
-
-        private static int bodyCamCullingMask;
-        private static FrameSettings mainCameraCustomFrameSettings;
-        private static FrameSettingsOverrideMask mainCameraCustomFrameSettingsMask;
-        private static Material fogShaderMaterial;
-        private static GameObject nightVisionPrefab;
-        private static Light vanillaMapNightVisionLight;
-        private static bool hasFinishedStaticSetup = false;
-
-        private static bool disableCameraWhileTargetIsOnShip = false;
-
-        private static float radarBoosterPanSpeed;
-
-        private static bool bruteForcePreventNullModels;
-
-        internal GameObject CameraObject;
-        internal Camera Camera;
         public Camera GetCamera() { return Camera; }
 
         // This event is fired whenever the camera is created/recreated. No settings from the old
@@ -77,7 +44,6 @@ namespace OpenBodyCams
 
         public event BodyCam.BodyCamStatusUpdate OnTargetChanged;
 
-        private bool isRemoteCamera = true;
         // Used by API users to indicate whether the camera this component controls is remote, i.e.
         // wirelessly connected to the ship. This is intended to be used by other mods to incorporate
         // effects like static based on gameplay events.
@@ -94,19 +60,12 @@ namespace OpenBodyCams
             }
         }
 
-        internal Renderer MonitorRenderer;
-        internal int MonitorMaterialIndex = -1;
-        internal Material MonitorOnMaterial;
-        internal Material MonitorNoTargetMaterial;
-        internal Material MonitorOffMaterial;
-        internal Material MonitorDisabledMaterial;
-        internal bool MonitorIsOn = true;
-
-        private bool keepCameraOn = false;
+        // Forces the camera to continue rendering regardless of its renderer's visibility,
+        // as well as ignoring the option to disable cameras while their target is on the ship.
         public bool ForceEnableCamera { get => keepCameraOn; set => keepCameraOn = value; }
 
-        private static readonly Vector2Int DefaultResolution = new(160, 120);
-        private Vector2Int resolution = DefaultResolution;
+        // The resolution of the render texture that is created and assigned to the camera
+        // every time it is instantiated.
         public Vector2Int Resolution
         {
             get => resolution;
@@ -116,7 +75,7 @@ namespace OpenBodyCams
                 UpdateSettings();
             }
         }
-        [Obsolete]
+        [Obsolete("Use Resolution")]
         private Vector2Int? ResolutionOverride
         {
             get => Resolution;
@@ -129,11 +88,85 @@ namespace OpenBodyCams
             }
         }
 
-        internal bool EnableCamera = true;
-
-        private bool wasBlanked = false;
+        // Whether the camera is currently rendering to the texture.
         public bool IsBlanked { get => wasBlanked; }
 
+        // The framerate at which to render the camera. Lower values may improve game performance.
+        //
+        // A value of 0 will result in rendering the camera every game frame.
+        public float Framerate
+        {
+            get => 1f / timePerFrame;
+            set
+            {
+                if (value != 0)
+                    timePerFrame = 1.0f / value;
+                else
+                    timePerFrame = 0;
+            }
+        }
+        #endregion
+
+        #region Global constants
+        private const float RADAR_BOOSTER_INITIAL_PAN = 270;
+
+        private static readonly Vector3 BODY_CAM_OFFSET = new(0.07f, 0, 0.16f);
+        private static readonly Vector3 CAMERA_CONTAINER_OFFSET = new(0.07f, 0, 0.125f);
+        #endregion
+
+        #region Per-game constants
+        private static readonly int CullModeProperty = Shader.PropertyToID("_CullMode");
+
+        private static int bodyCamCullingMask;
+        private static FrameSettings mainCameraCustomFrameSettings;
+        private static FrameSettingsOverrideMask mainCameraCustomFrameSettingsMask;
+        private static Material fogShaderMaterial;
+        private static GameObject nightVisionPrefab;
+        private static Light vanillaMapNightVisionLight;
+        private static bool hasFinishedStaticSetup = false;
+        #endregion
+
+        #region Static state
+        private static BodyCamComponent[] AllBodyCams = [];
+
+        private static BodyCamComponent lastBodyCamRendered;
+        #endregion
+
+        #region Global options
+        private static bool disableCameraWhileTargetIsOnShip = false;
+
+        private static float radarBoosterPanSpeed;
+
+        private static bool bruteForcePreventNullModels;
+        #endregion
+
+        #region Camera info
+        internal GameObject CameraObject;
+        internal Camera Camera;
+        #endregion
+
+        #region Monitor info
+        internal Renderer MonitorRenderer;
+        internal int MonitorMaterialIndex = -1;
+        internal Material MonitorOnMaterial;
+        internal Material MonitorNoTargetMaterial;
+        internal Material MonitorOffMaterial;
+        internal Material MonitorDisabledMaterial;
+        internal bool MonitorIsOn = true;
+        #endregion
+
+        #region Internal API state
+        internal bool EnableCamera = true;
+
+        private bool keepCameraOn = false;
+
+        private static readonly Vector2Int DefaultResolution = new(160, 120);
+        private Vector2Int resolution = DefaultResolution;
+
+        private bool isRemoteCamera = true;
+        #endregion
+
+        #region Camera rendering state
         private bool vanillaMapNightVisionLightWasEnabled;
 
         private PlayerModelState localPlayerModelState;
@@ -146,32 +179,35 @@ namespace OpenBodyCams
 
         private Material currentObstructingMaterial;
         private float currentObstructingMaterialCullMode;
+        #endregion
 
-        private TargetDirtyStatus targetDirtyStatus = TargetDirtyStatus.None;
-
-        private float elapsedSinceLastFrame = 0;
-        private float timePerFrame = 0;
-
-        public float Framerate
-        {
-            get => 1f / timePerFrame;
-            set
-            {
-                if (value != 0)
-                    timePerFrame = 1.0f / value;
-                else
-                    timePerFrame = 0;
-            }
-        }
-
-        private bool panCamera = false;
-        private float panAngle = RADAR_BOOSTER_INITIAL_PAN;
-
+        #region Objects for body cam rendering
         private Light nightVisionLight;
         private MeshRenderer greenFlashRenderer;
         private Animator greenFlashAnimator;
 
         private MeshRenderer fogShaderPlaneRenderer;
+        #endregion
+
+        #region General state
+        private TargetDirtyStatus targetDirtyStatus = TargetDirtyStatus.None;
+
+        private float elapsedSinceLastFrame = 0;
+        private float timePerFrame = 0;
+
+        private bool panCamera = false;
+        private float panAngle = RADAR_BOOSTER_INITIAL_PAN;
+
+        private bool wasBlanked = false;
+        #endregion
+
+        [Flags]
+        private enum TargetDirtyStatus
+        {
+            None = 0,
+            Immediate = 1,
+            UntilRender = 2,
+        }
 
         internal static void InitializeStatic()
         {
