@@ -32,6 +32,8 @@ namespace OpenBodyCams
         // Use this event to hide/show the output of the body cam wherever it is used. If this
         // event is ignored, then frozen or invalid video may display on your materials.
         public event Action<bool> OnBlankedSet;
+        // Fired when the camera's rendering status changes. See members of CameraRenderingStatus.
+        public event Action<CameraRenderingStatus> OnCameraStatusChanged;
 
         public delegate Renderer[] GetRenderersToHide(Renderer[] renderers);
         // This can be used to append to or override the renderers that are hidden for non-player
@@ -77,7 +79,10 @@ namespace OpenBodyCams
         }
 
         // Whether the camera is currently rendering to the texture.
-        public bool IsBlanked { get => wasBlanked; }
+        public bool IsBlanked { get => !CameraShouldRender(cameraStatus); }
+
+        // Whether the camera is currently rendering to the texture.
+        public CameraRenderingStatus CameraStatus { get => cameraStatus; }
 
         // The framerate at which to render the camera. Lower values may improve game performance.
         //
@@ -186,7 +191,7 @@ namespace OpenBodyCams
         private bool panCamera = false;
         private float panAngle = RADAR_BOOSTER_INITIAL_PAN;
 
-        private bool wasBlanked = false;
+        private CameraRenderingStatus cameraStatus = CameraRenderingStatus.Rendering;
         #endregion
 
         [Flags]
@@ -476,7 +481,7 @@ namespace OpenBodyCams
             }
 
             var isEnabled = enabled;
-            if (wasBlanked || !isEnabled)
+            if (IsBlanked || !isEnabled)
             {
                 MonitorOnMaterial.color = Color.black;
 
@@ -519,57 +524,73 @@ namespace OpenBodyCams
             return MonitorIsOn;
         }
 
-        private void SetScreenBlanked(bool blanked)
+        private bool CameraShouldRender(CameraRenderingStatus status)
         {
-            if (blanked != wasBlanked)
+            return status == CameraRenderingStatus.Rendering;
+        }
+
+        private void SetStatus(CameraRenderingStatus newStatus)
+        {
+            if (newStatus != cameraStatus)
             {
-                wasBlanked = blanked;
+                bool blankedChanged = CameraShouldRender(cameraStatus) == CameraShouldRender(newStatus);
+                cameraStatus = newStatus;
                 UpdateScreenMaterial();
-                OnBlankedSet?.Invoke(blanked);
+                if (blankedChanged)
+                    OnBlankedSet?.Invoke(IsBlanked);
+                OnCameraStatusChanged?.Invoke(cameraStatus);
             }
         }
 
-        private bool ShouldHideOutput(out bool targetIsOnShip)
+        private CameraRenderingStatus UpdatedCameraStatus()
         {
-            targetIsOnShip = false;
-
             if (!EnableCamera)
-                return true;
+                return CameraRenderingStatus.Disabled;
 
             if (currentActualTarget == null)
-                return true;
+                return CameraRenderingStatus.TargetInvalid;
 
             if (currentPlayer is not null)
             {
                 if (currentPlayer.isPlayerControlled)
                 {
-                    targetIsOnShip = currentPlayer.isInHangarShipRoom;
-                    return false;
+                    if (currentPlayer.isInHangarShipRoom)
+                        return CameraRenderingStatus.TargetDisabledOnShip;
+                    return CameraRenderingStatus.Rendering;
                 }
+
                 if (!currentPlayer.isPlayerDead)
-                    return false;
+                    return CameraRenderingStatus.Rendering;
+
                 if (currentPlayer.redirectToEnemy != null)
                 {
-                    targetIsOnShip = currentPlayer.redirectToEnemy.isInsidePlayerShip;
-                    return false;
+                    if (currentPlayer.redirectToEnemy.isInsidePlayerShip)
+                        return CameraRenderingStatus.TargetDisabledOnShip;
+                    return CameraRenderingStatus.Rendering;
                 }
+
                 if (currentPlayer.deadBody != null)
                 {
-                    targetIsOnShip = currentPlayer.deadBody.isInShip;
-                    return false;
+                    if (currentPlayer.deadBody.isInShip)
+                        return CameraRenderingStatus.TargetDisabledOnShip;
+                    return CameraRenderingStatus.Rendering;
                 }
             }
 
             var radarBooster = currentActualTarget.GetComponent<RadarBoosterItem>();
             if (radarBooster is not null)
             {
-                targetIsOnShip = radarBooster.isInShipRoom;
-
                 var beltBagPosition = new Vector3(3000, -400, 3000);
-                return radarBooster.targetFloorPosition.Equals(beltBagPosition);
+                if (radarBooster.targetFloorPosition.Equals(beltBagPosition))
+                    return CameraRenderingStatus.TargetInvalid;
+
+                if (radarBooster.isInShipRoom)
+                    return CameraRenderingStatus.TargetDisabledOnShip;
+
+                return CameraRenderingStatus.Rendering;
             }
 
-            return false;
+            return CameraRenderingStatus.Rendering;
         }
 
         private static void CollectDescendentModelsToHide(Transform parent, List<Renderer> list)
@@ -909,11 +930,11 @@ namespace OpenBodyCams
 
             if (enableCameraThisFrame)
             {
-                var disable = ShouldHideOutput(out var targetIsOnShip);
-                if (!disable && disableCameraWhileTargetIsOnShip && !keepCameraOn)
-                    disable = targetIsOnShip;
-                enableCameraThisFrame = !disable;
-                SetScreenBlanked(disable);
+                var newStatus = UpdatedCameraStatus();
+                if (newStatus == CameraRenderingStatus.TargetDisabledOnShip && (!disableCameraWhileTargetIsOnShip || keepCameraOn))
+                    newStatus = CameraRenderingStatus.Rendering;
+                SetStatus(newStatus);
+                enableCameraThisFrame = !IsBlanked;
             }
 
             if (enableCameraThisFrame && bruteForcePreventNullModels)
@@ -969,7 +990,7 @@ namespace OpenBodyCams
 
         void OnDisable()
         {
-            SetScreenBlanked(true);
+            SetStatus(CameraRenderingStatus.Disabled);
             UpdateScreenMaterial();
             if (Camera != null)
                 Camera.enabled = false;
