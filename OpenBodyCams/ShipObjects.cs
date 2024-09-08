@@ -1,12 +1,13 @@
 using System;
-using System.Collections;
 using System.Linq;
 
 using UnityEngine;
+using TMPro;
 
 using OpenBodyCams.Compatibility;
 using OpenBodyCams.API;
 using OpenBodyCams.Utilities;
+using UnityEngine.Rendering.HighDefinition;
 
 namespace OpenBodyCams
 {
@@ -18,6 +19,11 @@ namespace OpenBodyCams
         internal static bool TwoRadarCamsPresent = false;
 
         internal static BodyCamComponent MainBodyCam;
+
+        private static Canvas mainBodyCamOverlay;
+        private static RectTransform mainBodyCamOverlayTextTransform;
+        private static TextMeshProUGUI mainBodyCamOverlayTextRenderer;
+        private static bool lastOverlayedCameraHadTransparentPass;
 
         internal static ManualCameraRenderer InternalCameraRenderer;
 
@@ -196,12 +202,29 @@ namespace OpenBodyCams
                     else if (originalTexture == ExternalCameraRenderer?.cam?.targetTexture)
                         CameraReplacedByBodyCam = ExternalCameraRenderer;
                 }
-
-                UpdateMainBodyCamSettings();
             }
 
-            if (Plugin.DisplayBodyCamUpgradeTip && ShipUpgrades.BodyCamUnlockable != null && !ShipUpgrades.BodyCamUnlockableIsPlaced)
-                HUDManager.Instance.StartCoroutine(DisplayShipUpgradeTip());
+            InitializeMainBodyCamOverlay();
+            UpdateMainBodyCamSettings();
+        }
+
+        private static void InitializeMainBodyCamOverlay()
+        {
+            var canvasObject = new GameObject("MainBodyCamOverlay");
+            canvasObject.transform.SetParent(GameObject.Find("Systems/UI").transform, false);
+
+            mainBodyCamOverlay = canvasObject.AddComponent<Canvas>();
+            mainBodyCamOverlay.renderMode = RenderMode.ScreenSpaceCamera;
+
+            var textObject = new GameObject("Text");
+
+            mainBodyCamOverlayTextRenderer = textObject.AddComponent<TextMeshProUGUI>();
+            mainBodyCamOverlayTextRenderer.transform.SetParent(canvasObject.transform, false);
+            mainBodyCamOverlayTextRenderer.font = StartOfRound.Instance.screenLevelDescription.font;
+
+            mainBodyCamOverlayTextTransform = textObject.GetComponent<RectTransform>();
+
+            MainBodyCam.OnCameraStatusChanged += _ => UpdateMainBodyCamOverlaySettings();
         }
 
         internal static void UpdateMainBodyCamNoTargetMaterial()
@@ -211,16 +234,6 @@ namespace OpenBodyCams
             else
                 MainBodyCam.MonitorNoTargetMaterial = null;
             MainBodyCam.UpdateScreenMaterial();
-        }
-
-        private static IEnumerator DisplayShipUpgradeTip()
-        {
-            yield return new WaitForSeconds(1);
-            yield return new WaitUntil(() => HUDManager.Instance.CanTipDisplay(false, false, null));
-            HUDManager.Instance.DisplayTip("Body Cam Ship Upgrade",
-                "Body cams are now a ship upgrade purchaseable in the terminal. " +
-                "This can be disabled in the config.");
-            Plugin.DisplayBodyCamUpgradeTip = false;
         }
 
         internal static void UpdateMainBodyCamSettings()
@@ -235,6 +248,90 @@ namespace OpenBodyCams
 
             MainBodyCam.UpdateScreenMaterial();
             MainBodyCam.MonitorOnMaterial.SetColor("_EmissiveColor", Plugin.GetBodyCamEmissiveColor());
+
+            UpdateMainBodyCamOverlaySettings();
+        }
+
+        private static void MatchOriginalCameraResolutionToBodyCam()
+        {
+            // If the original camera that may display our overlay is too low-res, it will not be
+            // legible.
+            var newTexture = new RenderTexture(MainBodyCam.Resolution.x, MainBodyCam.Resolution.y, CameraReplacedByBodyCam.cam.targetTexture.depth)
+            {
+                filterMode = MainBodyCam.MonitorOnMaterial.mainTexture.filterMode,
+            };
+            CameraReplacedByBodyCam.cam.targetTexture = newTexture;
+            MainBodyCam.MonitorDisabledMaterial = new(MainBodyCam.MonitorDisabledMaterial)
+            {
+                mainTexture = newTexture,
+            };
+            UpdateMainBodyCamNoTargetMaterial();
+        }
+
+        private static bool SetTransparentPassEnabled(Camera camera, bool enabled)
+        {
+            if (camera.GetComponent<HDAdditionalCameraData>() is not { } hdCamera)
+                return false;
+            var settings = hdCamera.renderingPathCustomFrameSettings;
+            var wasEnabled = settings.IsEnabled(FrameSettingsField.TransparentObjects);
+            settings.SetEnabled(FrameSettingsField.TransparentObjects, enabled);
+            hdCamera.renderingPathCustomFrameSettings = settings;
+            return wasEnabled;
+        }
+
+        internal static void UpdateMainBodyCamOverlaySettings()
+        {
+            if (mainBodyCamOverlay.worldCamera is { } camera)
+                SetTransparentPassEnabled(camera, lastOverlayedCameraHadTransparentPass);
+
+            MatchOriginalCameraResolutionToBodyCam();
+
+            var cameraToAttachTo = MainBodyCam.IsBlanked ? CameraReplacedByBodyCam.cam : MainBodyCam.Camera;
+            mainBodyCamOverlay.worldCamera = cameraToAttachTo;
+            mainBodyCamOverlay.planeDistance = cameraToAttachTo.nearClipPlane + 0.01f;
+            lastOverlayedCameraHadTransparentPass = SetTransparentPassEnabled(cameraToAttachTo, true);
+
+            mainBodyCamOverlayTextTransform.sizeDelta = mainBodyCamOverlay.renderingDisplaySize;
+            mainBodyCamOverlayTextRenderer.fontSize = Math.Max(mainBodyCamOverlay.renderingDisplaySize.y / 10, 17);
+            mainBodyCamOverlayTextRenderer.margin = Vector4.one * Math.Max(mainBodyCamOverlay.renderingDisplaySize.y / 40, 2);
+
+            UpdateMainBodyCamOverlayText();
+        }
+
+        internal static void UpdateMainBodyCamOverlayText()
+        {
+            mainBodyCamOverlayTextRenderer.enabled = true;
+
+            if (ShipUpgrades.BodyCamUnlockable != null)
+            {
+                if (!ShipUpgrades.BodyCamUnlockable.hasBeenUnlockedByPlayer)
+                {
+                    mainBodyCamOverlayTextRenderer.text = $"Body cam ${ShipUpgrades.BodyCamPrice}";
+                    mainBodyCamOverlayTextRenderer.color = Color.yellow;
+                    return;
+                }
+
+                if (!ShipUpgrades.BodyCamUnlockableIsPlaced)
+                {
+                    mainBodyCamOverlayTextRenderer.text = "Antenna stored";
+                    mainBodyCamOverlayTextRenderer.color = Color.yellow;
+                    return;
+                }
+            }
+
+            switch (MainBodyCam.CameraStatus)
+            {
+                case CameraRenderingStatus.TargetInvalid:
+                    mainBodyCamOverlayTextRenderer.text = "Signal lost";
+                    mainBodyCamOverlayTextRenderer.color = Color.red;
+                    return;
+                case CameraRenderingStatus.TargetDisabledOnShip:
+                    mainBodyCamOverlayTextRenderer.text = "Target on ship";
+                    mainBodyCamOverlayTextRenderer.color = Color.green;
+                    return;
+            }
+
+            mainBodyCamOverlayTextRenderer.enabled = false;
         }
     }
 }

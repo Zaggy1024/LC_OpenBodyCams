@@ -12,6 +12,7 @@ namespace OpenBodyCams
     internal static class ShipUpgrades
     {
         internal static UnlockableItem BodyCamUnlockable;
+        internal static int BodyCamPrice;
         internal static bool BodyCamUnlockableIsPlaced = false;
 
         public static void Initialize()
@@ -57,13 +58,13 @@ namespace OpenBodyCams
                 alwaysInStock = true,
             };
 
-            var price = Plugin.ShipUpgradePrice.Value;
-            Unlockables.RegisterUnlockable(bodyCamUnlockable, price, StoreType.ShipUpgrade);
+            BodyCamPrice = Plugin.ShipUpgradePrice.Value;
+            Unlockables.RegisterUnlockable(bodyCamUnlockable, BodyCamPrice, StoreType.ShipUpgrade);
             NetworkPrefabs.RegisterNetworkPrefab(bodyCamUnlockablePrefab);
             LethalLib.Modules.Utilities.FixMixerGroups(bodyCamUnlockablePrefab);
 
             BodyCamUnlockable = bodyCamUnlockable;
-            Plugin.Instance.Logger.LogInfo($"Registered body cam unlockable for {price} credits.");
+            Plugin.Instance.Logger.LogInfo($"Registered body cam unlockable for {BodyCamPrice} credits.");
         }
     }
 
@@ -77,6 +78,7 @@ namespace OpenBodyCams
             if (ShipObjects.MainBodyCam == null)
                 return;
             ShipObjects.MainBodyCam.enabled = true;
+            ShipObjects.UpdateMainBodyCamOverlayText();
         }
 
         private void OnDisable()
@@ -87,6 +89,7 @@ namespace OpenBodyCams
             if (ShipObjects.MainBodyCam == null)
                 return;
             ShipObjects.MainBodyCam.enabled = false;
+            ShipObjects.UpdateMainBodyCamOverlayText();
         }
     }
 }
