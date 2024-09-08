@@ -17,7 +17,7 @@ namespace OpenBodyCams
         internal static Terminal TerminalScript;
         internal static bool TwoRadarCamsPresent = false;
 
-        public static BodyCamComponent MainBodyCam;
+        internal static BodyCamComponent MainBodyCam;
 
         internal static ManualCameraRenderer InternalCameraRenderer;
 

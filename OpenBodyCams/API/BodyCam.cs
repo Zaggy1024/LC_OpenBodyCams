@@ -27,6 +27,8 @@ namespace OpenBodyCams.API
             }
         }
 
+        public static BodyCamComponent MainBodyCam => ShipObjects.MainBodyCam;
+
         public static BodyCamComponent CreateBodyCam(GameObject objectToAttachComponentTo, Renderer displayedOnRenderer, int displayMaterialIndex, ManualCameraRenderer mapRendererToSyncTo = null)
         {
             if (mapRendererToSyncTo != null && mapRendererToSyncTo.cam != mapRendererToSyncTo.mapCamera)
