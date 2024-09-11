@@ -39,7 +39,7 @@ namespace OpenBodyCams
             if (!Plugin.ShipUpgradeEnabled.Value)
                 return;
 
-            var bodyCamUnlockablePrefab = Plugin.Assets.LoadAsset<GameObject>("Assets/OpenBodyCams/BodyCamAntenna.prefab");
+            var bodyCamUnlockablePrefab = Plugin.Assets.LoadAsset<GameObject>("Assets/OpenBodyCams/Prefabs/BodyCamAntenna.prefab");
 
             if (bodyCamUnlockablePrefab == null)
             {
@@ -78,7 +78,6 @@ namespace OpenBodyCams
             if (ShipObjects.MainBodyCam == null)
                 return;
             ShipObjects.MainBodyCam.enabled = true;
-            ShipObjects.UpdateMainBodyCamOverlayText();
         }
 
         private void OnDisable()
@@ -89,7 +88,6 @@ namespace OpenBodyCams
             if (ShipObjects.MainBodyCam == null)
                 return;
             ShipObjects.MainBodyCam.enabled = false;
-            ShipObjects.UpdateMainBodyCamOverlayText();
         }
     }
 }

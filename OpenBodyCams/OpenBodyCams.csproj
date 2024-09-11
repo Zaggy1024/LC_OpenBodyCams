@@ -51,6 +51,10 @@
             <HintPath>..\..\Libraries\Unity.Netcode.Runtime.dll</HintPath>
             <Private>false</Private>
         </Reference>
+        <Reference Include="Unity.RenderPipelines.Core.Runtime">
+            <HintPath>..\..\Libraries\Unity.RenderPipelines.Core.Runtime.dll</HintPath>
+            <Private>false</Private>
+        </Reference>
         <Reference Include="Unity.RenderPipelines.HighDefinition.Runtime">
             <HintPath>..\..\Libraries\Unity.RenderPipelines.HighDefinition.Runtime.dll</HintPath>
             <Private>false</Private>

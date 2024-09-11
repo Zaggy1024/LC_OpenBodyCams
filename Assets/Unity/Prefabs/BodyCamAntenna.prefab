@@ -46,7 +46,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 4652826553677518390}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 997097fabaa130b4596393533d275468, type: 3}
+  m_Script: {fileID: 11500000, guid: e8194862773f9e741b3c61898acbbebf, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   disableObject: 0
@@ -141,11 +141,11 @@ MonoBehaviour:
   m_GameObject: {fileID: 8854181781525498059}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3c08ae117b67c4e4a9deeff93df1081f, type: 3}
+  m_Script: {fileID: 11500000, guid: d3829eccb5ccc884fa9c6b711a33d8e6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   unlockableID: 0
-  placeObjectSFX: {fileID: 8300000, guid: 2fee8b0868f004546b24534623619fd1, type: 3}
+  placeObjectSFX: {fileID: 8300000, guid: 5ae7e99631358124ba00e595ae73f4a7, type: 3}
   parentObject: {fileID: 3345286062248625731}
   parentObjectSecondary: {fileID: 0}
   mainMesh: {fileID: 3742469234040872397}
@@ -189,7 +189,7 @@ AudioSource:
   m_GameObject: {fileID: 8854181781525498059}
   m_Enabled: 1
   serializedVersion: 4
-  OutputAudioMixerGroup: {fileID: 24300042, guid: 0361087be0cf08d4d8a3eeaf0c5a20a6,
+  OutputAudioMixerGroup: {fileID: 24300044, guid: 711a76d114d8a7042ac67a72e33cc6fe,
     type: 2}
   m_audioClip: {fileID: 0}
   m_PlayOnAwake: 0
@@ -471,6 +471,11 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: -7511558181221131132, guid: 4d2a36328744f3b4bbe53fa37a7de416,
+        type: 3}
+      propertyPath: m_Materials.Array.data[0]
+      value: 
+      objectReference: {fileID: 2100000, guid: 0ae0d13fb0690cf4b9fdaf36541c739d, type: 2}
     - target: {fileID: 919132149155446097, guid: 4d2a36328744f3b4bbe53fa37a7de416,
         type: 3}
       propertyPath: m_Name
