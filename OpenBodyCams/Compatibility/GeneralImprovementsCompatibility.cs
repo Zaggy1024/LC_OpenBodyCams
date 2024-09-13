@@ -1,4 +1,4 @@
-﻿using System.Runtime.CompilerServices;
+using System.Runtime.CompilerServices;
 
 using BepInEx.Bootstrap;
 using GeneralImprovements.API;
@@ -26,11 +26,8 @@ namespace OpenBodyCams.Compatibility
         [MethodImpl(MethodImplOptions.NoInlining)]
         private static bool BetterMonitorsEnabledWithAPI()
         {
-            if (MonitorsAPI.NewMonitorMeshActive)
-                return true;
-
             // Versions up to and including 1.4.3 don't set NewMonitorMeshActive.
-            return MonitorsAPI.GetMonitorAtIndex(0) != null;
+            return MonitorsAPI.GetMonitorAtIndex(0)?.MeshRenderer != null;
         }
 
         public readonly struct GeneralImprovementsMonitorSpecification(Renderer renderer, int materialIndex, Material originalMaterial)
