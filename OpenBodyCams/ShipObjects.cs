@@ -210,6 +210,9 @@ namespace OpenBodyCams
 
         private static void InitializeMainBodyCamOverlay()
         {
+            if (!Plugin.OverlayEnabled.Value)
+                return;
+
             var canvasObject = new GameObject("MainBodyCamOverlay");
             canvasObject.transform.SetParent(GameObject.Find("Systems/UI").transform, false);
 
