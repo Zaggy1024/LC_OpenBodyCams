@@ -1,23 +1,17 @@
 ﻿using TMPro;
 using UnityEngine;
+using UnityEngine.Rendering.HighDefinition;
 
 using OpenBodyCams.Utilities;
-using UnityEngine.Rendering.HighDefinition;
-using UnityEngine.Rendering;
 
-namespace OpenBodyCams
+namespace OpenBodyCams.Overlay
 {
     internal class OverlayManager : MonoBehaviour
     {
-        private static readonly int ForegroundColorProperty = Shader.PropertyToID("_Color");
-
         internal BodyCamComponent BodyCam;
 
         private Camera camera;
-        private Canvas canvas;
         private TextMeshProUGUI textRenderer;
-
-        private Material overlayMaterial;
 
         private bool renderThisFrame = false;
 
@@ -25,7 +19,23 @@ namespace OpenBodyCams
         {
             camera = GetComponentInChildren<Camera>();
 
-            canvas = GetComponentInChildren<Canvas>();
+            var volume = camera.gameObject.AddComponent<CustomPassVolume>();
+            volume.targetCamera = camera;
+
+            var pass = (TransparentRenderTexturePass)volume.AddPassOfType<TransparentRenderTexturePass>();
+            pass.targetColorBuffer = CustomPass.TargetBuffer.Custom;
+            pass.targetDepthBuffer = CustomPass.TargetBuffer.Custom;
+            pass.clearFlags = UnityEngine.Rendering.ClearFlag.All;
+            pass.targetTexture = camera.targetTexture;
+            camera.targetTexture = new RenderTexture(camera.targetTexture)
+            {
+                name = "Dummy Overlay Camera Output",
+            };
+
+            var hdCamera = camera.GetComponent<HDAdditionalCameraData>();
+            hdCamera.customRenderingSettings = true;
+            hdCamera.renderingPathCustomFrameSettingsOverrideMask.mask[(uint)FrameSettingsField.DecalLayers] = true;
+            hdCamera.renderingPathCustomFrameSettings.SetEnabled(FrameSettingsField.DecalLayers, false);
 
             textRenderer = GetComponentInChildren<TextMeshProUGUI>();
             textRenderer.font = StartOfRound.Instance.screenLevelDescription.font;
@@ -42,8 +52,6 @@ namespace OpenBodyCams
         private void CreateOverlayMesh()
         {
             var overlayObject = Instantiate(Plugin.Assets.LoadAsset<GameObject>("Assets/OpenBodyCams/Prefabs/BodyCamOverlayMesh.prefab"));
-
-            overlayMaterial = overlayObject.GetComponent<Renderer>().sharedMaterial;
 
             var overlayTransform = overlayObject.transform;
             var copyTransform = BodyCam.MonitorRenderer.transform;
@@ -65,7 +73,7 @@ namespace OpenBodyCams
         {
             textRenderer.enabled = GetTextAndColor(out var text, out var color);
             textRenderer.text = text;
-            overlayMaterial.SetColor(ForegroundColorProperty, color);
+            textRenderer.color = color;
 
             renderThisFrame = true;
         }

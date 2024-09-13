@@ -6,6 +6,7 @@ using UnityEngine;
 using OpenBodyCams.Compatibility;
 using OpenBodyCams.API;
 using OpenBodyCams.Utilities;
+using OpenBodyCams.Overlay;
 
 namespace OpenBodyCams
 {
