@@ -1,4 +1,4 @@
-using TMPro;
+﻿using TMPro;
 using UnityEngine;
 using UnityEngine.Rendering.HighDefinition;
 
@@ -45,7 +45,7 @@ namespace OpenBodyCams.Overlay
             baseFontSize = textRenderer.fontSize;
             baseMargin = textRenderer.margin;
 
-            BodyCam.OnCameraStatusChanged += _ => UpdateText();
+            BodyCam.OnCameraStatusChanged += BodyCamStatusChanged;
             API.BodyCam.OnBodyCamReceiverBecameEnabled += UpdateText;
             API.BodyCam.OnBodyCamReceiverBecameDisabled += UpdateText;
 
@@ -81,6 +81,11 @@ namespace OpenBodyCams.Overlay
             textRenderer.margin = baseMargin * Plugin.OverlayTextScale.Value;
 
             renderThisFrame = true;
+        }
+
+        private void BodyCamStatusChanged(CameraRenderingStatus _)
+        {
+            UpdateText();
         }
 
         internal void UpdateText()
@@ -127,6 +132,13 @@ namespace OpenBodyCams.Overlay
             }
 
             return false;
+        }
+
+        private void OnDestroy()
+        {
+            BodyCam.OnCameraStatusChanged -= BodyCamStatusChanged;
+            API.BodyCam.OnBodyCamReceiverBecameEnabled -= UpdateText;
+            API.BodyCam.OnBodyCamReceiverBecameDisabled -= UpdateText;
         }
     }
 }
