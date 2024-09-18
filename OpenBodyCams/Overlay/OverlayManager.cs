@@ -51,6 +51,7 @@ namespace OpenBodyCams.Overlay
 
             CreateOverlayMesh();
 
+            UpdatePreferences();
             UpdateText();
         }
 
