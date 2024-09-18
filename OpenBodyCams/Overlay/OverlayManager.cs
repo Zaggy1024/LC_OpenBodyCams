@@ -1,4 +1,4 @@
-﻿using TMPro;
+using TMPro;
 using UnityEngine;
 using UnityEngine.Rendering.HighDefinition;
 
@@ -12,6 +12,9 @@ namespace OpenBodyCams.Overlay
 
         private Camera camera;
         private TextMeshProUGUI textRenderer;
+
+        private float baseFontSize;
+        private Vector4 baseMargin;
 
         private bool renderThisFrame = false;
 
@@ -39,6 +42,8 @@ namespace OpenBodyCams.Overlay
 
             textRenderer = GetComponentInChildren<TextMeshProUGUI>();
             textRenderer.font = StartOfRound.Instance.screenLevelDescription.font;
+            baseFontSize = textRenderer.fontSize;
+            baseMargin = textRenderer.margin;
 
             BodyCam.OnCameraStatusChanged += _ => UpdateText();
             API.BodyCam.OnBodyCamReceiverBecameEnabled += UpdateText;
@@ -67,6 +72,14 @@ namespace OpenBodyCams.Overlay
         {
             camera.enabled = renderThisFrame;
             renderThisFrame = false;
+        }
+
+        internal void UpdatePreferences()
+        {
+            textRenderer.fontSize = baseFontSize * Plugin.OverlayTextScale.Value;
+            textRenderer.margin = baseMargin * Plugin.OverlayTextScale.Value;
+
+            renderThisFrame = true;
         }
 
         internal void UpdateText()

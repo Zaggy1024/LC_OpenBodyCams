@@ -56,6 +56,7 @@ namespace OpenBodyCams
         public static ConfigEntry<bool> DisplayOriginalScreenWhenDisabled;
 
         public static ConfigEntry<bool> OverlayEnabled;
+        public static ConfigEntry<float> OverlayTextScale;
 
         public static ConfigEntry<bool> TerminalPiPBodyCamEnabled;
         public static ConfigEntry<PiPPosition> TerminalPiPPosition;
@@ -144,6 +145,9 @@ namespace OpenBodyCams
 
             // Overlay:
             OverlayEnabled = Config.Bind("Overlay", "Enabled", true, "Displays an overlay on the monitor that the body cam replaces to communicate the status of the body cam. This will only work if the screen is displaying a render texture connected to a camera. Restart the lobby to apply.");
+            OverlayTextScale = Config.Bind("Overlay", "TextScale", 1f, "The factor by which to scale the text on the overlay screen.");
+
+            OverlayTextScale.SettingChanged += (_, _) => ShipObjects.Overlay?.UpdatePreferences();
 
             // Terminal:
             TerminalPiPBodyCamEnabled = Config.Bind("Terminal", "EnablePiPBodyCam", false, "Adds a 'view bodycam' command to the terminal that places a picture-in-picture view of the bodycam in front of the radar map.");
