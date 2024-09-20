@@ -1,4 +1,4 @@
-## Verison 2.4.0
+## Version 2.4.0
 - Added an overlay that indicates the reason the body cam is not visible. The supported states are:
     - The ship upgrade is enabled, but the body cam antenna has not been bought yet.
     - The antenna is bought but stored, preventing body cams from being used.
