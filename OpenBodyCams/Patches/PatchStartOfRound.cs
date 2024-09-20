@@ -1,23 +1,22 @@
 using HarmonyLib;
 
-namespace OpenBodyCams.Patches
-{
-    [HarmonyPatch(typeof(StartOfRound))]
-    internal static class PatchStartOfRound
-    {
-        [HarmonyPostfix]
-        [HarmonyPatch(nameof(StartOfRound.Start))]
-        [HarmonyPriority(Priority.VeryHigh)]
-        private static void StartPostfix()
-        {
-            ShipObjects.EarlyInitialization();
-        }
+namespace OpenBodyCams.Patches;
 
-        [HarmonyPostfix]
-        [HarmonyPatch(nameof(StartOfRound.ReviveDeadPlayers))]
-        private static void ReviveDeadPlayersPostfix()
-        {
-            BodyCamComponent.MarkTargetStatusChangedForAllBodyCams();
-        }
+[HarmonyPatch(typeof(StartOfRound))]
+internal static class PatchStartOfRound
+{
+    [HarmonyPostfix]
+    [HarmonyPatch(nameof(StartOfRound.Start))]
+    [HarmonyPriority(Priority.VeryHigh)]
+    private static void StartPostfix()
+    {
+        ShipObjects.EarlyInitialization();
+    }
+
+    [HarmonyPostfix]
+    [HarmonyPatch(nameof(StartOfRound.ReviveDeadPlayers))]
+    private static void ReviveDeadPlayersPostfix()
+    {
+        BodyCamComponent.MarkTargetStatusChangedForAllBodyCams();
     }
 }

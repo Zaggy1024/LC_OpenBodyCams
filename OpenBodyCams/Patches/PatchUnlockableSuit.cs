@@ -8,59 +8,58 @@ using HarmonyLib;
 
 using OpenBodyCams.Utilities;
 
-namespace OpenBodyCams.Patches
+namespace OpenBodyCams.Patches;
+
+[HarmonyPatch(typeof(UnlockableSuit))]
+internal static class PatchUnlockableSuit
 {
-    [HarmonyPatch(typeof(UnlockableSuit))]
-    internal static class PatchUnlockableSuit
+    [HarmonyTranspiler]
+    [HarmonyPatch(nameof(UnlockableSuit.SwitchSuitForPlayer))]
+    private static IEnumerable<CodeInstruction> SwitchSuitForPlayerTranspiler(IEnumerable<CodeInstruction> instructions)
     {
-        [HarmonyTranspiler]
-        [HarmonyPatch(nameof(UnlockableSuit.SwitchSuitForPlayer))]
-        private static IEnumerable<CodeInstruction> SwitchSuitForPlayerTranspiler(IEnumerable<CodeInstruction> instructions)
-        {
-            var instructionsList = instructions.ToList();
+        var instructionsList = instructions.ToList();
 
-            var checkForLocalPlayer = instructionsList.FindIndexOfSequence(
-                [
-                    insn => insn.Calls(Reflection.m_GameNetworkManager_get_Instance),
-                    insn => insn.LoadsField(Reflection.f_GameNetworkManager_localPlayerController),
-                    insn => insn.opcode == OpCodes.Ldarg_0,
-                    insn => insn.Calls(Reflection.m_Object_op_Inequality),
-                    insn => insn.opcode == OpCodes.Brfalse_S || insn.opcode == OpCodes.Brfalse,
-                ]);
-            var isLocalPlayerLabel = (Label)instructionsList[checkForLocalPlayer.End - 1].operand;
-            var isLocalPlayerIndex = instructionsList.FindIndex(checkForLocalPlayer.End, insn => insn.labels.Contains(isLocalPlayerLabel));
+        var checkForLocalPlayer = instructionsList.FindIndexOfSequence(
+            [
+                insn => insn.Calls(Reflection.m_GameNetworkManager_get_Instance),
+                insn => insn.LoadsField(Reflection.f_GameNetworkManager_localPlayerController),
+                insn => insn.opcode == OpCodes.Ldarg_0,
+                insn => insn.Calls(Reflection.m_Object_op_Inequality),
+                insn => insn.opcode == OpCodes.Brfalse_S || insn.opcode == OpCodes.Brfalse,
+            ]);
+        var isLocalPlayerLabel = (Label)instructionsList[checkForLocalPlayer.End - 1].operand;
+        var isLocalPlayerIndex = instructionsList.FindIndex(checkForLocalPlayer.End, insn => insn.labels.Contains(isLocalPlayerLabel));
 
-            var isNotLocalPlayerJump = instructionsList.FindLastIndex(isLocalPlayerIndex, insn => insn.opcode == OpCodes.Br_S || insn.opcode == OpCodes.Br);
-            var isNotLocalPlayerLabel = (Label)instructionsList[isNotLocalPlayerJump].operand;
+        var isNotLocalPlayerJump = instructionsList.FindLastIndex(isLocalPlayerIndex, insn => insn.opcode == OpCodes.Br_S || insn.opcode == OpCodes.Br);
+        var isNotLocalPlayerLabel = (Label)instructionsList[isNotLocalPlayerJump].operand;
 
-            instructionsList.RemoveRange(checkForLocalPlayer);
-            instructionsList.RemoveAt(isNotLocalPlayerJump - checkForLocalPlayer.Size);
+        instructionsList.RemoveRange(checkForLocalPlayer);
+        instructionsList.RemoveAt(isNotLocalPlayerJump - checkForLocalPlayer.Size);
 
-            var afterCosmeticsSpawned = instructionsList.FindIndex(checkForLocalPlayer.Start, insn => insn.labels.Contains(isNotLocalPlayerLabel));
-            instructionsList.InsertRange(afterCosmeticsSpawned,
-                [
-                    new(OpCodes.Ldarg_0),
-                    new(OpCodes.Call, typeof(PatchUnlockableSuit).GetMethod(nameof(AfterCosmeticsSpawned), BindingFlags.NonPublic | BindingFlags.Static, [typeof(PlayerControllerB)])),
-                ]);
+        var afterCosmeticsSpawned = instructionsList.FindIndex(checkForLocalPlayer.Start, insn => insn.labels.Contains(isNotLocalPlayerLabel));
+        instructionsList.InsertRange(afterCosmeticsSpawned,
+            [
+                new(OpCodes.Ldarg_0),
+                new(OpCodes.Call, typeof(PatchUnlockableSuit).GetMethod(nameof(AfterCosmeticsSpawned), BindingFlags.NonPublic | BindingFlags.Static, [typeof(PlayerControllerB)])),
+            ]);
 
-            Plugin.Instance.Logger.LogInfo("Patched UnlockableSuit to spawn cosmetics for both perspectives on all players.");
-            return instructionsList;
-        }
+        Plugin.Instance.Logger.LogInfo("Patched UnlockableSuit to spawn cosmetics for both perspectives on all players.");
+        return instructionsList;
+    }
 
-        private static void AfterCosmeticsSpawned(PlayerControllerB player)
-        {
-            var firstPersonLayer = ViewPerspective.ENEMIES_NOT_RENDERED_LAYER;
-            var thirdPersonLayer = ViewPerspective.DEFAULT_LAYER;
+    private static void AfterCosmeticsSpawned(PlayerControllerB player)
+    {
+        var firstPersonLayer = ViewPerspective.ENEMIES_NOT_RENDERED_LAYER;
+        var thirdPersonLayer = ViewPerspective.DEFAULT_LAYER;
 
-            if (player == GameNetworkManager.Instance.localPlayerController)
-                (firstPersonLayer, thirdPersonLayer) = (thirdPersonLayer, firstPersonLayer);
+        if (player == GameNetworkManager.Instance.localPlayerController)
+            (firstPersonLayer, thirdPersonLayer) = (thirdPersonLayer, firstPersonLayer);
 
-            foreach (var cosmeticObject in Cosmetics.CollectVanillaFirstPersonCosmetics(player))
-                cosmeticObject.gameObject.layer = firstPersonLayer;
-            foreach (var cosmeticObject in Cosmetics.CollectVanillaThirdPersonCosmetics(player))
-                cosmeticObject.gameObject.layer = thirdPersonLayer;
+        foreach (var cosmeticObject in Cosmetics.CollectVanillaFirstPersonCosmetics(player))
+            cosmeticObject.gameObject.layer = firstPersonLayer;
+        foreach (var cosmeticObject in Cosmetics.CollectVanillaThirdPersonCosmetics(player))
+            cosmeticObject.gameObject.layer = thirdPersonLayer;
 
-            BodyCamComponent.MarkTargetDirtyUntilRenderForAllBodyCams(player.transform);
-        }
+        BodyCamComponent.MarkTargetDirtyUntilRenderForAllBodyCams(player.transform);
     }
 }

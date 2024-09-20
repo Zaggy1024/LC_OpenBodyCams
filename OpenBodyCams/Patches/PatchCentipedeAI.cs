@@ -9,115 +9,114 @@ using HarmonyLib;
 
 using OpenBodyCams.Utilities;
 
-namespace OpenBodyCams.Patches
+namespace OpenBodyCams.Patches;
+
+[HarmonyPatch(typeof(CentipedeAI))]
+internal class PatchCentipedeAI
 {
-    [HarmonyPatch(typeof(CentipedeAI))]
-    internal class PatchCentipedeAI
+    internal static HashSet<CentipedeAI>[] CentipedesAttachedToPlayers;
+    internal static bool HasWarnedClingingMismatch = false;
+
+    public static void SetClingingAnimationPositionsForPlayer(PlayerControllerB player, Perspective perspective)
     {
-        internal static HashSet<CentipedeAI>[] CentipedesAttachedToPlayers;
-        internal static bool HasWarnedClingingMismatch = false;
-
-        public static void SetClingingAnimationPositionsForPlayer(PlayerControllerB player, Perspective perspective)
+        if (CentipedesAttachedToPlayers != null)
         {
-            if (CentipedesAttachedToPlayers != null)
+            foreach (var clingingCentipede in CentipedesAttachedToPlayers[player.playerClientId])
             {
-                foreach (var clingingCentipede in CentipedesAttachedToPlayers[player.playerClientId])
+                if (clingingCentipede == null)
+                    continue;
+                if (clingingCentipede.isEnemyDead)
+                    continue;
+                if (clingingCentipede.clingingToDeadBody)
+                    continue;
+                if (clingingCentipede.clingingToPlayer == null)
                 {
-                    if (clingingCentipede == null)
-                        continue;
-                    if (clingingCentipede.isEnemyDead)
-                        continue;
-                    if (clingingCentipede.clingingToDeadBody)
-                        continue;
-                    if (clingingCentipede.clingingToPlayer == null)
+                    if (!HasWarnedClingingMismatch)
                     {
-                        if (!HasWarnedClingingMismatch)
-                        {
-                            Plugin.Instance.Logger.LogWarning($"{clingingCentipede} should be clinging to a player according to our hooks, but it is not.");
-                            HasWarnedClingingMismatch = true;
-                        }
-                        continue;
+                        Plugin.Instance.Logger.LogWarning($"{clingingCentipede} should be clinging to a player according to our hooks, but it is not.");
+                        HasWarnedClingingMismatch = true;
                     }
-
-                    var originallyClingedToLocalPlayer = clingingCentipede.clingingToLocalClient;
-
-                    switch (perspective)
-                    {
-                        case Perspective.Original:
-                            break;
-                        case Perspective.FirstPerson:
-                            clingingCentipede.clingingToLocalClient = true;
-                            break;
-                        case Perspective.ThirdPerson:
-                            clingingCentipede.clingingToLocalClient = false;
-                            break;
-                    }
-
-                    clingingCentipede.UpdatePositionToClingingPlayerHead();
-                    clingingCentipede.clingingToLocalClient = originallyClingedToLocalPlayer;
+                    continue;
                 }
+
+                var originallyClingedToLocalPlayer = clingingCentipede.clingingToLocalClient;
+
+                switch (perspective)
+                {
+                    case Perspective.Original:
+                        break;
+                    case Perspective.FirstPerson:
+                        clingingCentipede.clingingToLocalClient = true;
+                        break;
+                    case Perspective.ThirdPerson:
+                        clingingCentipede.clingingToLocalClient = false;
+                        break;
+                }
+
+                clingingCentipede.UpdatePositionToClingingPlayerHead();
+                clingingCentipede.clingingToLocalClient = originallyClingedToLocalPlayer;
             }
         }
+    }
 
-        private static void EnsureCentipedesAttachedToPlayersArrayIsCorrectSize()
+    private static void EnsureCentipedesAttachedToPlayersArrayIsCorrectSize()
+    {
+        var playerCount = StartOfRound.Instance.allPlayerScripts.Length;
+        if (CentipedesAttachedToPlayers == null)
+            CentipedesAttachedToPlayers = new HashSet<CentipedeAI>[playerCount];
+        else if (CentipedesAttachedToPlayers.Length != playerCount)
+            Array.Resize(ref CentipedesAttachedToPlayers, playerCount);
+        else
+            return;
+
+        for (var i = 0; i < playerCount; i++)
         {
-            var playerCount = StartOfRound.Instance.allPlayerScripts.Length;
-            if (CentipedesAttachedToPlayers == null)
-                CentipedesAttachedToPlayers = new HashSet<CentipedeAI>[playerCount];
-            else if (CentipedesAttachedToPlayers.Length != playerCount)
-                Array.Resize(ref CentipedesAttachedToPlayers, playerCount);
-            else
-                return;
-
-            for (var i = 0; i < playerCount; i++)
-            {
-                if (CentipedesAttachedToPlayers[i] == null)
-                    CentipedesAttachedToPlayers[i] = [];
-            }
+            if (CentipedesAttachedToPlayers[i] == null)
+                CentipedesAttachedToPlayers[i] = [];
         }
+    }
 
-        [HarmonyPrefix]
-        [HarmonyPatch(nameof(CentipedeAI.ClingToPlayer))]
-        private static void ClingToPlayerPrefix(CentipedeAI __instance, PlayerControllerB playerScript)
-        {
-            CentipedeStartedClingingToPlayer(__instance, playerScript);
-        }
+    [HarmonyPrefix]
+    [HarmonyPatch(nameof(CentipedeAI.ClingToPlayer))]
+    private static void ClingToPlayerPrefix(CentipedeAI __instance, PlayerControllerB playerScript)
+    {
+        CentipedeStartedClingingToPlayer(__instance, playerScript);
+    }
 
-        internal static void CentipedeStartedClingingToPlayer(CentipedeAI centipede, PlayerControllerB player)
-        {
-            EnsureCentipedesAttachedToPlayersArrayIsCorrectSize();
-            if (centipede.clingingToPlayer != null)
-                CentipedesAttachedToPlayers[centipede.clingingToPlayer.playerClientId].Remove(centipede);
-            CentipedesAttachedToPlayers[player.playerClientId].Add(centipede);
-        }
+    internal static void CentipedeStartedClingingToPlayer(CentipedeAI centipede, PlayerControllerB player)
+    {
+        EnsureCentipedesAttachedToPlayersArrayIsCorrectSize();
+        if (centipede.clingingToPlayer != null)
+            CentipedesAttachedToPlayers[centipede.clingingToPlayer.playerClientId].Remove(centipede);
+        CentipedesAttachedToPlayers[player.playerClientId].Add(centipede);
+    }
 
-        [HarmonyTranspiler]
-        [HarmonyPatch(nameof(CentipedeAI.UnclingFromPlayer), MethodType.Enumerator)]
-        private static IEnumerable<CodeInstruction> UnclingFromPlayerTranspiler(IEnumerable<CodeInstruction> instructions)
-        {
-            var clingedToPlayer = typeof(CentipedeAI).GetField(nameof(CentipedeAI.clingingToPlayer));
+    [HarmonyTranspiler]
+    [HarmonyPatch(nameof(CentipedeAI.UnclingFromPlayer), MethodType.Enumerator)]
+    private static IEnumerable<CodeInstruction> UnclingFromPlayerTranspiler(IEnumerable<CodeInstruction> instructions)
+    {
+        var clingedToPlayer = typeof(CentipedeAI).GetField(nameof(CentipedeAI.clingingToPlayer));
 
-            var instructionsList = instructions.ToList();
+        var instructionsList = instructions.ToList();
 
-            var clearClingedToPlayer = instructionsList.FindIndexOfSequence(
-                [
-                    insn => insn.opcode == OpCodes.Ldnull,
-                    insn => insn.StoresField(clingedToPlayer),
-                ]);
-            instructionsList.InsertRange(clearClingedToPlayer.Start,
-                [
-                    new CodeInstruction(OpCodes.Ldloc_1),
-                    new CodeInstruction(OpCodes.Call, typeof(PatchCentipedeAI).GetMethod(nameof(CentipedeStoppedClingingToPlayer), BindingFlags.NonPublic | BindingFlags.Static, [typeof(CentipedeAI)])),
-                ]);
+        var clearClingedToPlayer = instructionsList.FindIndexOfSequence(
+            [
+                insn => insn.opcode == OpCodes.Ldnull,
+                insn => insn.StoresField(clingedToPlayer),
+            ]);
+        instructionsList.InsertRange(clearClingedToPlayer.Start,
+            [
+                new CodeInstruction(OpCodes.Ldloc_1),
+                new CodeInstruction(OpCodes.Call, typeof(PatchCentipedeAI).GetMethod(nameof(CentipedeStoppedClingingToPlayer), BindingFlags.NonPublic | BindingFlags.Static, [typeof(CentipedeAI)])),
+            ]);
 
-            return instructionsList;
-        }
+        return instructionsList;
+    }
 
-        internal static void CentipedeStoppedClingingToPlayer(CentipedeAI centipede)
-        {
-            EnsureCentipedesAttachedToPlayersArrayIsCorrectSize();
-            if (centipede.clingingToPlayer != null)
-                CentipedesAttachedToPlayers[centipede.clingingToPlayer.playerClientId].Remove(centipede);
-        }
+    internal static void CentipedeStoppedClingingToPlayer(CentipedeAI centipede)
+    {
+        EnsureCentipedesAttachedToPlayersArrayIsCorrectSize();
+        if (centipede.clingingToPlayer != null)
+            CentipedesAttachedToPlayers[centipede.clingingToPlayer.playerClientId].Remove(centipede);
     }
 }
