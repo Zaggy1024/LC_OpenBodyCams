@@ -14,7 +14,8 @@ namespace OpenBodyCams
     {
         internal static Material BlackScreenMaterial;
 
-        internal static Terminal TerminalScript;
+        private static Terminal terminalScriptCache = null;
+        internal static Terminal TerminalScript => terminalScriptCache ??= UnityEngine.Object.FindAnyObjectByType<Terminal>();
         internal static bool TwoRadarCamsPresent = false;
 
         internal static BodyCamComponent MainBodyCam;
@@ -34,8 +35,6 @@ namespace OpenBodyCams
 
         public static void EarlyInitialization()
         {
-            TerminalScript = UnityEngine.Object.FindAnyObjectByType<Terminal>();
-
             BlackScreenMaterial = StartOfRound.Instance.mapScreen.offScreenMat;
 
             InternalCameraRenderer = GameObject.Find("Environment/HangarShip/Cameras/ShipCamera")?.GetComponent<ManualCameraRenderer>();
