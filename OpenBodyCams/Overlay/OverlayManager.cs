@@ -1,4 +1,6 @@
-﻿using TMPro;
+﻿using System;
+
+using TMPro;
 using UnityEngine;
 using UnityEngine.Rendering.HighDefinition;
 
@@ -90,48 +92,29 @@ namespace OpenBodyCams.Overlay
 
         internal void UpdateText()
         {
-            textRenderer.enabled = GetTextAndColor(out var text, out var color);
-            textRenderer.text = text;
-            textRenderer.color = color;
+            textRenderer.text = GetTextAndColor();
+            textRenderer.enabled = textRenderer.text != "";
 
             renderThisFrame = true;
         }
 
-        private bool GetTextAndColor(out string text, out Color color)
+        private string GetTextAndColor()
         {
-            text = "";
-            color = Color.clear;
-
             if (ShipUpgrades.BodyCamUnlockable != null)
             {
                 if (!ShipUpgrades.BodyCamUnlockable.hasBeenUnlockedByPlayer)
-                {
-                    text = $"Body cam ${ShipUpgrades.BodyCamPrice}";
-                    color = Color.yellow;
-                    return true;
-                }
+                    return Plugin.BuyAntennaText.Value.Replace("{price}", ShipUpgrades.BodyCamPrice.ToString(), StringComparison.OrdinalIgnoreCase);
 
                 if (!ShipUpgrades.BodyCamUnlockableIsPlaced)
-                {
-                    text = "Antenna stored";
-                    color = Color.yellow;
-                    return true;
-                }
+                    return Plugin.AntennaStoredText.Value;
             }
 
-            switch (BodyCam.CameraStatus)
+            return BodyCam.CameraStatus switch
             {
-                case CameraRenderingStatus.TargetInvalid:
-                    text = "Signal lost";
-                    color = Color.red;
-                    return true;
-                case CameraRenderingStatus.TargetDisabledOnShip:
-                    text = "Target on ship";
-                    color = Color.green;
-                    return true;
-            }
-
-            return false;
+                CameraRenderingStatus.TargetInvalid => Plugin.TargetInvalidText.Value,
+                CameraRenderingStatus.TargetDisabledOnShip => Plugin.TargetOnShipText.Value,
+                _ => "",
+            };
         }
 
         private void OnDestroy()

@@ -57,6 +57,10 @@ namespace OpenBodyCams
 
         public static ConfigEntry<bool> OverlayEnabled;
         public static ConfigEntry<float> OverlayTextScale;
+        public static ConfigEntry<string> BuyAntennaText;
+        public static ConfigEntry<string> AntennaStoredText;
+        public static ConfigEntry<string> TargetInvalidText;
+        public static ConfigEntry<string> TargetOnShipText;
 
         public static ConfigEntry<bool> TerminalPiPBodyCamEnabled;
         public static ConfigEntry<PiPPosition> TerminalPiPPosition;
@@ -147,6 +151,11 @@ namespace OpenBodyCams
             OverlayEnabled = Config.Bind("Overlay", "Enabled", true, "Displays an overlay on the monitor that the body cam replaces to communicate the status of the body cam. This will only work if the screen is displaying a render texture connected to a camera. Restart the lobby to apply.");
             OverlayTextScale = Config.Bind("Overlay", "TextScale", 1f, "The factor by which to scale the text on the overlay screen.");
 
+            BuyAntennaText = Config.Bind("Overlay", "BuyAntennaText", """<color="yellow">Body cam ${price}""", "The text displayed on the body cam monitor to prompt players to buy the antenna in the store to enable body cams.");
+            AntennaStoredText = Config.Bind("Overlay", "AntennaStoredText", """<color="yellow">Antenna stored""", "The text displayed when the antenna is stored, preventing the body cams displaying on the monitor.");
+            TargetInvalidText = Config.Bind("Overlay", "TargetInvalidText", """<color="red">Signal lost""", "The text displayed when the selected target is invalid (for example, the target is a player that has been eaten).");
+            TargetOnShipText = Config.Bind("Overlay", "TargetOnShipText", """<color="green">Target on ship""", "The text displayed when the selected target is safe on the ship with DisableCameraWhileTargetIsOnShip enabled.");
+
             static void UpdateOverlayPrefs(object target, EventArgs args)
             {
                 if (ShipObjects.Overlay != null)
@@ -154,6 +163,17 @@ namespace OpenBodyCams
             }
 
             OverlayTextScale.SettingChanged += UpdateOverlayPrefs;
+
+            static void UpdateOverlayText(object target, EventArgs args)
+            {
+                if (ShipObjects.Overlay != null)
+                    ShipObjects.Overlay.UpdateText();
+            }
+
+            BuyAntennaText.SettingChanged += UpdateOverlayText;
+            AntennaStoredText.SettingChanged += UpdateOverlayText;
+            TargetInvalidText.SettingChanged += UpdateOverlayText;
+            TargetOnShipText.SettingChanged += UpdateOverlayText;
 
             // Terminal:
             TerminalPiPBodyCamEnabled = Config.Bind("Terminal", "EnablePiPBodyCam", false, "Adds a 'view bodycam' command to the terminal that places a picture-in-picture view of the bodycam in front of the radar map.");
