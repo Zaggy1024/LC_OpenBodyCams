@@ -52,6 +52,15 @@ Please **report any issues [here](https://github.com/Zaggy1024/LC_OpenBodyCams/i
 - `EnableCamera`: When this is enabled, the screen will be powered off. This can be changed in-game with LethalConfig or any similar mod.
 - `DisplayOriginalScreenWhenDisabled`: When enabled, whatever was on the screen that the main body cam replaced will be displayed when the body cam has no valid target, or when disabled by the `DisableCameraWhileTargetIsOnShip` option. This currently has no effect when GeneralImprovements's UseBetterMonitors option is enabled.
 
+## Overlay
+- `Enabled`: Can be used to disable the overlay used to display the reason that the body cam is not currently available.
+- `TextScale`: A multiplier for the default font size of the overlay text.
+- The text displayed for each state can be customized:
+    - `BuyAntennaText`: The ship upgrade is enabled, but the body cam antenna has not been bought yet.
+    - `AntennaStoredText`: The antenna is bought but stored, preventing body cams from being used.
+    - `TargetInvalidText`: The body cam's target is invalid, e.g. when the targeted player has been eaten and has no corpse.
+    - `TargetOnShipText`: The body cam is disabled due to its target being safe on the ship.
+
 ## Terminal
 - `EnablePiPBodyCam`: Off by default, this adds a `view bodycam` command to the terminal that displays the body cam in one corner of the radar map. When the radar map is hidden, the body cam will be hidden as well.
 - `PiPPosition`: Selects the corner of the radar map that the body cam view in the terminal should reside in.

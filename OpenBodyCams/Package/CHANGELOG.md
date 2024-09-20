@@ -1,3 +1,15 @@
+## Verison 2.4.0
+- Added an overlay that indicates the reason the body cam is not visible. The supported states are:
+    - The ship upgrade is enabled, but the body cam antenna has not been bought yet.
+    - The antenna is bought but stored, preventing body cams from being used.
+    - The body cam's target is invalid, e.g. when the targeted player has been eaten and has no corpse.
+    - The body cam is disabled due to its target being safe on the ship.
+- Fixed the body cam not appearing when the GeneralImprovements option for extra monitors was enabled while the mesh it depends on is disabled.
+- Disabled the body cam view when it is attached to a radar booster in a belt bag to avoid seeing the items stacked in the void.
+- API changes:
+    - Added the static `BodyCam.MainBodyCam` property to get the body cam displayed on the ship monitors.
+    - Improved organization of the `BodyCamComponent` members, moving API to the top and adding comments.
+
 ## Version 2.3.1
 - Fixed some issues that could cause breakage or crashes upon loading a corrupted save.
 - Fixed an issue preventing the body cam from functioning if another mod removes the camera from the small monitor with `DisableCameraOnSmallMonitor` enabled.
