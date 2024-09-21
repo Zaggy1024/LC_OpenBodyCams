@@ -14,8 +14,7 @@ namespace OpenBodyCams
     {
         internal static Material BlackScreenMaterial;
 
-        private static Terminal terminalScriptCache = null;
-        internal static Terminal TerminalScript => terminalScriptCache ??= UnityEngine.Object.FindAnyObjectByType<Terminal>();
+        internal static Terminal TerminalScript = null;
         internal static bool TwoRadarCamsPresent = false;
 
         internal static BodyCamComponent MainBodyCam;
