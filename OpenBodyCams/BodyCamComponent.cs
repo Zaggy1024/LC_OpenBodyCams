@@ -34,6 +34,8 @@ namespace OpenBodyCams
         public event Action<bool> OnBlankedSet;
         // This event is fired when the camera's rendering status changes. See members of CameraRenderingStatus.
         public event Action<CameraRenderingStatus> OnCameraStatusChanged;
+        // This event is fired when the screen is powered off or on.
+        public event Action<bool> OnScreenPowerChanged;
 
         public delegate Renderer[] GetRenderersToHide(Renderer[] renderers);
         // This can be used to append to or override the renderers that are hidden for non-player
@@ -517,6 +519,8 @@ namespace OpenBodyCams
 
             MonitorIsOn = powered;
             UpdateScreenMaterial();
+
+            OnScreenPowerChanged?.Invoke(MonitorIsOn);
         }
 
         public bool IsScreenPowered()

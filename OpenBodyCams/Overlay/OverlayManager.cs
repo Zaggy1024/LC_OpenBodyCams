@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 
 using TMPro;
 using UnityEngine;
@@ -13,6 +13,8 @@ namespace OpenBodyCams.Overlay
         internal BodyCamComponent BodyCam;
 
         private Camera camera;
+
+        private Canvas canvas;
         private TextMeshProUGUI textRenderer;
 
         private float baseFontSize;
@@ -42,12 +44,15 @@ namespace OpenBodyCams.Overlay
             hdCamera.renderingPathCustomFrameSettingsOverrideMask.mask[(uint)FrameSettingsField.DecalLayers] = true;
             hdCamera.renderingPathCustomFrameSettings.SetEnabled(FrameSettingsField.DecalLayers, false);
 
-            textRenderer = GetComponentInChildren<TextMeshProUGUI>();
+            canvas = GetComponentInChildren<Canvas>();
+
+            textRenderer = canvas.GetComponentInChildren<TextMeshProUGUI>();
             textRenderer.font = StartOfRound.Instance.screenLevelDescription.font;
             baseFontSize = textRenderer.fontSize;
             baseMargin = textRenderer.margin;
 
             BodyCam.OnCameraStatusChanged += BodyCamStatusChanged;
+            BodyCam.OnScreenPowerChanged += BodyCamScreenPowerChanged;
             API.BodyCam.OnBodyCamReceiverBecameEnabled += UpdateText;
             API.BodyCam.OnBodyCamReceiverBecameDisabled += UpdateText;
 
@@ -90,8 +95,15 @@ namespace OpenBodyCams.Overlay
             UpdateText();
         }
 
+        private void BodyCamScreenPowerChanged(bool _)
+        {
+            UpdateText();
+        }
+
         internal void UpdateText()
         {
+            canvas.gameObject.SetActive(BodyCam.IsScreenPowered());
+
             textRenderer.text = GetText();
             textRenderer.enabled = textRenderer.text != "";
 
@@ -120,6 +132,7 @@ namespace OpenBodyCams.Overlay
         private void OnDestroy()
         {
             BodyCam.OnCameraStatusChanged -= BodyCamStatusChanged;
+            BodyCam.OnScreenPowerChanged -= BodyCamScreenPowerChanged;
             API.BodyCam.OnBodyCamReceiverBecameEnabled -= UpdateText;
             API.BodyCam.OnBodyCamReceiverBecameDisabled -= UpdateText;
         }
