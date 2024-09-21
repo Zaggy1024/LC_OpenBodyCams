@@ -1,3 +1,6 @@
+## Version 2.4.2
+- Fixed an error that would occur when [GeneralImprovements](https://github.com/Shaosil/LethalCompanyMods-GeneralImprovements/)'s `UseBetterMonitors` option is enabled.
+
 ## Version 2.4.1
 - Hid the overlay when the body cam's screen is powered off.
 - Added an option to set the text displayed when the body cam is rendering normally. This is currently independent of whether a player is living or dead.
