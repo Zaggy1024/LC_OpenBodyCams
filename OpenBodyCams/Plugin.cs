@@ -108,6 +108,7 @@ namespace OpenBodyCams
             else
                 Instance.Logger.LogError("Failed to load the asset bundle, some features may be missing.");
 
+            harmony.PatchAll(typeof(PatchTerminal));
             harmony.PatchAll(typeof(PatchStartOfRound));
             harmony.PatchAll(typeof(PatchManualCameraRenderer));
             harmony.PatchAll(typeof(PatchPlayerControllerB));

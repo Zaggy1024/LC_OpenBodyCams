@@ -6,14 +6,6 @@ namespace OpenBodyCams.Patches;
 internal static class PatchStartOfRound
 {
     [HarmonyPostfix]
-    [HarmonyPatch(nameof(StartOfRound.Start))]
-    [HarmonyPriority(Priority.VeryHigh)]
-    private static void StartPostfix()
-    {
-        ShipObjects.EarlyInitialization();
-    }
-
-    [HarmonyPostfix]
     [HarmonyPatch(nameof(StartOfRound.ReviveDeadPlayers))]
     private static void ReviveDeadPlayersPostfix()
     {
