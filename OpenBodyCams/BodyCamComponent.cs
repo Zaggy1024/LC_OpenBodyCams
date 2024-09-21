@@ -542,7 +542,7 @@ namespace OpenBodyCams
             }
         }
 
-        private CameraRenderingStatus UpdatedCameraStatus()
+        private CameraRenderingStatus GetUpdatedCameraStatus()
         {
             if (!EnableCamera)
                 return CameraRenderingStatus.Disabled;
@@ -930,7 +930,7 @@ namespace OpenBodyCams
 
             if (enableCameraThisFrame)
             {
-                var newStatus = UpdatedCameraStatus();
+                var newStatus = GetUpdatedCameraStatus();
                 if (newStatus == CameraRenderingStatus.TargetDisabledOnShip && (!disableCameraWhileTargetIsOnShip || keepCameraOn))
                     newStatus = CameraRenderingStatus.Rendering;
                 SetStatus(newStatus);
