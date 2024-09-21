@@ -152,6 +152,7 @@ namespace OpenBodyCams
             OverlayEnabled = Config.Bind("Overlay", "Enabled", true, "Displays an overlay on the monitor that the body cam replaces to communicate the status of the body cam. This will only work if the screen is displaying a render texture connected to a camera. Restart the lobby to apply.");
             OverlayTextScale = Config.Bind("Overlay", "TextScale", 1f, "The factor by which to scale the text on the overlay screen.");
 
+            DefaultText = Config.Bind("Overlay", "DefaultText", "", "The text displayed on the body cam monitor when it is operating normally.");
             BuyAntennaText = Config.Bind("Overlay", "BuyAntennaText", """<color="yellow">Body cam ${price}""", "The text displayed on the body cam monitor to prompt players to buy the antenna in the store to enable body cams.");
             AntennaStoredText = Config.Bind("Overlay", "AntennaStoredText", """<color="yellow">Antenna stored""", "The text displayed when the antenna is stored, preventing the body cams displaying on the monitor.");
             TargetInvalidText = Config.Bind("Overlay", "TargetInvalidText", """<color="red">Signal lost""", "The text displayed when the selected target is invalid (for example, the target is a player that has been eaten).");
@@ -171,6 +172,7 @@ namespace OpenBodyCams
                     ShipObjects.Overlay.UpdateText();
             }
 
+            DefaultText.SettingChanged += UpdateOverlayText;
             BuyAntennaText.SettingChanged += UpdateOverlayText;
             AntennaStoredText.SettingChanged += UpdateOverlayText;
             TargetInvalidText.SettingChanged += UpdateOverlayText;

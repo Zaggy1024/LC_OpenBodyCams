@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 
 using TMPro;
 using UnityEngine;
@@ -123,6 +123,7 @@ namespace OpenBodyCams.Overlay
 
             return BodyCam.CameraStatus switch
             {
+                CameraRenderingStatus.Rendering => Plugin.DefaultText.Value,
                 CameraRenderingStatus.TargetInvalid => Plugin.TargetInvalidText.Value,
                 CameraRenderingStatus.TargetDisabledOnShip => Plugin.TargetOnShipText.Value,
                 _ => "",
