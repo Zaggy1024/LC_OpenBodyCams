@@ -480,7 +480,7 @@ namespace OpenBodyCams
 
             if (!MonitorIsOn)
             {
-                if (MonitorOffMaterial  != null)
+                if (MonitorOffMaterial != null)
                     SetMonitorMaterial(MonitorOffMaterial);
                 return;
             }
