@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 
 using TMPro;
 using UnityEngine;
@@ -92,13 +92,13 @@ namespace OpenBodyCams.Overlay
 
         internal void UpdateText()
         {
-            textRenderer.text = GetTextAndColor();
+            textRenderer.text = GetText();
             textRenderer.enabled = textRenderer.text != "";
 
             renderThisFrame = true;
         }
 
-        private string GetTextAndColor()
+        private string GetText()
         {
             if (ShipUpgrades.BodyCamUnlockable != null)
             {
