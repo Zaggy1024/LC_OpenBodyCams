@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Rendering;
 
@@ -52,7 +52,8 @@ namespace OpenBodyCams.Utilities
 
         internal static Mesh CopySubmesh(Mesh mesh, int submesh)
         {
-            mesh = MakeReadableMeshCopy(mesh);
+            if (!mesh.isReadable)
+                mesh = MakeReadableMeshCopy(mesh);
 
             var indexRemap = new Dictionary<int, int>();
 
