@@ -1,5 +1,6 @@
 ## Version 2.4.1
 - Hid the overlay when the body cam's screen is powered off.
+- Added an option to set the text displayed when the body cam is rendering normally. This is currently independent of whether a player is living or dead.
 - Switched initialization to use a different hook to (hopefully) avoid broken saves causing the body cam not to function.
 
 ## Version 2.4.0
