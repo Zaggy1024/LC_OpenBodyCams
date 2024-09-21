@@ -50,9 +50,14 @@ namespace OpenBodyCams
                 // HACK: We have to get to the emissive color before GeneralImprovements (as of 1.2.5) can, since the material
                 //       gets re-instantiated every time it is assigned back to the screen's renderer, so any changes to it
                 //       will not be shared.
-                ExternalCameraMaterial = ExternalCameraRenderer.mesh.sharedMaterials[2];
-                OriginalExternalCameraEmissiveColor = ExternalCameraMaterial.GetColor("_EmissiveColor");
-                SetExternalCameraEmissiveColor();
+                var externalCameraMaterialIndex = GetCameraMaterialIndex(ExternalCameraRenderer);
+
+                if (externalCameraMaterialIndex != -1)
+                {
+                    ExternalCameraMaterial = ExternalCameraRenderer.mesh.sharedMaterials[externalCameraMaterialIndex];
+                    OriginalExternalCameraEmissiveColor = ExternalCameraMaterial.GetColor("_EmissiveColor");
+                    SetExternalCameraEmissiveColor();
+                }
             }
         }
 
@@ -99,7 +104,10 @@ namespace OpenBodyCams
                 return -1;
             if (shipCamera.mesh == null)
                 return -1;
-            var texture = shipCamera.cam.targetTexture;
+            var camera = shipCamera.cam;
+            if (camera == null)
+                camera = shipCamera.GetComponent<Camera>();
+            var texture = camera.targetTexture;
             return Array.FindIndex(shipCamera.mesh.sharedMaterials, material => material.mainTexture == texture);
         }
 
