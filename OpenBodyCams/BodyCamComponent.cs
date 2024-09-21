@@ -441,6 +441,9 @@ namespace OpenBodyCams
 
         public void UpdateSettings()
         {
+            if (Camera == null)
+                return;
+
             var horizontalResolution = resolution.x;
             var verticalResolution = resolution.y;
 
