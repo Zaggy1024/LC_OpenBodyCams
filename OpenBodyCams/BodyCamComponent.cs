@@ -32,7 +32,7 @@ namespace OpenBodyCams
         // Use this event to hide/show the output of the body cam wherever it is used. If this
         // event is ignored, then frozen or invalid video may display on your materials.
         public event Action<bool> OnBlankedSet;
-        // Fired when the camera's rendering status changes. See members of CameraRenderingStatus.
+        // This event is fired when the camera's rendering status changes. See members of CameraRenderingStatus.
         public event Action<CameraRenderingStatus> OnCameraStatusChanged;
 
         public delegate Renderer[] GetRenderersToHide(Renderer[] renderers);
