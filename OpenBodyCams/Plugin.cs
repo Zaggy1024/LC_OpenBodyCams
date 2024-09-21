@@ -33,7 +33,7 @@ namespace OpenBodyCams
     {
         public const string MOD_NAME = "OpenBodyCams";
         public const string MOD_UNIQUE_NAME = "Zaggy1024." + MOD_NAME;
-        public const string MOD_VERSION = "2.4.0";
+        public const string MOD_VERSION = "2.4.1";
 
         private readonly Harmony harmony = new(MOD_UNIQUE_NAME);
 
@@ -57,6 +57,7 @@ namespace OpenBodyCams
 
         public static ConfigEntry<bool> OverlayEnabled;
         public static ConfigEntry<float> OverlayTextScale;
+        public static ConfigEntry<string> DefaultText;
         public static ConfigEntry<string> BuyAntennaText;
         public static ConfigEntry<string> AntennaStoredText;
         public static ConfigEntry<string> TargetInvalidText;
