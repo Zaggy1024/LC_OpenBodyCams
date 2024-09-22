@@ -118,7 +118,6 @@ namespace OpenBodyCams
         private static Material fogShaderMaterial;
         private static GameObject nightVisionPrefab;
         private static Light vanillaMapNightVisionLight;
-        private static bool hasFinishedStaticSetup = false;
         #endregion
 
         #region Static state
@@ -238,8 +237,11 @@ namespace OpenBodyCams
             vanillaMapNightVisionLight = StartOfRound.Instance.mapScreen.mapCameraLight;
 
             UpdateAllCameraSettings();
+        }
 
-            hasFinishedStaticSetup = true;
+        internal static bool HasFinishedGameStartSetup()
+        {
+            return vanillaMapNightVisionLight != null;
         }
 
         public static void UpdateAllCameraSettings()
@@ -320,7 +322,7 @@ namespace OpenBodyCams
 
         void Awake()
         {
-            if (!hasFinishedStaticSetup)
+            if (!HasFinishedGameStartSetup())
             {
                 Plugin.Instance.Logger.LogError("Attempted to create a body cam before static initialization has been completed.");
                 Plugin.Instance.Logger.LogError("This may occur if the save is corrupted, or if a mod caused an error during the start of the game.");
@@ -363,7 +365,7 @@ namespace OpenBodyCams
 
         private bool EnsureCameraExistsOrReturnFalse()
         {
-            if (!hasFinishedStaticSetup)
+            if (!HasFinishedGameStartSetup())
                 return false;
             if (CameraObject != null)
                 return true;
@@ -473,7 +475,7 @@ namespace OpenBodyCams
 
         public void UpdateScreenMaterial()
         {
-            if (!hasFinishedStaticSetup)
+            if (!HasFinishedGameStartSetup())
                 return;
 
             EnsureMaterialsExist();
