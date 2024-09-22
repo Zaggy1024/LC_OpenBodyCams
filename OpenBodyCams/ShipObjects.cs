@@ -32,8 +32,12 @@ namespace OpenBodyCams
         internal static ManualCameraRenderer ShipCameraOnSmallMonitor;
         internal static ManualCameraRenderer CameraReplacedByBodyCam;
 
+        // Called from both postfixes on both Terminal.Start() and StartOfRound.Start() to ensure reliability.
         public static void EarlyInitialization()
         {
+            if (HasFinishedEarlyInitialization())
+                return;
+
             BlackScreenMaterial = StartOfRound.Instance.mapScreen.offScreenMat;
 
             InternalCameraRenderer = GameObject.Find("Environment/HangarShip/Cameras/ShipCamera")?.GetComponent<ManualCameraRenderer>();
@@ -59,6 +63,11 @@ namespace OpenBodyCams
                     SetExternalCameraEmissiveColor();
                 }
             }
+        }
+
+        private static bool HasFinishedEarlyInitialization()
+        {
+            return ShipCameraOnSmallMonitor != null;
         }
 
         internal static void SetExternalCameraEmissiveColor()
