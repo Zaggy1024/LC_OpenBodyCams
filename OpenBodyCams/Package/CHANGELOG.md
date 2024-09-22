@@ -1,3 +1,6 @@
+## Version 2.4.3
+- Made the initialization at the start of the game much less likely to be prevented by errors from other mods.
+
 ## Version 2.4.2
 - Fixed an error that would occur when [GeneralImprovements](https://github.com/Shaosil/LethalCompanyMods-GeneralImprovements/)'s `UseBetterMonitors` option is enabled.
 
