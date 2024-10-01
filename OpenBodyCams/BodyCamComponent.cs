@@ -101,6 +101,16 @@ namespace OpenBodyCams
                     timePerFrame = 0;
             }
         }
+
+        // The player that the body cam is currently attached to and displaying the perspective of.
+        public PlayerControllerB? CurrentPlayerTarget => currentPlayer;
+        // The transform that the body cam is currently attached to. When the target is a player,
+        // this will be the same as CurrentPlayerTarget.transform.
+        //
+        // When using this, please note that mods may set the target to any object, so this is not
+        // only restricted to players, enemies, and radar boosters.
+        public Transform? CurrentTarget => currentActualTarget;
+        #nullable restore
         #endregion
 
         #region Global constants
