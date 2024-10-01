@@ -20,6 +20,15 @@ namespace OpenBodyCams
         #nullable enable
         public static BodyCamComponent[] GetAllBodyCams() { return [.. AllBodyCams]; }
 
+        public delegate void RenderersToHideTransformer(BodyCamComponent bodyCam, ref Renderer[] renderers);
+        // This can be used to append to or override the renderers that are hidden for non-player
+        // targets. Any renderers in the list passed by reference to this event's handler will be
+        // hidden when the body cam this component controls is rendered.
+        //
+        // The list provided to the event will be empty for players, but the renderers returned
+        // will still be hidden, along with all the player models that are hidden/shown by default.
+        public static event RenderersToHideTransformer? RenderersToHideTransformers;
+
         public Camera? GetCamera() { return Camera; }
 
         // This event is fired whenever the camera is created/recreated. No settings from the old
@@ -38,13 +47,9 @@ namespace OpenBodyCams
         // This event is fired when the screen is powered off or on.
         public event Action<bool>? OnScreenPowerChanged;
 
+        [Obsolete]
         public delegate Renderer[] GetRenderersToHide(Renderer[] renderers);
-        // This can be used to append to or override the renderers that are hidden for non-player
-        // targets. Any renderers in the list returned by this event's handler will be hidden when
-        // the body cam this component controls is rendered.
-        //
-        // The list provided to the event will be empty for players, but the renderers returned
-        // will still be hidden, along with all the player models that are hidden/shown by default.
+        [Obsolete("Use RenderersToHideTransformers")]
         public event GetRenderersToHide? OnRenderersToHideChanged;
 
         public event BodyCam.BodyCamStatusUpdate? OnTargetChanged;
@@ -680,10 +685,9 @@ namespace OpenBodyCams
         private void SetRenderersToHide(Renderer[] renderers)
         {
             if (currentActualTarget != null && OnRenderersToHideChanged != null)
-            {
-                currentRenderersToHide = OnRenderersToHideChanged(renderers);
-                return;
-            }
+                renderers = OnRenderersToHideChanged(renderers);
+
+            RenderersToHideTransformers?.Invoke(this, ref renderers);
 
             currentRenderersToHide = renderers;
         }
