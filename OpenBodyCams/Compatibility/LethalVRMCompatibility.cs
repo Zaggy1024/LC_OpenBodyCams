@@ -56,7 +56,7 @@ namespace OpenBodyCams.Compatibility
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
-        public static GameObject[] CollectCosmetics(PlayerControllerB player)
+        public static IEnumerable<GameObject> CollectCosmetics(PlayerControllerB player)
         {
             foreach (var instance in (ICollection<LethalVRMManager.LethalVRMInstance>)vrmInstances)
             {
@@ -65,11 +65,10 @@ namespace OpenBodyCams.Compatibility
                 if (!ReferenceEquals(instance.PlayerControllerB, player))
                     continue;
                 return instance.renderers
-                    .Select(renderer => renderer.gameObject)
-                    .ToArray();
+                    .Select(renderer => renderer.gameObject);
             }
 
-            return new GameObject[0];
+            return [];
         }
     }
 }

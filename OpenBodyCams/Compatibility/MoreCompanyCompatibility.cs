@@ -112,15 +112,14 @@ namespace OpenBodyCams.Compatibility
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
-        public static GameObject[] CollectCosmetics(PlayerControllerB player)
+        public static IEnumerable<GameObject> CollectCosmetics(PlayerControllerB player)
         {
             Plugin.Instance.Logger.LogInfo($"Getting MoreCompany cosmetic models for {player.playerUsername}");
             return player.GetComponentsInChildren<CosmeticApplication>()
                 .SelectMany(cosmeticApplication => cosmeticApplication.spawnedCosmetics)
                 .Where(cosmetic => cosmetic != null)
                 .SelectMany(cosmetic => cosmetic.GetComponentsInChildren<Transform>())
-                .Select(cosmeticObject => cosmeticObject.gameObject)
-                .ToArray();
+                .Select(cosmeticObject => cosmeticObject.gameObject);
         }
     }
 }

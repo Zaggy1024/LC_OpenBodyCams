@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 
 using BepInEx.Bootstrap;
@@ -89,29 +90,29 @@ namespace OpenBodyCams.Utilities
                 Plugin.Instance.Logger.LogInfo(data);
         }
 
-        public static GameObject[] CollectVanillaFirstPersonCosmetics(PlayerControllerB player)
+        public static List<GameObject> CollectVanillaFirstPersonCosmetics(PlayerControllerB player)
         {
             var headChildrenTransforms = player.headCostumeContainerLocal.GetComponentsInChildren<Transform>();
 
-            var objects = new GameObject[headChildrenTransforms.Length - 1];
+            var objects = new List<GameObject>(headChildrenTransforms.Length - 1);
 
             for (var i = 1; i < headChildrenTransforms.Length; i++)
-                objects[i - 1] = headChildrenTransforms[i].gameObject;
+                objects.Add(headChildrenTransforms[i].gameObject);
             return objects;
         }
 
-        public static GameObject[] CollectVanillaThirdPersonCosmetics(PlayerControllerB player)
+        public static List<GameObject> CollectVanillaThirdPersonCosmetics(PlayerControllerB player)
         {
             var headChildrenTransforms = player.headCostumeContainer.GetComponentsInChildren<Transform>();
             var lowerTorsoChildrenTransforms = player.lowerTorsoCostumeContainer.GetComponentsInChildren<Transform>();
 
-            var childrenObjects = new GameObject[headChildrenTransforms.Length + lowerTorsoChildrenTransforms.Length - 2];
+            var childrenObjects = new List<GameObject>(headChildrenTransforms.Length + lowerTorsoChildrenTransforms.Length - 2);
 
-            var resultIndex = 0;
+            // Start at 1 to skip the container.
             for (var i = 1; i < headChildrenTransforms.Length; i++)
-                childrenObjects[resultIndex++] = headChildrenTransforms[i].gameObject;
+                childrenObjects.Add(headChildrenTransforms[i].gameObject);
             for (var i = 1; i < lowerTorsoChildrenTransforms.Length; i++)
-                childrenObjects[resultIndex++] = lowerTorsoChildrenTransforms[i].gameObject;
+                childrenObjects.Add(lowerTorsoChildrenTransforms[i].gameObject);
             return childrenObjects;
         }
 
@@ -127,31 +128,33 @@ namespace OpenBodyCams.Utilities
 
             DebugLog($"Collecting cosmetics for {player.playerUsername}.");
 
-            thirdPersonCosmetics = CollectVanillaThirdPersonCosmetics(player);
-            firstPersonCosmetics = CollectVanillaFirstPersonCosmetics(player);
+            var thirdPersonCosmeticsList = CollectVanillaThirdPersonCosmetics(player);
+            var firstPersonCosmeticsList = CollectVanillaFirstPersonCosmetics(player);
             hasViewmodelReplacement = false;
 
             if (compatibilityMode.HasFlag(CompatibilityMode.MoreCompany))
             {
                 var mcCosmetics = MoreCompanyCompatibility.CollectCosmetics(player);
-                thirdPersonCosmetics = [.. thirdPersonCosmetics, .. mcCosmetics];
+                thirdPersonCosmeticsList.AddRange(mcCosmetics);
             }
 
             if (compatibilityMode.HasFlag(CompatibilityMode.AdvancedCompany))
             {
                 var acCosmetics = AdvancedCompanyCompatibility.CollectCosmetics(player);
-                thirdPersonCosmetics = [.. thirdPersonCosmetics, .. acCosmetics];
+                thirdPersonCosmeticsList.AddRange(acCosmetics);
             }
 
             if (compatibilityMode.HasFlag(CompatibilityMode.LethalVRM))
             {
                 var vrmCosmetics = LethalVRMCompatibility.CollectCosmetics(player);
-                thirdPersonCosmetics = [.. thirdPersonCosmetics, .. vrmCosmetics];
+                thirdPersonCosmeticsList.AddRange(vrmCosmetics);
             }
 
             if (compatibilityMode.HasFlag(CompatibilityMode.ModelReplacementAPI))
-                ModelReplacementAPICompatibility.CollectCosmetics(player, ref thirdPersonCosmetics, ref firstPersonCosmetics, ref hasViewmodelReplacement);
+                ModelReplacementAPICompatibility.CollectCosmetics(player, thirdPersonCosmeticsList, firstPersonCosmeticsList, ref hasViewmodelReplacement);
 
+            thirdPersonCosmetics = [.. thirdPersonCosmeticsList];
+            firstPersonCosmetics = [.. firstPersonCosmeticsList];
             Plugin.Instance.Logger.LogInfo($"Collected {thirdPersonCosmetics.Length} third-person and {firstPersonCosmetics.Length} cosmetics for {player.playerUsername} with{(hasViewmodelReplacement ? "" : "out")} a viewmodel replacement.");
 
             if (PrintDebugInfo)

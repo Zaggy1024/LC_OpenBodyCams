@@ -53,7 +53,7 @@ namespace OpenBodyCams.Compatibility
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
-        public static GameObject[] CollectCosmetics(PlayerControllerB player)
+        public static IEnumerable<GameObject> CollectCosmetics(PlayerControllerB player)
         {
             Player acPlayer = Player.GetPlayer(player);
             IEnumerable<GameObject> attachedObjects = acPlayer.AppliedCosmetics.Values;
@@ -69,8 +69,7 @@ namespace OpenBodyCams.Compatibility
                 .Where(cosmetic => cosmetic != null)
                 .SelectMany(cosmetic => cosmetic.GetComponentsInChildren<Transform>())
                 .Select(transform => transform.gameObject)
-                .Concat(acPlayer.HeadMount == null ? [] : [ acPlayer.HeadMount ])
-                .ToArray();
+                .Concat(acPlayer.HeadMount == null ? [] : [acPlayer.HeadMount]);
         }
 
         static void AfterEquipmentChange()
