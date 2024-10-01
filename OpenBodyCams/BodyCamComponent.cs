@@ -17,25 +17,26 @@ namespace OpenBodyCams
     public class BodyCamComponent : MonoBehaviour
     {
         #region Public API
+        #nullable enable
         public static BodyCamComponent[] GetAllBodyCams() { return [.. AllBodyCams]; }
 
-        public Camera GetCamera() { return Camera; }
+        public Camera? GetCamera() { return Camera; }
 
         // This event is fired whenever the camera is created/recreated. No settings from the old
         // camera instances will carry over to a new camera, so this should be used to apply any
         // necessary settings to the new camera instance.
-        public event Action<Camera> OnCameraCreated;
+        public event Action<Camera>? OnCameraCreated;
         // This event will fire any time the render texture is created/recreated. The texture may
         // change when settings in the OpenBodyCams config are changed, or when any of this
         // component's properties that affect camera or texture settings are changed.
-        public event Action<RenderTexture> OnRenderTextureCreated;
+        public event Action<RenderTexture>? OnRenderTextureCreated;
         // Use this event to hide/show the output of the body cam wherever it is used. If this
         // event is ignored, then frozen or invalid video may display on your materials.
-        public event Action<bool> OnBlankedSet;
+        public event Action<bool>? OnBlankedSet;
         // This event is fired when the camera's rendering status changes. See members of CameraRenderingStatus.
-        public event Action<CameraRenderingStatus> OnCameraStatusChanged;
+        public event Action<CameraRenderingStatus>? OnCameraStatusChanged;
         // This event is fired when the screen is powered off or on.
-        public event Action<bool> OnScreenPowerChanged;
+        public event Action<bool>? OnScreenPowerChanged;
 
         public delegate Renderer[] GetRenderersToHide(Renderer[] renderers);
         // This can be used to append to or override the renderers that are hidden for non-player
@@ -44,9 +45,9 @@ namespace OpenBodyCams
         //
         // The list provided to the event will be empty for players, but the renderers returned
         // will still be hidden, along with all the player models that are hidden/shown by default.
-        public event GetRenderersToHide OnRenderersToHideChanged;
+        public event GetRenderersToHide? OnRenderersToHideChanged;
 
-        public event BodyCam.BodyCamStatusUpdate OnTargetChanged;
+        public event BodyCam.BodyCamStatusUpdate? OnTargetChanged;
 
         // Used by API users to indicate whether the camera this component controls is remote, i.e.
         // wirelessly connected to the ship. This is intended to be used by other mods to incorporate

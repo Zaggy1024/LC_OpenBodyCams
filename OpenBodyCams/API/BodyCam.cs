@@ -3,19 +3,21 @@ using System.Linq;
 
 using UnityEngine;
 
+#nullable enable
+
 namespace OpenBodyCams.API
 {
     public static class BodyCam
     {
         public delegate void MainBodyCamStatusUpdate();
 
-        public static event MainBodyCamStatusUpdate OnBodyCamReceiverBecameEnabled;
-        public static event MainBodyCamStatusUpdate OnBodyCamReceiverBecameDisabled;
+        public static event MainBodyCamStatusUpdate? OnBodyCamReceiverBecameEnabled;
+        public static event MainBodyCamStatusUpdate? OnBodyCamReceiverBecameDisabled;
 
         public delegate void BodyCamStatusUpdate(BodyCamComponent bodyCam);
 
-        public static event BodyCamStatusUpdate OnBodyCamInstantiated;
-        public static event BodyCamStatusUpdate OnBodyCamDestroyed;
+        public static event BodyCamStatusUpdate? OnBodyCamInstantiated;
+        public static event BodyCamStatusUpdate? OnBodyCamDestroyed;
 
         public static bool BodyCamsAreAvailable
         {
@@ -27,9 +29,9 @@ namespace OpenBodyCams.API
             }
         }
 
-        public static BodyCamComponent MainBodyCam => ShipObjects.MainBodyCam;
+        public static BodyCamComponent? MainBodyCam => ShipObjects.MainBodyCam;
 
-        public static BodyCamComponent CreateBodyCam(GameObject objectToAttachComponentTo, Renderer displayedOnRenderer, int displayMaterialIndex, ManualCameraRenderer mapRendererToSyncTo = null)
+        public static BodyCamComponent CreateBodyCam(GameObject objectToAttachComponentTo, Renderer? displayedOnRenderer, int displayMaterialIndex, ManualCameraRenderer? mapRendererToSyncTo = null)
         {
             if (mapRendererToSyncTo != null && mapRendererToSyncTo.cam != mapRendererToSyncTo.mapCamera)
                 throw new ArgumentException("The camera must be a map renderer", nameof(mapRendererToSyncTo));
@@ -53,7 +55,7 @@ namespace OpenBodyCams.API
             return bodyCam;
         }
 
-        public static BodyCamComponent CreateBodyCam(GameObject objectToAttachComponentTo, Material screenMaterial, ManualCameraRenderer mapRendererToSyncTo = null)
+        public static BodyCamComponent CreateBodyCam(GameObject objectToAttachComponentTo, Material screenMaterial, ManualCameraRenderer? mapRendererToSyncTo = null)
         {
             var bodyCam = CreateBodyCam(objectToAttachComponentTo, null, -1, mapRendererToSyncTo);
             bodyCam.MonitorOnMaterial = screenMaterial;
