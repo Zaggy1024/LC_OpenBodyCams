@@ -1,6 +1,8 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 
+using GameNetcodeStuff;
 using UnityEngine;
 
 #nullable enable
@@ -30,6 +32,17 @@ namespace OpenBodyCams.API
         }
 
         public static BodyCamComponent? MainBodyCam => ShipObjects.MainBodyCam;
+
+        public delegate GameObject[] GetPlayerFirstPersonCosmetics(PlayerControllerB player, out bool hasViewmodelReplacement);
+        // An event called whenever OpenBodyCams collects the first person cosmetics for a player. Use this to allow
+        // any objects attached to the player that are visible in first person to be hidden when OpenBodyCams switches
+        // the perspective to third-person.
+        public static event GetPlayerFirstPersonCosmetics? PlayerFirstPersonCosmeticsGetters;
+        // An event called whenever OpenBodyCams collects the third person cosmetics for a player. Use this to allow
+        // any objects attached to the player that are visible in third person to be hidden when OpenBodyCams switches
+        // the perspective to first-person.
+        public delegate GameObject[] GetPlayerThirdPersonCosmetics(PlayerControllerB player);
+        public static event GetPlayerThirdPersonCosmetics? PlayerThirdPersonCosmeticsGetters;
 
         public static BodyCamComponent CreateBodyCam(GameObject objectToAttachComponentTo, Renderer? displayedOnRenderer, int displayMaterialIndex, ManualCameraRenderer? mapRendererToSyncTo = null)
         {
@@ -80,6 +93,31 @@ namespace OpenBodyCams.API
         internal static void BodyCamDestroyed(BodyCamComponent bodyCam)
         {
             OnBodyCamDestroyed?.Invoke(bodyCam);
+        }
+
+        internal static void CollectPlayerFirstPersonCosmetics(PlayerControllerB player, List<GameObject> cosmetics, ref bool hasViewmodelReplacement)
+        {
+            if (PlayerFirstPersonCosmeticsGetters == null)
+                return;
+            foreach (var handler in PlayerFirstPersonCosmeticsGetters.GetInvocationList())
+            {
+                var renderers = ((GetPlayerFirstPersonCosmetics)handler).Invoke(player, out var handlerHasViewmodelReplacement);
+                if (renderers != null)
+                    cosmetics.AddRange(renderers);
+                hasViewmodelReplacement |= handlerHasViewmodelReplacement;
+            }
+        }
+
+        internal static void CollectPlayerThirdPersonCosmetics(PlayerControllerB player, List<GameObject> cosmetics)
+        {
+            if (PlayerThirdPersonCosmeticsGetters == null)
+                return;
+            foreach (var handler in PlayerThirdPersonCosmeticsGetters.GetInvocationList())
+            {
+                var renderers = ((GetPlayerThirdPersonCosmetics)handler).Invoke(player);
+                if (renderers != null)
+                    cosmetics.AddRange(renderers);
+            }
         }
     }
 }

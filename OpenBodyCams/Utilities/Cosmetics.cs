@@ -8,6 +8,7 @@ using HarmonyLib;
 using UnityEngine;
 
 using OpenBodyCams.Compatibility;
+using OpenBodyCams.API;
 
 namespace OpenBodyCams.Utilities
 {
@@ -131,6 +132,9 @@ namespace OpenBodyCams.Utilities
             var thirdPersonCosmeticsList = CollectVanillaThirdPersonCosmetics(player);
             var firstPersonCosmeticsList = CollectVanillaFirstPersonCosmetics(player);
             hasViewmodelReplacement = false;
+
+            BodyCam.CollectPlayerThirdPersonCosmetics(player, thirdPersonCosmeticsList);
+            BodyCam.CollectPlayerFirstPersonCosmetics(player, firstPersonCosmeticsList, ref hasViewmodelReplacement);
 
             if (compatibilityMode.HasFlag(CompatibilityMode.MoreCompany))
             {

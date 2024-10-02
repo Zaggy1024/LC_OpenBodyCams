@@ -880,9 +880,9 @@ namespace OpenBodyCams
 
             var localPlayer = StartOfRound.Instance.localPlayerController;
 
-            ViewPerspective.Apply(currentPlayer, ref currentPlayerModelState, Perspective.FirstPerson);
+            ViewPerspective.Apply(ref currentPlayerModelState, Perspective.FirstPerson);
             if ((object)currentPlayer != localPlayer)
-                ViewPerspective.Apply(localPlayer, ref localPlayerModelState, Perspective.ThirdPerson);
+                ViewPerspective.Apply(ref localPlayerModelState, Perspective.ThirdPerson);
 
             bool warnedNullMesh = false;
             foreach (var mesh in currentRenderersToHide)
@@ -914,9 +914,9 @@ namespace OpenBodyCams
 
             var localPlayer = StartOfRound.Instance.localPlayerController;
 
-            ViewPerspective.Restore(currentPlayer, currentPlayerModelState);
+            ViewPerspective.Restore(ref currentPlayerModelState);
             if ((object)currentPlayer != localPlayer)
-                ViewPerspective.Restore(localPlayer, localPlayerModelState);
+                ViewPerspective.Restore(ref localPlayerModelState);
 
             foreach (var mesh in currentRenderersToHide)
             {
