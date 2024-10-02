@@ -28,6 +28,11 @@ namespace OpenBodyCams.Utilities
 
         public static void PrepareModelState(PlayerControllerB player, ref PlayerModelState state)
         {
+            Restore(ref state);
+
+            state.player = player;
+            state.lastPerspective = Perspective.Original;
+
             if (player is null)
             {
                 state.thirdPersonCosmetics = [];
@@ -43,13 +48,14 @@ namespace OpenBodyCams.Utilities
             state.firstPersonCosmeticsLayers = new int[state.firstPersonCosmetics.Length];
         }
 
-        public static void Apply(PlayerControllerB player, ref PlayerModelState state, Perspective perspective)
+        public static void Apply(ref PlayerModelState state, Perspective perspective)
         {
+            var player = state.player;
+
             if (player is null)
                 return;
 
-            if (state.isValid)
-                Restore(player, state);
+            Restore(ref state);
 
             if (perspective == Perspective.Original)
                 return;
@@ -145,11 +151,15 @@ namespace OpenBodyCams.Utilities
 
             PatchFlowerSnakeEnemy.SetClingingAnimationPositionsForPlayer(player, perspective);
             PatchCentipedeAI.SetClingingAnimationPositionsForPlayer(player, perspective);
+
+            state.lastPerspective = perspective;
         }
 
-        public static void Restore(PlayerControllerB player, PlayerModelState state)
+        public static void Restore(ref PlayerModelState state)
         {
-            if (player is null)
+            var player = state.player;
+
+            if (player is null || state.lastPerspective == Perspective.Original)
                 return;
 
             player.thisPlayerModel.shadowCastingMode = state.thirdPersonBodyShadowMode;
@@ -160,7 +170,6 @@ namespace OpenBodyCams.Utilities
 
             for (int i = 0; i < state.thirdPersonCosmetics.Length; i++)
                 state.thirdPersonCosmetics[i].layer = state.thirdPersonCosmeticsLayers[i];
-
             for (int i = 0; i < state.firstPersonCosmetics.Length; i++)
                 state.firstPersonCosmetics[i].layer = state.firstPersonCosmeticsLayers[i];
 
@@ -179,12 +188,16 @@ namespace OpenBodyCams.Utilities
 
             PatchFlowerSnakeEnemy.SetClingingAnimationPositionsForPlayer(player, Perspective.Original);
             PatchCentipedeAI.SetClingingAnimationPositionsForPlayer(player, Perspective.Original);
+
+            state.lastPerspective = Perspective.Original;
         }
     }
 
     public struct PlayerModelState()
     {
-        internal bool isValid = false;
+        internal PlayerControllerB player;
+
+        internal Perspective lastPerspective = Perspective.Original;
 
         internal ShadowCastingMode thirdPersonBodyShadowMode;
         internal int thirdPersonBodyLayer;
@@ -218,7 +231,7 @@ namespace OpenBodyCams.Utilities
 
         internal readonly bool VerifyCosmeticsExist(string name)
         {
-            if (!isValid)
+            if (player == null)
                 return true;
 
             if (!AllObjectsExistInArray(thirdPersonCosmetics))
@@ -237,7 +250,7 @@ namespace OpenBodyCams.Utilities
 
         internal readonly bool ReferencesObject(GameObject obj)
         {
-            if (!isValid)
+            if (player == null)
                 return false;
 
             if (Array.IndexOf(thirdPersonCosmetics, obj) != -1)
