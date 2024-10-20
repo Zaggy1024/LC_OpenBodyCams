@@ -86,6 +86,9 @@ public static class TerminalCommands
 
     private static void DisablePiPImage()
     {
+        if (PiPImage == null)
+            return;
+
         PiPImage.gameObject.SetActive(false);
     }
 
@@ -95,16 +98,16 @@ public static class TerminalCommands
         ViewBodyCamNode = null;
         BodyCamKeyword = null;
 
+        var viewKeyword = FindKeyword("view", verb: true);
+        ViewMonitorNode = viewKeyword?.FindCompatibleNoun("monitor")?.result;
+
         if (Plugin.TerminalPiPBodyCamEnabled.Value)
         {
-            var viewKeyword = FindKeyword("view", verb: true);
-            ViewMonitorNode = viewKeyword?.FindCompatibleNoun("monitor")?.result;
             if (ViewMonitorNode == null)
             {
                 Plugin.Instance.Logger.LogWarning("'view monitor' command does not exist, terminal PiP body cam view will be disabled.");
                 return;
             }
-
 
             ViewBodyCamNode = ScriptableObject.CreateInstance<TerminalNode>();
             ViewBodyCamNode.name = "ViewBodyCam";
@@ -138,6 +141,9 @@ public static class TerminalCommands
 
     private static bool TerminalIsDisplayingMap()
     {
+        if (ViewMonitorNode == null)
+            return false;
+
         return ShipObjects.TerminalScript.displayingPersistentImage == ViewMonitorNode.displayTexture;
     }
 
@@ -183,7 +189,7 @@ public static class TerminalCommands
     [HarmonyPatch(typeof(Terminal), nameof(Terminal.LoadNewNode))]
     static void LoadNewNodePostfix(TerminalNode node)
     {
-        if (PiPImage == null || node != ViewMonitorNode)
+        if (node != ViewMonitorNode)
             return;
 
         if (!TerminalIsDisplayingMap())
