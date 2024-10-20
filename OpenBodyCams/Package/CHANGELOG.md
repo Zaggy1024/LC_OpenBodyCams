@@ -1,3 +1,6 @@
+## Version 2.4.5
+- Fixed an error that would occur when loading a save with the PiP body cam disabled.
+
 ## Version 2.4.4
 - Fixed the body cam staying visible in the terminal when going to orbit.
 
