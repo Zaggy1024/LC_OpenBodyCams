@@ -1,3 +1,6 @@
+## Version 2.4.4
+- Fixed the body cam staying visible in the terminal when going to orbit.
+
 ## Version 2.4.3
 - Made the initialization at the start of the game much less likely to be prevented by errors from other mods.
 
