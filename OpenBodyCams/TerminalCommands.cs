@@ -141,6 +141,11 @@ public static class TerminalCommands
         return ShipObjects.TerminalScript.displayingPersistentImage == ViewMonitorNode.displayTexture;
     }
 
+    internal static bool TerminalIsDisplayingBodyCam()
+    {
+        return PiPImage.gameObject.activeSelf;
+    }
+
     [HarmonyPrefix]
     [HarmonyPatch(typeof(Terminal), nameof(Terminal.LoadNewNode))]
     static void LoadNewNodePrefix(ref TerminalNode node)
@@ -150,7 +155,7 @@ public static class TerminalCommands
 
         if (node == ViewBodyCamNode)
         {
-            if (PiPImage.gameObject.activeSelf)
+            if (TerminalIsDisplayingBodyCam())
             {
                 PiPImage.gameObject.SetActive(false);
                 return;
