@@ -5,277 +5,276 @@ using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace OpenBodyCams
+namespace OpenBodyCams;
+
+public static class TerminalCommands
 {
-    public static class TerminalCommands
+    public static TerminalNode ViewMonitorNode;
+
+    public static TerminalNode ViewBodyCamNode;
+    public static TerminalKeyword BodyCamKeyword;
+    public static TerminalNode BodyCamFailedNode;
+    public static TerminalNode BodyCamLockedNode;
+
+    public static RawImage PiPImage;
+
+    private static readonly List<TerminalKeyword> newTerminalKeywords = [];
+    private static readonly List<TerminalKeyword> modifiedTerminalKeywords = [];
+
+    public static void Initialize()
     {
-        public static TerminalNode ViewMonitorNode;
+        if (ShipObjects.TerminalScript == null || ShipObjects.MainBodyCam == null)
+            return;
 
-        public static TerminalNode ViewBodyCamNode;
-        public static TerminalKeyword BodyCamKeyword;
-        public static TerminalNode BodyCamFailedNode;
-        public static TerminalNode BodyCamLockedNode;
+        if (PiPImage != null)
+            Object.Destroy(PiPImage.gameObject);
+        PiPImage = null;
 
-        public static RawImage PiPImage;
+        ShipObjects.MainBodyCam.OnRenderTextureCreated -= SetRenderTexture;
 
-        private static readonly List<TerminalKeyword> newTerminalKeywords = [];
-        private static readonly List<TerminalKeyword> modifiedTerminalKeywords = [];
-
-        public static void Initialize()
+        if (Plugin.TerminalPiPBodyCamEnabled.Value)
         {
-            if (ShipObjects.TerminalScript == null || ShipObjects.MainBodyCam == null)
-                return;
+            var pipImageObject = new GameObject("PictureInPictureImage");
+            pipImageObject.transform.SetParent(ShipObjects.TerminalScript.terminalImageMask.transform, worldPositionStays: false);
+            PiPImage = pipImageObject.AddComponent<RawImage>();
 
-            if (PiPImage != null)
-                Object.Destroy(PiPImage.gameObject);
-            PiPImage = null;
+            pipImageObject.AddComponent<TerminalBodyCamVisibilityTracker>().BodyCamToActivate = ShipObjects.MainBodyCam;
 
-            ShipObjects.MainBodyCam.OnRenderTextureCreated -= SetRenderTexture;
+            var bigImageTransform = ShipObjects.TerminalScript.terminalImage.rectTransform;
 
-            if (Plugin.TerminalPiPBodyCamEnabled.Value)
+            var origin = new Vector2(0, 0);
+            var inward = new Vector2(1, 1);
+            var pipPosition = (int)Plugin.TerminalPiPPosition.Value;
+            (origin.x, inward.x) = (pipPosition & 1) switch
             {
-                var pipImageObject = new GameObject("PictureInPictureImage");
-                pipImageObject.transform.SetParent(ShipObjects.TerminalScript.terminalImageMask.transform, worldPositionStays: false);
-                PiPImage = pipImageObject.AddComponent<RawImage>();
+                0 => (bigImageTransform.offsetMin.x, 1),
+                _ => (bigImageTransform.offsetMax.x, -1),
+            };
+            (origin.y, inward.y) = (pipPosition & 2) switch
+            {
+                0 => (bigImageTransform.offsetMin.y, 1),
+                _ => (bigImageTransform.offsetMax.y, -1),
+            };
 
-                pipImageObject.AddComponent<TerminalBodyCamVisibilityTracker>().BodyCamToActivate = ShipObjects.MainBodyCam;
+            var corner = origin + (new Vector2(1f, 3f / 4f) * inward * Plugin.TerminalPiPWidth.Value);
+            PiPImage.rectTransform.offsetMin = Vector2.Min(origin, corner);
+            PiPImage.rectTransform.offsetMax = Vector2.Max(origin, corner);
 
-                var bigImageTransform = ShipObjects.TerminalScript.terminalImage.rectTransform;
+            if (ShipObjects.MainBodyCam.Camera != null)
+                PiPImage.texture = ShipObjects.MainBodyCam.Camera.targetTexture;
+            ShipObjects.MainBodyCam.OnRenderTextureCreated += SetRenderTexture;
 
-                var origin = new Vector2(0, 0);
-                var inward = new Vector2(1, 1);
-                var pipPosition = (int)Plugin.TerminalPiPPosition.Value;
-                (origin.x, inward.x) = (pipPosition & 1) switch
-                {
-                    0 => (bigImageTransform.offsetMin.x, 1),
-                    _ => (bigImageTransform.offsetMax.x, -1),
-                };
-                (origin.y, inward.y) = (pipPosition & 2) switch
-                {
-                    0 => (bigImageTransform.offsetMin.y, 1),
-                    _ => (bigImageTransform.offsetMax.y, -1),
-                };
+            ShipObjects.MainBodyCam.OnBlankedSet += SetBodyCamBlanked;
 
-                var corner = origin + (new Vector2(1f, 3f / 4f) * inward * Plugin.TerminalPiPWidth.Value);
-                PiPImage.rectTransform.offsetMin = Vector2.Min(origin, corner);
-                PiPImage.rectTransform.offsetMax = Vector2.Max(origin, corner);
+            BodyCam.OnBodyCamReceiverBecameDisabled += DisablePiPImage;
 
-                if (ShipObjects.MainBodyCam.Camera != null)
-                    PiPImage.texture = ShipObjects.MainBodyCam.Camera.targetTexture;
-                ShipObjects.MainBodyCam.OnRenderTextureCreated += SetRenderTexture;
+            pipImageObject.SetActive(false);
+        }
 
-                ShipObjects.MainBodyCam.OnBlankedSet += SetBodyCamBlanked;
+        InitializeCommands();
+    }
 
-                BodyCam.OnBodyCamReceiverBecameDisabled += DisablePiPImage;
+    public static void SetRenderTexture(RenderTexture texture)
+    {
+        PiPImage.texture = texture;
+    }
 
-                pipImageObject.SetActive(false);
+    public static void SetBodyCamBlanked(bool blanked)
+    {
+        PiPImage.color = blanked ? Color.black : Color.white;
+    }
+
+    private static void DisablePiPImage()
+    {
+        PiPImage.gameObject.SetActive(false);
+    }
+
+    static void InitializeCommands()
+    {
+        RemoveAddedKeywords();
+        ViewBodyCamNode = null;
+        BodyCamKeyword = null;
+
+        if (Plugin.TerminalPiPBodyCamEnabled.Value)
+        {
+            var viewKeyword = FindKeyword("view", verb: true);
+            ViewMonitorNode = viewKeyword?.FindCompatibleNoun("monitor")?.result;
+            if (ViewMonitorNode == null)
+            {
+                Plugin.Instance.Logger.LogWarning("'view monitor' command does not exist, terminal PiP body cam view will be disabled.");
+                return;
             }
 
-            InitializeCommands();
-        }
 
-        public static void SetRenderTexture(RenderTexture texture)
-        {
-            PiPImage.texture = texture;
-        }
+            ViewBodyCamNode = ScriptableObject.CreateInstance<TerminalNode>();
+            ViewBodyCamNode.name = "ViewBodyCam";
+            ViewBodyCamNode.displayText = "Toggling picture-in-picture body cam.\n\n";
+            ViewBodyCamNode.clearPreviousText = true;
 
-        public static void SetBodyCamBlanked(bool blanked)
-        {
-            PiPImage.color = blanked ? Color.black : Color.white;
-        }
+            BodyCamKeyword = FindOrCreateKeyword("BodyCam", "bodycam", verb: false);
 
-        private static void DisablePiPImage()
-        {
-            PiPImage.gameObject.SetActive(false);
-        }
-
-        static void InitializeCommands()
-        {
-            RemoveAddedKeywords();
-            ViewBodyCamNode = null;
-            BodyCamKeyword = null;
-
-            if (Plugin.TerminalPiPBodyCamEnabled.Value)
-            {
-                var viewKeyword = FindKeyword("view", verb: true);
-                ViewMonitorNode = viewKeyword?.FindCompatibleNoun("monitor")?.result;
-                if (ViewMonitorNode == null)
+            viewKeyword.compatibleNouns = [
+                .. viewKeyword.compatibleNouns ?? [],
+                new CompatibleNoun()
                 {
-                    Plugin.Instance.Logger.LogWarning("'view monitor' command does not exist, terminal PiP body cam view will be disabled.");
-                    return;
+                    noun = BodyCamKeyword,
+                    result = ViewBodyCamNode,
                 }
+            ];
 
+            BodyCamFailedNode = ScriptableObject.CreateInstance<TerminalNode>();
+            BodyCamFailedNode.name = "BodyCamFailed";
+            BodyCamFailedNode.displayText = "Map view is currently disabled.\n\n";
+            BodyCamFailedNode.clearPreviousText = true;
 
-                ViewBodyCamNode = ScriptableObject.CreateInstance<TerminalNode>();
-                ViewBodyCamNode.name = "ViewBodyCam";
-                ViewBodyCamNode.displayText = "Toggling picture-in-picture body cam.\n\n";
-                ViewBodyCamNode.clearPreviousText = true;
+            BodyCamLockedNode = ScriptableObject.CreateInstance<TerminalNode>();
+            BodyCamLockedNode.name = "BodyCamFailed";
+            BodyCamLockedNode.displayText = "Please place a body cams receiver antenna on the ship.\n\n";
+            BodyCamLockedNode.clearPreviousText = true;
+        }
 
-                BodyCamKeyword = FindOrCreateKeyword("BodyCam", "bodycam", verb: false);
+        AddNewlyCreatedCommands();
+    }
 
-                viewKeyword.compatibleNouns = [
-                    .. viewKeyword.compatibleNouns ?? [],
-                    new CompatibleNoun()
-                    {
-                        noun = BodyCamKeyword,
-                        result = ViewBodyCamNode,
-                    }
-                ];
+    private static bool TerminalIsDisplayingMap()
+    {
+        return ShipObjects.TerminalScript.displayingPersistentImage == ViewMonitorNode.displayTexture;
+    }
 
-                BodyCamFailedNode = ScriptableObject.CreateInstance<TerminalNode>();
-                BodyCamFailedNode.name = "BodyCamFailed";
-                BodyCamFailedNode.displayText = "Map view is currently disabled.\n\n";
-                BodyCamFailedNode.clearPreviousText = true;
+    [HarmonyPrefix]
+    [HarmonyPatch(typeof(Terminal), nameof(Terminal.LoadNewNode))]
+    static void LoadNewNodePrefix(ref TerminalNode node)
+    {
+        if (node == null)
+            return;
 
-                BodyCamLockedNode = ScriptableObject.CreateInstance<TerminalNode>();
-                BodyCamLockedNode.name = "BodyCamFailed";
-                BodyCamLockedNode.displayText = "Please place a body cams receiver antenna on the ship.\n\n";
-                BodyCamLockedNode.clearPreviousText = true;
+        if (node == ViewBodyCamNode)
+        {
+            if (PiPImage.gameObject.activeSelf)
+            {
+                PiPImage.gameObject.SetActive(false);
+                return;
             }
 
-            AddNewlyCreatedCommands();
-        }
-
-        private static bool TerminalIsDisplayingMap()
-        {
-            return ShipObjects.TerminalScript.displayingPersistentImage == ViewMonitorNode.displayTexture;
-        }
-
-        [HarmonyPrefix]
-        [HarmonyPatch(typeof(Terminal), nameof(Terminal.LoadNewNode))]
-        static void LoadNewNodePrefix(ref TerminalNode node)
-        {
-            if (node == null)
-                return;
-
-            if (node == ViewBodyCamNode)
+            if (!BodyCam.BodyCamsAreAvailable)
             {
-                if (PiPImage.gameObject.activeSelf)
-                {
-                    PiPImage.gameObject.SetActive(false);
-                    return;
-                }
-
-                if (!BodyCam.BodyCamsAreAvailable)
-                {
-                    node = BodyCamLockedNode;
-                    return;
-                }
-
-                if (!TerminalIsDisplayingMap())
-                    ShipObjects.TerminalScript.LoadTerminalImage(ViewMonitorNode);
-                if (!TerminalIsDisplayingMap())
-                {
-                    node = BodyCamFailedNode;
-                    return;
-                }
-
-                PiPImage.gameObject.SetActive(true);
-            }
-        }
-
-        [HarmonyPostfix]
-        [HarmonyPatch(typeof(Terminal), nameof(Terminal.LoadNewNode))]
-        static void LoadNewNodePostfix(TerminalNode node)
-        {
-            if (PiPImage == null || node != ViewMonitorNode)
+                node = BodyCamLockedNode;
                 return;
+            }
 
             if (!TerminalIsDisplayingMap())
-                DisablePiPImage();
-        }
-
-        [HarmonyPostfix]
-        [HarmonyPatch(typeof(StartOfRound), nameof(StartOfRound.SwitchMapMonitorPurpose))]
-        private static void SwitchMapMonitorPurposePostfix()
-        {
+                ShipObjects.TerminalScript.LoadTerminalImage(ViewMonitorNode);
             if (!TerminalIsDisplayingMap())
-                DisablePiPImage();
-        }
-
-        static void RemoveAddedKeywords()
-        {
-            // Remove references to new keywords.
-            foreach (var keyword in modifiedTerminalKeywords)
             {
-                if (keyword.compatibleNouns != null)
-                    keyword.compatibleNouns = [.. keyword.compatibleNouns.Where(compatible => !newTerminalKeywords.Contains(compatible.noun))];
-            }
-            modifiedTerminalKeywords.Clear();
-
-            // Remove new keywords.
-            foreach (var keyword in newTerminalKeywords)
-                Object.Destroy(keyword);
-
-            var nodes = ShipObjects.TerminalScript.terminalNodes;
-            nodes.allKeywords = [.. nodes.allKeywords.Where(keyword => !newTerminalKeywords.Contains(keyword))];
-
-            newTerminalKeywords.Clear();
-        }
-
-        static TerminalKeyword FindKeyword(string word, bool verb)
-        {
-            return ShipObjects.TerminalScript.terminalNodes.allKeywords.FirstOrDefault(keyword => keyword.word == word && keyword.isVerb == verb);
-        }
-
-        static CompatibleNoun FindCompatibleNoun(this TerminalKeyword keyword, string noun)
-        {
-            return keyword.compatibleNouns.FirstOrDefault(compatible => compatible.noun.word == noun);
-        }
-
-        static TerminalKeyword FindOrCreateKeyword(string name, string word, bool verb, CompatibleNoun[] compatibleNouns = null)
-        {
-            Plugin.Instance.Logger.LogInfo($"Creating terminal {(verb ? "verb" : "noun")} '{word}' ({name}).");
-            TerminalKeyword keyword = FindKeyword(word, verb);
-            if (keyword == null)
-            {
-                keyword = ScriptableObject.CreateInstance<TerminalKeyword>();
-                keyword.name = name;
-                keyword.isVerb = verb;
-                keyword.word = word;
-                keyword.compatibleNouns = compatibleNouns;
-                newTerminalKeywords.Add(keyword);
-                Plugin.Instance.Logger.LogInfo($"  Keyword was not found, created a new one.");
-            }
-            else
-            {
-                keyword.compatibleNouns = [.. keyword.compatibleNouns ?? [], .. compatibleNouns ?? []];
-                Plugin.Instance.Logger.LogInfo($"  Keyword existed, appended nouns.");
+                node = BodyCamFailedNode;
+                return;
             }
 
-            modifiedTerminalKeywords.Add(keyword);
-            return keyword;
-        }
-
-        static void AddNewlyCreatedCommands()
-        {
-            var nodes = ShipObjects.TerminalScript.terminalNodes;
-            nodes.allKeywords = [.. nodes.allKeywords, .. newTerminalKeywords];
+            PiPImage.gameObject.SetActive(true);
         }
     }
 
-    public enum PiPPosition : uint
+    [HarmonyPostfix]
+    [HarmonyPatch(typeof(Terminal), nameof(Terminal.LoadNewNode))]
+    static void LoadNewNodePostfix(TerminalNode node)
     {
-        BottomLeft = 0b00,
-        BottomRight = 0b01,
-        TopLeft = 0b10,
-        TopRight = 0b11,
+        if (PiPImage == null || node != ViewMonitorNode)
+            return;
+
+        if (!TerminalIsDisplayingMap())
+            DisablePiPImage();
     }
 
-    public class TerminalBodyCamVisibilityTracker : MonoBehaviour
+    [HarmonyPostfix]
+    [HarmonyPatch(typeof(StartOfRound), nameof(StartOfRound.SwitchMapMonitorPurpose))]
+    private static void SwitchMapMonitorPurposePostfix()
     {
-        public BodyCamComponent BodyCamToActivate;
+        if (!TerminalIsDisplayingMap())
+            DisablePiPImage();
+    }
 
-        void OnEnable()
+    static void RemoveAddedKeywords()
+    {
+        // Remove references to new keywords.
+        foreach (var keyword in modifiedTerminalKeywords)
         {
-            if (BodyCamToActivate != null)
-                BodyCamToActivate.ForceEnableCamera = true;
+            if (keyword.compatibleNouns != null)
+                keyword.compatibleNouns = [.. keyword.compatibleNouns.Where(compatible => !newTerminalKeywords.Contains(compatible.noun))];
+        }
+        modifiedTerminalKeywords.Clear();
+
+        // Remove new keywords.
+        foreach (var keyword in newTerminalKeywords)
+            Object.Destroy(keyword);
+
+        var nodes = ShipObjects.TerminalScript.terminalNodes;
+        nodes.allKeywords = [.. nodes.allKeywords.Where(keyword => !newTerminalKeywords.Contains(keyword))];
+
+        newTerminalKeywords.Clear();
+    }
+
+    static TerminalKeyword FindKeyword(string word, bool verb)
+    {
+        return ShipObjects.TerminalScript.terminalNodes.allKeywords.FirstOrDefault(keyword => keyword.word == word && keyword.isVerb == verb);
+    }
+
+    static CompatibleNoun FindCompatibleNoun(this TerminalKeyword keyword, string noun)
+    {
+        return keyword.compatibleNouns.FirstOrDefault(compatible => compatible.noun.word == noun);
+    }
+
+    static TerminalKeyword FindOrCreateKeyword(string name, string word, bool verb, CompatibleNoun[] compatibleNouns = null)
+    {
+        Plugin.Instance.Logger.LogInfo($"Creating terminal {(verb ? "verb" : "noun")} '{word}' ({name}).");
+        TerminalKeyword keyword = FindKeyword(word, verb);
+        if (keyword == null)
+        {
+            keyword = ScriptableObject.CreateInstance<TerminalKeyword>();
+            keyword.name = name;
+            keyword.isVerb = verb;
+            keyword.word = word;
+            keyword.compatibleNouns = compatibleNouns;
+            newTerminalKeywords.Add(keyword);
+            Plugin.Instance.Logger.LogInfo($"  Keyword was not found, created a new one.");
+        }
+        else
+        {
+            keyword.compatibleNouns = [.. keyword.compatibleNouns ?? [], .. compatibleNouns ?? []];
+            Plugin.Instance.Logger.LogInfo($"  Keyword existed, appended nouns.");
         }
 
-        void OnDisable()
-        {
-            if (BodyCamToActivate != null)
-                BodyCamToActivate.ForceEnableCamera = false;
-        }
+        modifiedTerminalKeywords.Add(keyword);
+        return keyword;
+    }
+
+    static void AddNewlyCreatedCommands()
+    {
+        var nodes = ShipObjects.TerminalScript.terminalNodes;
+        nodes.allKeywords = [.. nodes.allKeywords, .. newTerminalKeywords];
+    }
+}
+
+public enum PiPPosition : uint
+{
+    BottomLeft = 0b00,
+    BottomRight = 0b01,
+    TopLeft = 0b10,
+    TopRight = 0b11,
+}
+
+public class TerminalBodyCamVisibilityTracker : MonoBehaviour
+{
+    public BodyCamComponent BodyCamToActivate;
+
+    void OnEnable()
+    {
+        if (BodyCamToActivate != null)
+            BodyCamToActivate.ForceEnableCamera = true;
+    }
+
+    void OnDisable()
+    {
+        if (BodyCamToActivate != null)
+            BodyCamToActivate.ForceEnableCamera = false;
     }
 }
