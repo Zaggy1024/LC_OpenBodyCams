@@ -9,14 +9,14 @@ namespace OpenBodyCams;
 
 public static class TerminalCommands
 {
-    public static TerminalNode ViewMonitorNode;
+    private static TerminalNode ViewMonitorNode;
 
-    public static TerminalNode ViewBodyCamNode;
-    public static TerminalKeyword BodyCamKeyword;
-    public static TerminalNode BodyCamFailedNode;
-    public static TerminalNode BodyCamLockedNode;
+    private static TerminalNode ViewBodyCamNode;
+    private static TerminalKeyword BodyCamKeyword;
+    private static TerminalNode BodyCamFailedNode;
+    private static TerminalNode BodyCamLockedNode;
 
-    public static RawImage PiPImage;
+    private static RawImage PiPImage;
 
     private static readonly List<TerminalKeyword> newTerminalKeywords = [];
     private static readonly List<TerminalKeyword> modifiedTerminalKeywords = [];
