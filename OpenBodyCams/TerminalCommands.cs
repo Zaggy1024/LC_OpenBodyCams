@@ -182,7 +182,15 @@ namespace OpenBodyCams
                 return;
 
             if (!TerminalIsDisplayingMap())
-                PiPImage.gameObject.SetActive(false);
+                DisablePiPImage();
+        }
+
+        [HarmonyPostfix]
+        [HarmonyPatch(typeof(StartOfRound), nameof(StartOfRound.SwitchMapMonitorPurpose))]
+        private static void SwitchMapMonitorPurposePostfix()
+        {
+            if (!TerminalIsDisplayingMap())
+                DisablePiPImage();
         }
 
         static void RemoveAddedKeywords()
