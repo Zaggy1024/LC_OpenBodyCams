@@ -31,6 +31,8 @@ public static class TerminalCommands
         PiPImage = null;
 
         ShipObjects.MainBodyCam.OnRenderTextureCreated -= SetRenderTexture;
+        ShipObjects.MainBodyCam.OnBlankedSet -= SetBodyCamBlanked;
+        BodyCam.OnBodyCamReceiverBecameDisabled -= DisablePiPImage;
 
         if (Plugin.TerminalPiPBodyCamEnabled.Value)
         {
@@ -62,10 +64,9 @@ public static class TerminalCommands
 
             if (ShipObjects.MainBodyCam.Camera != null)
                 PiPImage.texture = ShipObjects.MainBodyCam.Camera.targetTexture;
+
             ShipObjects.MainBodyCam.OnRenderTextureCreated += SetRenderTexture;
-
             ShipObjects.MainBodyCam.OnBlankedSet += SetBodyCamBlanked;
-
             BodyCam.OnBodyCamReceiverBecameDisabled += DisablePiPImage;
 
             pipImageObject.SetActive(false);
@@ -86,10 +87,12 @@ public static class TerminalCommands
 
     private static void DisablePiPImage()
     {
-        if (PiPImage == null)
-            return;
-
         PiPImage.gameObject.SetActive(false);
+    }
+
+    private static void EnablePiPImage()
+    {
+        PiPImage.gameObject.SetActive(true);
     }
 
     static void InitializeCommands()
@@ -149,6 +152,9 @@ public static class TerminalCommands
 
     internal static bool TerminalIsDisplayingBodyCam()
     {
+        if (PiPImage == null)
+            return false;
+
         return PiPImage.gameObject.activeSelf;
     }
 
@@ -163,7 +169,7 @@ public static class TerminalCommands
         {
             if (TerminalIsDisplayingBodyCam())
             {
-                PiPImage.gameObject.SetActive(false);
+                DisablePiPImage();
                 return;
             }
 
@@ -181,7 +187,7 @@ public static class TerminalCommands
                 return;
             }
 
-            PiPImage.gameObject.SetActive(true);
+            EnablePiPImage();
         }
     }
 
@@ -189,6 +195,8 @@ public static class TerminalCommands
     [HarmonyPatch(typeof(Terminal), nameof(Terminal.LoadNewNode))]
     static void LoadNewNodePostfix(TerminalNode node)
     {
+        if (PiPImage == null)
+            return;
         if (node != ViewMonitorNode)
             return;
 
@@ -200,6 +208,8 @@ public static class TerminalCommands
     [HarmonyPatch(typeof(StartOfRound), nameof(StartOfRound.SwitchMapMonitorPurpose))]
     private static void SwitchMapMonitorPurposePostfix()
     {
+        if (PiPImage == null)
+            return;
         if (!TerminalIsDisplayingMap())
             DisablePiPImage();
     }
