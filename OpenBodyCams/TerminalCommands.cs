@@ -19,7 +19,7 @@ public static class TerminalCommands
     private static RawImage PiPImage;
 
     private static readonly List<TerminalKeyword> newTerminalKeywords = [];
-    private static readonly List<TerminalKeyword> modifiedTerminalKeywords = [];
+    private static readonly Dictionary<TerminalKeyword, List<TerminalKeyword>> addedCompatibleNouns = [];
 
     public static void Initialize()
     {
@@ -118,6 +118,8 @@ public static class TerminalCommands
             ViewBodyCamNode.clearPreviousText = true;
 
             BodyCamKeyword = FindOrCreateKeyword("BodyCam", "bodycam", verb: false);
+
+            AddCompatibleNoun(viewKeyword, BodyCamKeyword, ViewBodyCamNode);
 
             viewKeyword.compatibleNouns = [
                 .. viewKeyword.compatibleNouns ?? [],
@@ -238,14 +240,35 @@ public static class TerminalCommands
             newTerminalKeywords.Add(keyword);
             Plugin.Instance.Logger.LogInfo($"  Keyword was not found, created a new one.");
         }
-        else
+        else if (compatibleNouns != null)
         {
-            keyword.compatibleNouns = [.. keyword.compatibleNouns ?? [], .. compatibleNouns ?? []];
+            foreach (var compatibleNoun in compatibleNouns)
+                AddCompatibleNoun(keyword, compatibleNoun);
             Plugin.Instance.Logger.LogInfo($"  Keyword existed, appended nouns.");
         }
 
-        modifiedTerminalKeywords.Add(keyword);
         return keyword;
+    }
+
+    private static void AddCompatibleNoun(TerminalKeyword keyword, CompatibleNoun compatibleNoun)
+    {
+        if (!addedCompatibleNouns.TryGetValue(keyword, out var compatibleNounsList))
+        {
+            compatibleNounsList = new List<TerminalKeyword>();
+            addedCompatibleNouns[keyword] = compatibleNounsList;
+        }
+
+        keyword.compatibleNouns = [.. keyword.compatibleNouns ?? [], compatibleNoun];
+        compatibleNounsList.Add(compatibleNoun.noun);
+    }
+
+    private static void AddCompatibleNoun(TerminalKeyword keyword, TerminalKeyword compatibleKeyword, TerminalNode result)
+    {
+        AddCompatibleNoun(keyword, new CompatibleNoun()
+        {
+            noun = compatibleKeyword,
+            result = result,
+        });
     }
 
     static void AddNewlyCreatedCommands()
@@ -254,22 +277,22 @@ public static class TerminalCommands
         nodes.allKeywords = [.. nodes.allKeywords, .. newTerminalKeywords];
     }
 
-    static void RemoveAddedKeywords()
+    private static void RemoveAddedKeywords()
     {
         // Remove references to new keywords.
-        foreach (var keyword in modifiedTerminalKeywords)
+        foreach (var (keyword, addedNouns) in addedCompatibleNouns)
         {
             if (keyword.compatibleNouns != null)
-                keyword.compatibleNouns = [.. keyword.compatibleNouns.Where(compatible => !newTerminalKeywords.Contains(compatible.noun))];
+                keyword.compatibleNouns = [.. keyword.compatibleNouns.Where(compatible => !addedNouns.Contains(compatible.noun))];
         }
-        modifiedTerminalKeywords.Clear();
+        addedCompatibleNouns.Clear();
 
         // Remove new keywords.
-        foreach (var keyword in newTerminalKeywords)
-            Object.Destroy(keyword);
-
         var nodes = ShipObjects.TerminalScript.terminalNodes;
         nodes.allKeywords = [.. nodes.allKeywords.Where(keyword => !newTerminalKeywords.Contains(keyword))];
+
+        foreach (var keyword in newTerminalKeywords)
+            Object.Destroy(keyword);
 
         newTerminalKeywords.Clear();
     }
