@@ -19,32 +19,20 @@
     </ItemGroup>
 
     <ItemGroup>
+        <PackageReference Include="Evaisa-LethalLib" Version="0.16.1" />
+        <PackageReference Include="ShaosilGaming-GeneralImprovements" Version="1.4.4" />
+        <PackageReference Include="notnotnotswipez-MoreCompany" Version="1.10.1" Publicize="true" />
+        <PackageReference Include="BunyaPineTree-ModelReplacementAPI" Version="2.4.10" Publicize="true" />
+        <PackageReference Include="Ooseykins-LethalVRM" Version="1.0.7" Publicize="true" />
+    </ItemGroup>
+
+    <ItemGroup>
         <Reference Include="AdvancedCompany" Publicize="true">
             <HintPath>..\..\Libraries\AdvancedCompany.dll</HintPath>
             <Private>false</Private>
         </Reference>
         <Reference Include="Assembly-CSharp" Publicize="true">
             <HintPath>..\..\Libraries\Assembly-CSharp.dll</HintPath>
-            <Private>false</Private>
-        </Reference>
-        <Reference Include="GeneralImprovements">
-            <HintPath>..\..\Libraries\GeneralImprovements.dll</HintPath>
-            <Private>false</Private>
-        </Reference>
-        <Reference Include="LethalLib">
-            <HintPath>..\..\Libraries\LethalLib.dll</HintPath>
-            <Private>false</Private>
-        </Reference>
-        <Reference Include="LethalVRM" Publicize="true">
-            <HintPath>..\..\Libraries\LethalVRM.dll</HintPath>
-            <Private>false</Private>
-        </Reference>
-        <Reference Include="ModelReplacementAPI" Publicize="true">
-            <HintPath>..\..\Libraries\ModelReplacementAPI.dll</HintPath>
-            <Private>false</Private>
-        </Reference>
-        <Reference Include="MoreCompany" Publicize="true">
-            <HintPath>..\..\Libraries\MoreCompany.dll</HintPath>
             <Private>false</Private>
         </Reference>
         <Reference Include="Unity.Netcode.Runtime">
