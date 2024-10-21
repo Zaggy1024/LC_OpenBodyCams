@@ -214,26 +214,6 @@ public static class TerminalCommands
             DisablePiPImage();
     }
 
-    static void RemoveAddedKeywords()
-    {
-        // Remove references to new keywords.
-        foreach (var keyword in modifiedTerminalKeywords)
-        {
-            if (keyword.compatibleNouns != null)
-                keyword.compatibleNouns = [.. keyword.compatibleNouns.Where(compatible => !newTerminalKeywords.Contains(compatible.noun))];
-        }
-        modifiedTerminalKeywords.Clear();
-
-        // Remove new keywords.
-        foreach (var keyword in newTerminalKeywords)
-            Object.Destroy(keyword);
-
-        var nodes = ShipObjects.TerminalScript.terminalNodes;
-        nodes.allKeywords = [.. nodes.allKeywords.Where(keyword => !newTerminalKeywords.Contains(keyword))];
-
-        newTerminalKeywords.Clear();
-    }
-
     static TerminalKeyword FindKeyword(string word, bool verb)
     {
         return ShipObjects.TerminalScript.terminalNodes.allKeywords.FirstOrDefault(keyword => keyword.word == word && keyword.isVerb == verb);
@@ -272,6 +252,26 @@ public static class TerminalCommands
     {
         var nodes = ShipObjects.TerminalScript.terminalNodes;
         nodes.allKeywords = [.. nodes.allKeywords, .. newTerminalKeywords];
+    }
+
+    static void RemoveAddedKeywords()
+    {
+        // Remove references to new keywords.
+        foreach (var keyword in modifiedTerminalKeywords)
+        {
+            if (keyword.compatibleNouns != null)
+                keyword.compatibleNouns = [.. keyword.compatibleNouns.Where(compatible => !newTerminalKeywords.Contains(compatible.noun))];
+        }
+        modifiedTerminalKeywords.Clear();
+
+        // Remove new keywords.
+        foreach (var keyword in newTerminalKeywords)
+            Object.Destroy(keyword);
+
+        var nodes = ShipObjects.TerminalScript.terminalNodes;
+        nodes.allKeywords = [.. nodes.allKeywords.Where(keyword => !newTerminalKeywords.Contains(keyword))];
+
+        newTerminalKeywords.Clear();
     }
 }
 
