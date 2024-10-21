@@ -16,12 +16,12 @@ using OpenBodyCams.Utilities;
 
 namespace OpenBodyCams.Compatibility;
 
-public static class MoreCompanyCompatibility
+internal static class MoreCompanyCompatibility
 {
-    static MethodInfo m_CosmeticApplication_ClearCosmetics;
+    private static MethodInfo m_CosmeticApplication_ClearCosmetics;
 
     [MethodImpl(MethodImplOptions.NoInlining)]
-    public static bool Initialize(Harmony harmony)
+    internal static bool Initialize(Harmony harmony)
     {
         var m_ClientReceiveMessagePatch_HandleDataMessage = typeof(ClientReceiveMessagePatch).GetMethods(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static).First(method => method.Name == "HandleDataMessage");
 
@@ -34,7 +34,7 @@ public static class MoreCompanyCompatibility
 
         var thisType = typeof(MoreCompanyCompatibility);
         harmony.CreateProcessor(m_ClientReceiveMessagePatch_HandleDataMessage)
-            .AddTranspiler(thisType.GetMethod(nameof(ClientReceiveMessagePatch_HandleDataMessageTranspiler)))
+            .AddTranspiler(thisType.GetMethod(nameof(ClientReceiveMessagePatch_HandleDataMessageTranspiler), BindingFlags.NonPublic | BindingFlags.Static))
             .Patch();
 
         (string, Type[])[] cosmeticApplicationMethods = [
@@ -54,7 +54,7 @@ public static class MoreCompanyCompatibility
         return true;
     }
 
-    public static IEnumerable<CodeInstruction> ClientReceiveMessagePatch_HandleDataMessageTranspiler(IEnumerable<CodeInstruction> instructions)
+    private static IEnumerable<CodeInstruction> ClientReceiveMessagePatch_HandleDataMessageTranspiler(IEnumerable<CodeInstruction> instructions)
     {
         // Change cosmetic spawning to keep the cosmetics applied to the local player, but placed into the invisible enemies layer to match
         // other mods that use it to display cosmetics in third person.
@@ -102,7 +102,7 @@ public static class MoreCompanyCompatibility
         BodyCamComponent.MarkTargetDirtyUntilRenderForAllBodyCams();
     }
 
-    static void SetUpLocalMoreCompanyCosmetics(CosmeticApplication cosmeticApplication)
+    private static void SetUpLocalMoreCompanyCosmetics(CosmeticApplication cosmeticApplication)
     {
         foreach (var cosmetic in cosmeticApplication.spawnedCosmetics)
         {
@@ -112,7 +112,7 @@ public static class MoreCompanyCompatibility
     }
 
     [MethodImpl(MethodImplOptions.NoInlining)]
-    public static IEnumerable<GameObject> CollectCosmetics(PlayerControllerB player)
+    internal static IEnumerable<GameObject> CollectCosmetics(PlayerControllerB player)
     {
         Plugin.Instance.Logger.LogInfo($"Getting MoreCompany cosmetic models for {player.playerUsername}");
         return player.GetComponentsInChildren<CosmeticApplication>()

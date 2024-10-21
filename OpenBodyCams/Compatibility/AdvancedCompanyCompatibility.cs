@@ -13,9 +13,9 @@ using UnityEngine;
 
 namespace OpenBodyCams.Compatibility;
 
-public static class AdvancedCompanyCompatibility
+internal static class AdvancedCompanyCompatibility
 {
-    public static bool Initialize(Harmony harmony)
+    internal static bool Initialize(Harmony harmony)
     {
         var t_Player = typeof(Player);
 
@@ -35,7 +35,7 @@ public static class AdvancedCompanyCompatibility
             var method = t_Player.GetMethod(methodName, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic, null, types, null);
             if (method is null)
             {
-                Plugin.Instance.Logger.LogWarning($"Failed to find {t_Player.Name}.{methodName} to apply postfix.");
+                Plugin.Instance.Logger.LogWarning($"Failed to find {t_Player.FullName}.{methodName} to apply postfix.");
                 return false;
             }
 
@@ -53,7 +53,7 @@ public static class AdvancedCompanyCompatibility
     }
 
     [MethodImpl(MethodImplOptions.NoInlining)]
-    public static IEnumerable<GameObject> CollectCosmetics(PlayerControllerB player)
+    internal static IEnumerable<GameObject> CollectCosmetics(PlayerControllerB player)
     {
         Player acPlayer = Player.GetPlayer(player);
         IEnumerable<GameObject> attachedObjects = acPlayer.AppliedCosmetics.Values;
@@ -72,12 +72,12 @@ public static class AdvancedCompanyCompatibility
             .Concat(acPlayer.HeadMount == null ? [] : [acPlayer.HeadMount]);
     }
 
-    static void AfterEquipmentChange()
+    private static void AfterEquipmentChange()
     {
         BodyCamComponent.MarkTargetDirtyUntilRenderForAllBodyCams();
     }
 
-    static IEnumerator UpdateCosmeticsAfterCoroutine(IEnumerator __result)
+    private static IEnumerator UpdateCosmeticsAfterCoroutine(IEnumerator __result)
     {
         while (true)
         {

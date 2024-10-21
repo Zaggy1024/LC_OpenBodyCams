@@ -1,6 +1,6 @@
 ﻿namespace OpenBodyCams.Compatibility;
 
-public static class ModGUIDs
+internal static class ModGUIDs
 {
     public const string AdvancedCompany = "com.potatoepet.AdvancedCompany";
     public const string GeneralImprovements = "ShaosilGaming.GeneralImprovements";

@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace OpenBodyCams.Compatibility;
 
-public static class GeneralImprovementsCompatibility
+internal static class GeneralImprovementsCompatibility
 {
     internal static bool GeneralImprovementsEnabled => Chainloader.PluginInfos.ContainsKey(ModGUIDs.GeneralImprovements);
     internal static bool BetterMonitorsEnabled
@@ -30,14 +30,14 @@ public static class GeneralImprovementsCompatibility
         return MonitorsAPI.GetMonitorAtIndex(0)?.MeshRenderer != null;
     }
 
-    public readonly struct GeneralImprovementsMonitorSpecification(Renderer renderer, int materialIndex, Material originalMaterial)
+    internal readonly struct GeneralImprovementsMonitorSpecification(Renderer renderer, int materialIndex, Material originalMaterial)
     {
-        public readonly Renderer Renderer = renderer;
-        public readonly int MaterialIndex = materialIndex;
-        public readonly Material OriginalMaterial = originalMaterial;
+        internal readonly Renderer Renderer = renderer;
+        internal readonly int MaterialIndex = materialIndex;
+        internal readonly Material OriginalMaterial = originalMaterial;
     }
 
-    public static GeneralImprovementsMonitorSpecification? GetMonitorForID(int id)
+    internal static GeneralImprovementsMonitorSpecification? GetMonitorForID(int id)
     {
         if (!BetterMonitorsEnabled)
             return null;

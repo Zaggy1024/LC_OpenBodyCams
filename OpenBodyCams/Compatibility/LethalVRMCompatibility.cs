@@ -12,13 +12,13 @@ using UnityEngine;
 
 namespace OpenBodyCams.Compatibility;
 
-public static class LethalVRMCompatibility
+internal static class LethalVRMCompatibility
 {
     // This must not reference a LethalVRM type so that we don't automatically load the assembly.
-    static IEnumerable vrmInstances;
+    private static IEnumerable vrmInstances;
 
     [MethodImpl(MethodImplOptions.NoInlining)]
-    public static bool Initialize(Harmony harmony)
+    internal static bool Initialize(Harmony harmony)
     {
         var vrmManager = GameObject.Find("LethalVRM Manager")?.GetComponent<LethalVRMManager>();
         if (vrmManager is null)
@@ -39,13 +39,13 @@ public static class LethalVRMCompatibility
             .GetMethod("MoveNext", BindingFlags.NonPublic | BindingFlags.Instance);
         harmony
             .CreateProcessor(moveNextMethod)
-            .AddTranspiler(typeof(LethalVRMCompatibility).GetMethod(nameof(LoadModelToPlayerTranspiler), BindingFlags.Static | BindingFlags.NonPublic))
+            .AddTranspiler(typeof(LethalVRMCompatibility).GetMethod(nameof(LoadModelToPlayerTranspiler), BindingFlags.NonPublic | BindingFlags.Static))
             .Patch();
 
         return true;
     }
 
-    static IEnumerable<CodeInstruction> LoadModelToPlayerTranspiler(IEnumerable<CodeInstruction> instructions)
+    private static IEnumerable<CodeInstruction> LoadModelToPlayerTranspiler(IEnumerable<CodeInstruction> instructions)
     {
         var instructionsList = instructions.ToList();
 
@@ -56,7 +56,7 @@ public static class LethalVRMCompatibility
     }
 
     [MethodImpl(MethodImplOptions.NoInlining)]
-    public static IEnumerable<GameObject> CollectCosmetics(PlayerControllerB player)
+    internal static IEnumerable<GameObject> CollectCosmetics(PlayerControllerB player)
     {
         foreach (var instance in (ICollection<LethalVRMManager.LethalVRMInstance>)vrmInstances)
         {

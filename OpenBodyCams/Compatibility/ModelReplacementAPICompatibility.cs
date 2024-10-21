@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
@@ -12,11 +11,11 @@ using UnityEngine;
 
 namespace OpenBodyCams.Compatibility;
 
-public static class ModelReplacementAPICompatibility
+internal static class ModelReplacementAPICompatibility
 {
-    public static MethodInfo m_UpdateModelReplacement;
+    private static MethodInfo m_UpdateModelReplacement;
 
-    public static bool Initialize(Harmony harmony)
+    internal static bool Initialize(Harmony harmony)
     {
         var m_ViewStateManager_ReportBodyReplacementAddition = typeof(ViewStateManager).GetMethod(nameof(ViewStateManager.ReportBodyReplacementAddition), [typeof(BodyReplacementBase)]);
         if (m_ViewStateManager_ReportBodyReplacementAddition is null)
@@ -38,7 +37,7 @@ public static class ModelReplacementAPICompatibility
             .AddPostfix(m_UpdateModelReplacement)
             .Patch();
 
-        var m_RemoveModelReplacementTranspiler = typeof(ModelReplacementAPICompatibility).GetMethod(nameof(RemoveModelReplacementTranspiler));
+        var m_RemoveModelReplacementTranspiler = typeof(ModelReplacementAPICompatibility).GetMethod(nameof(RemoveModelReplacementTranspiler), BindingFlags.NonPublic | BindingFlags.Static);
         harmony.CreateProcessor(m_ModelReplacementAPI_RemovePlayerModelReplacement)
             .AddTranspiler(m_RemoveModelReplacementTranspiler)
             .Patch();
@@ -48,7 +47,7 @@ public static class ModelReplacementAPICompatibility
     }
 
     [MethodImpl(MethodImplOptions.NoInlining)]
-    public static void CollectCosmetics(PlayerControllerB player, List<GameObject> thirdPersonCosmetics, List<GameObject> firstPersonCosmetics, ref bool hasViewmodelReplacement)
+    internal static void CollectCosmetics(PlayerControllerB player, List<GameObject> thirdPersonCosmetics, List<GameObject> firstPersonCosmetics, ref bool hasViewmodelReplacement)
     {
         var bodyReplacement = player.GetComponent<ViewStateManager>()?.bodyReplacement;
 
@@ -70,7 +69,7 @@ public static class ModelReplacementAPICompatibility
         BodyCamComponent.MarkTargetDirtyUntilRenderForAllBodyCams(__instance.controller.transform);
     }
 
-    public static IEnumerable<CodeInstruction> RemoveModelReplacementTranspiler(IEnumerable<CodeInstruction> instructions)
+    private static IEnumerable<CodeInstruction> RemoveModelReplacementTranspiler(IEnumerable<CodeInstruction> instructions)
     {
         var instructionsList = new List<CodeInstruction>(instructions);
 
