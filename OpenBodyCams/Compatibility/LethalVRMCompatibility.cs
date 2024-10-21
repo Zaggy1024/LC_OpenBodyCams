@@ -10,65 +10,64 @@ using HarmonyLib;
 using LethalVRM;
 using UnityEngine;
 
-namespace OpenBodyCams.Compatibility
+namespace OpenBodyCams.Compatibility;
+
+public static class LethalVRMCompatibility
 {
-    public static class LethalVRMCompatibility
+    // This must not reference a LethalVRM type so that we don't automatically load the assembly.
+    static IEnumerable vrmInstances;
+
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    public static bool Initialize(Harmony harmony)
     {
-        // This must not reference a LethalVRM type so that we don't automatically load the assembly.
-        static IEnumerable vrmInstances;
-
-        [MethodImpl(MethodImplOptions.NoInlining)]
-        public static bool Initialize(Harmony harmony)
+        var vrmManager = GameObject.Find("LethalVRM Manager")?.GetComponent<LethalVRMManager>();
+        if (vrmManager is null)
         {
-            var vrmManager = GameObject.Find("LethalVRM Manager")?.GetComponent<LethalVRMManager>();
-            if (vrmManager is null)
-            {
-                Plugin.Instance.Logger.LogWarning("Failed to find the LethalVRMManager instance.");
-                return false;
-            }
-            vrmInstances = vrmManager.instances;
-            if (vrmInstances is null)
-            {
-                Plugin.Instance.Logger.LogWarning("Failed to get the value of the LethalVRMManager.instances field.");
-                return false;
-            }
-
-            var loadModelMethod = typeof(LethalVRMManager).GetMethod(nameof(LethalVRMManager.LoadModelToPlayer), BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
-            var moveNextMethod = loadModelMethod
-                .GetCustomAttribute<AsyncStateMachineAttribute>().StateMachineType
-                .GetMethod("MoveNext", BindingFlags.NonPublic | BindingFlags.Instance);
-            harmony
-                .CreateProcessor(moveNextMethod)
-                .AddTranspiler(typeof(LethalVRMCompatibility).GetMethod(nameof(LoadModelToPlayerTranspiler), BindingFlags.Static | BindingFlags.NonPublic))
-                .Patch();
-
-            return true;
+            Plugin.Instance.Logger.LogWarning("Failed to find the LethalVRMManager instance.");
+            return false;
+        }
+        vrmInstances = vrmManager.instances;
+        if (vrmInstances is null)
+        {
+            Plugin.Instance.Logger.LogWarning("Failed to get the value of the LethalVRMManager.instances field.");
+            return false;
         }
 
-        static IEnumerable<CodeInstruction> LoadModelToPlayerTranspiler(IEnumerable<CodeInstruction> instructions)
+        var loadModelMethod = typeof(LethalVRMManager).GetMethod(nameof(LethalVRMManager.LoadModelToPlayer), BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+        var moveNextMethod = loadModelMethod
+            .GetCustomAttribute<AsyncStateMachineAttribute>().StateMachineType
+            .GetMethod("MoveNext", BindingFlags.NonPublic | BindingFlags.Instance);
+        harmony
+            .CreateProcessor(moveNextMethod)
+            .AddTranspiler(typeof(LethalVRMCompatibility).GetMethod(nameof(LoadModelToPlayerTranspiler), BindingFlags.Static | BindingFlags.NonPublic))
+            .Patch();
+
+        return true;
+    }
+
+    static IEnumerable<CodeInstruction> LoadModelToPlayerTranspiler(IEnumerable<CodeInstruction> instructions)
+    {
+        var instructionsList = instructions.ToList();
+
+        var updateTargetMethod = typeof(BodyCamComponent).GetMethod(nameof(BodyCamComponent.MarkTargetDirtyUntilRenderForAllBodyCams), []);
+        instructionsList.Insert(instructionsList.Count() - 2, new CodeInstruction(OpCodes.Call, updateTargetMethod));
+
+        return instructionsList;
+    }
+
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    public static IEnumerable<GameObject> CollectCosmetics(PlayerControllerB player)
+    {
+        foreach (var instance in (ICollection<LethalVRMManager.LethalVRMInstance>)vrmInstances)
         {
-            var instructionsList = instructions.ToList();
-
-            var updateTargetMethod = typeof(BodyCamComponent).GetMethod(nameof(BodyCamComponent.MarkTargetDirtyUntilRenderForAllBodyCams), []);
-            instructionsList.Insert(instructionsList.Count() - 2, new CodeInstruction(OpCodes.Call, updateTargetMethod));
-
-            return instructionsList;
+            if (instance == null)
+                continue;
+            if (!ReferenceEquals(instance.PlayerControllerB, player))
+                continue;
+            return instance.renderers
+                .Select(renderer => renderer.gameObject);
         }
 
-        [MethodImpl(MethodImplOptions.NoInlining)]
-        public static IEnumerable<GameObject> CollectCosmetics(PlayerControllerB player)
-        {
-            foreach (var instance in (ICollection<LethalVRMManager.LethalVRMInstance>)vrmInstances)
-            {
-                if (instance == null)
-                    continue;
-                if (!ReferenceEquals(instance.PlayerControllerB, player))
-                    continue;
-                return instance.renderers
-                    .Select(renderer => renderer.gameObject);
-            }
-
-            return [];
-        }
+        return [];
     }
 }
