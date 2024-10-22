@@ -37,12 +37,9 @@ public class ILInjector(IEnumerable<CodeInstruction> instructions)
 
         while (forward ? index < instructions.Count : index >= 0)
         {
-            if (index + predicates.Length > instructions.Count)
+            if (forward && index + predicates.Length > instructions.Count)
             {
-                if (forward)
-                    index = instructions.Count;
-                else
-                    index = -1;
+                index = instructions.Count;
                 break;
             }
 
