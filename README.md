@@ -78,6 +78,7 @@ Please **report any issues [here](https://github.com/Zaggy1024/LC_OpenBodyCams/i
 
 ## Miscellaneous
 - `FixDroppedItemRotation`: Defaulted to `true`, this fixes a desync of items' rotations when dropping them. See [Notes/Item rotations](#item-rotations).
+- `FixMaskedConversionForClients`: Defaulted to `true`, this fixes vanilla bug that causes clients to be unable to see through the perspective of players that have been converted by masked enemies. It will cause such conversions to spawn dead bodies which will be instantly deactivated, similar to how the mask item behaves.
 
 ## Debug
 See [Debugging](#debugging).
