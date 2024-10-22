@@ -81,6 +81,7 @@ namespace OpenBodyCams
         public static ConfigEntry<string> ExternalCameraEmissiveColor;
 
         public static ConfigEntry<bool> FixDroppedItemRotation;
+        public static ConfigEntry<bool> FixMaskedConversionForClients;
 
         public static ConfigEntry<bool> PrintCosmeticsDebugInfo;
         public static ConfigEntry<bool> BruteForcePreventFreezes;
@@ -203,6 +204,7 @@ namespace OpenBodyCams
 
             // Misc:
             FixDroppedItemRotation = Config.Bind("Misc", "FixDroppedItemRotation", true, "If enabled, the mod will patch a bug that causes the rotation of dropped items to be desynced between clients.");
+            FixMaskedConversionForClients = Config.Bind("Misc", "FixMaskedConversionForClients", true, "If enabled, the mod will patch a bug that causes maps and body cams to be unable to target a player that was converted into a masked enemy.");
 
             // Debug:
             PrintCosmeticsDebugInfo = Config.Bind("Debug", "PrintCosmeticsDebugInfo", false, "Prints extra information about the cosmetics being collected for each player, as well as the code that is causing the collection.");
