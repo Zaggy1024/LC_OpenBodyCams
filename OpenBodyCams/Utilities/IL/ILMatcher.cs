@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
@@ -23,6 +23,9 @@ public interface ILMatcher
     public static StlocMatcher Stloc() => new();
     public static BranchMatcher Branch() => new();
 
+    public static OpcodeOperandMatcher Ldfld(FieldInfo field) => new(OpCodes.Ldfld, field);
+    public static OpcodeOperandMatcher Ldsfld(FieldInfo field) => new(OpCodes.Ldsfld, field);
+
     public static OpcodeOperandMatcher Callvirt(MethodBase method)
     {
         if (method == null)
@@ -37,6 +40,15 @@ public interface ILMatcher
     }
 
     public static PredicateMatcher Predicate(Func<CodeInstruction, bool> predicate) => new(predicate);
+    public static PredicateMatcher Predicate(Func<FieldInfo, bool> predicate)
+    {
+        return new(insn =>
+        {
+            if (insn.operand is not FieldInfo field)
+                return false;
+            return predicate(field);
+        });
+    }
 }
 
 public class OpcodeMatcher(OpCode opcode) : ILMatcher
