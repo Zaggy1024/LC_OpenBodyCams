@@ -74,7 +74,7 @@ public class ILInjector(IEnumerable<CodeInstruction> instructions)
         return this;
     }
 
-    public ILInjector GoAfterPush(int popIndex)
+    public ILInjector GoToPush(int popIndex)
     {
         if (!IsValid)
             return this;
@@ -89,10 +89,7 @@ public class ILInjector(IEnumerable<CodeInstruction> instructions)
             stackPosition -= instruction.PopCount();
 
             if (stackPosition > popIndex)
-            {
-                index++;
                 return this;
-            }
 
             index--;
         }
