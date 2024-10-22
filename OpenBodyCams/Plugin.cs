@@ -109,18 +109,6 @@ namespace OpenBodyCams
             else
                 Instance.Logger.LogError("Failed to load the asset bundle, some features may be missing.");
 
-            harmony.PatchAll(typeof(PatchTerminal));
-            harmony.PatchAll(typeof(PatchStartOfRound));
-            harmony.PatchAll(typeof(PatchManualCameraRenderer));
-            harmony.PatchAll(typeof(PatchPlayerControllerB));
-            harmony.PatchAll(typeof(PatchHauntedMaskItem));
-            harmony.PatchAll(typeof(PatchMaskedPlayerEnemy));
-            harmony.PatchAll(typeof(PatchUnlockableSuit));
-            harmony.PatchAll(typeof(PatchCentipedeAI));
-            harmony.PatchAll(typeof(PatchFlowerSnakeEnemy));
-            harmony.PatchAll(typeof(PatchCopyVanillaFlowerSnakeEnemyCode));
-            harmony.PatchAll(typeof(PatchHDRenderPipeline));
-
             // Camera:
             CameraMode = Config.Bind("Camera", "Mode", CameraModeOptions.Head, "Choose where to attach the camera. 'Head' will attach the camera to the right side of the head, 'Body' will attach it to the chest.");
             HorizontalResolution = Config.Bind("Camera", "HorizontalResolution", 160, "The horizontal resolution of the rendering. The vertical resolution is calculated based on the aspect ratio of the monitor.");
@@ -232,6 +220,17 @@ namespace OpenBodyCams
 
             Cosmetics.Initialize(harmony);
 
+            harmony.PatchAll(typeof(PatchTerminal));
+            harmony.PatchAll(typeof(PatchStartOfRound));
+            harmony.PatchAll(typeof(PatchManualCameraRenderer));
+            harmony.PatchAll(typeof(PatchPlayerControllerB));
+            harmony.PatchAll(typeof(PatchHauntedMaskItem));
+            harmony.PatchAll(typeof(PatchMaskedPlayerEnemy));
+            harmony.PatchAll(typeof(PatchUnlockableSuit));
+            harmony.PatchAll(typeof(PatchCentipedeAI));
+            harmony.PatchAll(typeof(PatchFlowerSnakeEnemy));
+            harmony.PatchAll(typeof(PatchCopyVanillaFlowerSnakeEnemyCode));
+            harmony.PatchAll(typeof(PatchHDRenderPipeline));
             harmony.PatchAll(typeof(PatchFixItemDropping));
 
             BodyCamComponent.InitializeStatic();
