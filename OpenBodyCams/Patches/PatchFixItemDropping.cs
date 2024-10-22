@@ -15,7 +15,7 @@ internal static class PatchFixItemDropping
     private readonly static MethodInfo m_PlayerControllerB_SetObjectAsNoLongerHeld = typeof(PlayerControllerB).GetMethod(nameof(PlayerControllerB.SetObjectAsNoLongerHeld), [ typeof(bool), typeof(bool), typeof(Vector3), typeof(GrabbableObject), typeof(int) ]);
 
     [HarmonyTranspiler]
-    [HarmonyPatch(typeof(PlayerControllerB), "ThrowObjectClientRpc")]
+    [HarmonyPatch(typeof(PlayerControllerB), nameof(PlayerControllerB.ThrowObjectClientRpc))]
     private static IEnumerable<CodeInstruction> ThrowObjectClientRpcTranspiler(IEnumerable<CodeInstruction> instructions, MethodBase method)
     {
         if (!Plugin.FixDroppedItemRotation.Value)

@@ -16,7 +16,7 @@ namespace OpenBodyCams.Patches;
 internal static class PatchManualCameraRenderer
 {
     [HarmonyPostfix]
-    [HarmonyPatch("updateMapTarget")]
+    [HarmonyPatch(nameof(ManualCameraRenderer.updateMapTarget))]
     private static IEnumerator updateMapTargetPostfix(IEnumerator result, ManualCameraRenderer __instance)
     {
         SyncBodyCamToRadarMap.StartTargetTransitionForMap(__instance);
@@ -36,7 +36,7 @@ internal static class PatchManualCameraRenderer
     }
 
     [HarmonyPostfix]
-    [HarmonyPatch("MeetsCameraEnabledConditions")]
+    [HarmonyPatch(nameof(ManualCameraRenderer.MeetsCameraEnabledConditions))]
     private static void MeetsCameraEnabledConditionsPostfix(ManualCameraRenderer __instance, ref bool __result, PlayerControllerB player)
     {
         if ((object)__instance == ShipObjects.CameraReplacedByBodyCam && __result && !ShipObjects.MainBodyCam.IsBlanked)
