@@ -11,6 +11,7 @@ using UnityEngine.Rendering.HighDefinition;
 
 using OpenBodyCams.Utilities;
 using OpenBodyCams.API;
+using OpenBodyCams.Patches;
 
 namespace OpenBodyCams
 {
@@ -139,7 +140,7 @@ namespace OpenBodyCams
         #region Static state
         private static BodyCamComponent[] AllBodyCams = [];
 
-        private static BodyCamComponent lastBodyCamRendered;
+        private static BodyCamComponent lastBodyCamCulled;
         #endregion
 
         #region Global options
@@ -221,8 +222,8 @@ namespace OpenBodyCams
 
         internal static void InitializeStatic()
         {
-            RenderPipelineManager.beginCameraRendering += BeginAnyCameraRendering;
-            RenderPipelineManager.endCameraRendering += EndAnyCameraRendering;
+            PatchHDRenderPipeline.BeforeCameraCulling += BeforeCullingAnyCamera;
+            RenderPipelineManager.endCameraRendering += AfterRenderingAnyCamera;
         }
 
         internal static void InitializeAtStartOfGame()
@@ -301,22 +302,18 @@ namespace OpenBodyCams
                 bodyCam.MarkTargetStatusChanged();
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static void ResetLastRenderedBodyCam()
+        private static void RevertLastOverrides()
         {
-            if (lastBodyCamRendered != null)
+            if (lastBodyCamCulled != null)
             {
-                lastBodyCamRendered.ResetCameraRendering();
-                lastBodyCamRendered = null;
+                lastBodyCamCulled.RevertCullingOverrides();
+                lastBodyCamCulled = null;
             }
         }
 
-        static void BeginAnyCameraRendering(ScriptableRenderContext context, Camera camera)
+        private static void BeforeCullingAnyCamera(ScriptableRenderContext context, Camera camera)
         {
-            // HDRP does not end one camera's rendering before beginning another's.
-            // Reset the camera perspective if any other camera is beginning rendering.
-            // This appears to still allow the perspective change to take effect properly.
-            ResetLastRenderedBodyCam();
+            RevertLastOverrides();
 
             var bodyCamCount = AllBodyCams.Length;
             for (int i = 0; i < bodyCamCount; i++)
@@ -324,16 +321,16 @@ namespace OpenBodyCams
                 var bodyCam = AllBodyCams[i];
                 if ((object)bodyCam.Camera == camera)
                 {
-                    lastBodyCamRendered = bodyCam;
-                    bodyCam.BeginCameraRendering();
+                    lastBodyCamCulled = bodyCam;
+                    bodyCam.ApplyCullingOverrides();
                     return;
                 }
             }
         }
 
-        static void EndAnyCameraRendering(ScriptableRenderContext context, Camera camera)
+        internal static void AfterRenderingAnyCamera(ScriptableRenderContext context, Camera camera)
         {
-            ResetLastRenderedBodyCam();
+            RevertLastOverrides();
         }
 
         void Awake()
@@ -867,7 +864,7 @@ namespace OpenBodyCams
             }
         }
 
-        private void BeginCameraRendering()
+        private void ApplyCullingOverrides()
         {
             UpdateTargetStatusBeforeRender();
 
@@ -904,7 +901,7 @@ namespace OpenBodyCams
             }
         }
 
-        private void ResetCameraRendering()
+        private void RevertCullingOverrides()
         {
             vanillaMapNightVisionLight.enabled = vanillaMapNightVisionLightWasEnabled;
 

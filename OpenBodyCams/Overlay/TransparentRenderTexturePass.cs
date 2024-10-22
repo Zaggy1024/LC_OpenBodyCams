@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.HighDefinition;
 using UnityEngine.Rendering.RendererUtils;
@@ -12,7 +12,7 @@ namespace OpenBodyCams.Overlay
         private static ShaderTagId[] depthPrepassTags;
         private static ShaderTagId[] forwardTags;
 
-        protected override void Setup(ScriptableRenderContext renderContext, CommandBuffer cmd)
+        public override void Setup(ScriptableRenderContext renderContext, CommandBuffer cmd)
         {
             depthPrepassTags = [
                 HDShaderPassNames.s_DepthForwardOnlyName,
@@ -52,7 +52,7 @@ namespace OpenBodyCams.Overlay
             return frameSettings.IsEnabled(FrameSettingsField.FPTLForForwardOpaque);
         }
 
-        protected override void Execute(CustomPassContext ctx)
+        public override void Execute(CustomPassContext ctx)
         {
             ctx.cmd.SetRenderTarget(targetTexture.colorBuffer, targetTexture.depthBuffer);
             ctx.cmd.ClearRenderTarget(true, true, Color.clear);

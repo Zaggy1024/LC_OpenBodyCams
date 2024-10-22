@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
         <TargetFramework>netstandard2.1</TargetFramework>
@@ -43,7 +43,7 @@
             <HintPath>..\..\Libraries\Unity.RenderPipelines.Core.Runtime.dll</HintPath>
             <Private>false</Private>
         </Reference>
-        <Reference Include="Unity.RenderPipelines.HighDefinition.Runtime">
+        <Reference Include="Unity.RenderPipelines.HighDefinition.Runtime" Publicize="true">
             <HintPath>..\..\Libraries\Unity.RenderPipelines.HighDefinition.Runtime.dll</HintPath>
             <Private>false</Private>
         </Reference>
