@@ -1,16 +1,19 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection.Emit;
 using System.Text;
+
 using HarmonyLib;
 
 namespace OpenBodyCams.Utilities.IL;
 
-public class ILInjector(IEnumerable<CodeInstruction> instructions)
+public class ILInjector(IEnumerable<CodeInstruction> instructions, ILGenerator generator = null)
 {
     private const string INVALID = "Injector is invalid";
 
     private List<CodeInstruction> instructions = instructions.ToList();
+    private ILGenerator generator = generator;
 
     private int index = 0;
 
@@ -118,6 +121,16 @@ public class ILInjector(IEnumerable<CodeInstruction> instructions)
     public bool IsValid => instructions != null && index >= 0 && index < instructions.Count;
 
     public CodeInstruction Instruction => IsValid ? instructions[index] : null;
+
+    public Label AddLabel()
+    {
+        if (generator == null)
+            throw new InvalidOperationException("No ILGenerator was provided");
+
+        var label = generator.DefineLabel();
+        Instruction.labels.Add(label);
+        return label;
+    }
 
     public ILInjector InsertInPlace(params CodeInstruction[] instructions)
     {
