@@ -101,22 +101,19 @@ public class ILInjector(IEnumerable<CodeInstruction> instructions)
 
     public CodeInstruction Instruction => IsValid ? instructions[index] : null;
 
-    public ILInjector Insert(params CodeInstruction[] instructions)
-    {
-        if (!IsValid)
-            throw new InvalidOperationException(INVALID);
-
-        this.instructions.InsertRange(index, instructions);
-        index += instructions.Length;
-        return this;
-    }
-
     public ILInjector InsertInPlace(params CodeInstruction[] instructions)
     {
         if (!IsValid)
             throw new InvalidOperationException(INVALID);
 
         this.instructions.InsertRange(index, instructions);
+        return this;
+    }
+
+    public ILInjector Insert(params CodeInstruction[] instructions)
+    {
+        InsertInPlace(instructions);
+        index += instructions.Length;
         return this;
     }
 
