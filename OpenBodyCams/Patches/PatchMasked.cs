@@ -1,6 +1,9 @@
-﻿using System.Collections;
+using System.Collections.Generic;
+using System.Reflection.Emit;
 
 using HarmonyLib;
+
+using OpenBodyCams.Utilities.IL;
 
 namespace OpenBodyCams.Patches;
 
@@ -14,14 +17,20 @@ internal static class PatchHauntedMaskItem
         BodyCamComponent.MarkTargetStatusChangedForAllBodyCams();
     }
 
-    [HarmonyPostfix]
-    [HarmonyPatch("waitForMimicEnemySpawn")]
-    private static IEnumerator waitForMimicEnemySpawnPostfix(IEnumerator __result)
+    [HarmonyTranspiler]
+    [HarmonyPatch(nameof(HauntedMaskItem.waitForMimicEnemySpawn), MethodType.Enumerator)]
+    private static IEnumerable<CodeInstruction> waitForMimicEnemySpawnTranspiler(IEnumerable<CodeInstruction> instructions)
     {
-        while (__result.MoveNext())
-            yield return __result.Current;
-
-        BodyCamComponent.MarkTargetStatusChangedForAllBodyCams();
+        return new ILInjector(instructions)
+            .ToEnd()
+            .ReverseFindStart([
+                ILMatcher.Opcode(OpCodes.Ldc_I4_0),
+                ILMatcher.Opcode(OpCodes.Ret),
+            ])
+            .Insert([
+                new(OpCodes.Call, typeof(BodyCamComponent).GetMethod(nameof(BodyCamComponent.MarkTargetStatusChangedForAllBodyCams), []))
+            ])
+            .ReleaseInstructions();
     }
 }
 
@@ -37,13 +46,19 @@ internal static class PatchMaskedPlayerEnemy
             BodyCamComponent.MarkTargetStatusChangedForAllBodyCams();
     }
 
-    [HarmonyPostfix]
-    [HarmonyPatch("waitForMimicEnemySpawn")]
-    private static IEnumerator waitForMimicEnemySpawnPostfix(IEnumerator __result)
+    [HarmonyTranspiler]
+    [HarmonyPatch(nameof(MaskedPlayerEnemy.waitForMimicEnemySpawn), MethodType.Enumerator)]
+    private static IEnumerable<CodeInstruction> waitForMimicEnemySpawnTranspiler(IEnumerable<CodeInstruction> instructions)
     {
-        while (__result.MoveNext())
-            yield return __result.Current;
-
-        BodyCamComponent.MarkTargetStatusChangedForAllBodyCams();
+        return new ILInjector(instructions)
+            .ToEnd()
+            .ReverseFindStart([
+                ILMatcher.Opcode(OpCodes.Ldc_I4_0),
+                ILMatcher.Opcode(OpCodes.Ret),
+            ])
+            .Insert([
+                new(OpCodes.Call, typeof(BodyCamComponent).GetMethod(nameof(BodyCamComponent.MarkTargetStatusChangedForAllBodyCams), []))
+            ])
+            .ReleaseInstructions();
     }
 }

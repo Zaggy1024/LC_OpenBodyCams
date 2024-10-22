@@ -20,6 +20,12 @@ public class ILInjector(IEnumerable<CodeInstruction> instructions)
         return this;
     }
 
+    public ILInjector ToEnd()
+    {
+        index = instructions.Count - 1;
+        return this;
+    }
+
     public ILInjector Forward(int offset)
     {
         index = Math.Clamp(index + offset, -1, instructions.Count);
@@ -71,6 +77,18 @@ public class ILInjector(IEnumerable<CodeInstruction> instructions)
     public ILInjector FindEnd(params ILMatcher[] predicates)
     {
         Search(forward: true, cursorAtEnd: true, predicates);
+        return this;
+    }
+
+    public ILInjector ReverseFindStart(params ILMatcher[] predicates)
+    {
+        Search(forward: false, cursorAtEnd: false, predicates);
+        return this;
+    }
+
+    public ILInjector ReverseFindEnd(params ILMatcher[] predicates)
+    {
+        Search(forward: false, cursorAtEnd: true, predicates);
         return this;
     }
 
