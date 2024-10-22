@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,6 +8,8 @@ namespace OpenBodyCams.Utilities.IL;
 
 public class ILInjector(IEnumerable<CodeInstruction> instructions)
 {
+    private const string INVALID = "Injector is invalid";
+
     private List<CodeInstruction> instructions = instructions.ToList();
 
     private int index = 0;
@@ -108,7 +110,7 @@ public class ILInjector(IEnumerable<CodeInstruction> instructions)
     public ILInjector Insert(params CodeInstruction[] instructions)
     {
         if (!IsValid)
-            throw new InvalidOperationException("Injector is invalid");
+            throw new InvalidOperationException(INVALID);
 
         this.instructions.InsertRange(index, instructions);
         index += instructions.Length;
@@ -118,7 +120,7 @@ public class ILInjector(IEnumerable<CodeInstruction> instructions)
     public ILInjector InsertInPlace(params CodeInstruction[] instructions)
     {
         if (!IsValid)
-            throw new InvalidOperationException("Injector is invalid");
+            throw new InvalidOperationException(INVALID);
 
         this.instructions.InsertRange(index, instructions);
         return this;
@@ -129,7 +131,7 @@ public class ILInjector(IEnumerable<CodeInstruction> instructions)
     public List<CodeInstruction> ReleaseInstructions()
     {
         if (!IsValid)
-            throw new InvalidOperationException("Injector is invalid");
+            throw new InvalidOperationException(INVALID);
 
         var instructions = this.instructions;
         this.instructions = null;
@@ -139,7 +141,7 @@ public class ILInjector(IEnumerable<CodeInstruction> instructions)
     public ILInjector PrintContext(int context, string header = "")
     {
         if (!IsValid)
-            throw new InvalidOperationException("Injector is invalid");
+            throw new InvalidOperationException(INVALID + $" ({header})");
 
         var builder = new StringBuilder(header);
         if (header.Length > 0)
