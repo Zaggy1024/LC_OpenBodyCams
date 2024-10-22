@@ -141,6 +141,7 @@ namespace OpenBodyCams
         private static BodyCamComponent[] AllBodyCams = [];
 
         private static BodyCamComponent lastBodyCamCulled;
+        private static BodyCamComponent lastBodyCamRendered;
         #endregion
 
         #region Global options
@@ -190,6 +191,19 @@ namespace OpenBodyCams
 
         private Material currentObstructingMaterial;
         private float currentObstructingMaterialCullMode;
+
+        private delegate void GetCameraPosition(in Vector3 position, ref bool isInInterior, ref bool isInShip);
+        private GetCameraPosition cameraPositionGetter;
+
+        private bool originalDirectSunlightEnabled;
+        private bool originalIndirectSunlightEnabled;
+        private bool targetSunlightEnabled;
+
+        private float originalBlackSkyVolumeWeight;
+        private float targetBlackSkyVolumeWeight;
+
+        private float originalIndirectSunlightDimmer;
+        private float targetIndirectSunlightDimmer;
         #endregion
 
         #region Objects for body cam rendering
@@ -223,6 +237,7 @@ namespace OpenBodyCams
         internal static void InitializeStatic()
         {
             PatchHDRenderPipeline.BeforeCameraCulling += BeforeCullingAnyCamera;
+            PatchHDRenderPipeline.BeforeCameraRendering += BeforeRenderingAnyCamera;
             RenderPipelineManager.endCameraRendering += AfterRenderingAnyCamera;
         }
 
@@ -309,6 +324,12 @@ namespace OpenBodyCams
                 lastBodyCamCulled.RevertCullingOverrides();
                 lastBodyCamCulled = null;
             }
+
+            if (lastBodyCamRendered != null)
+            {
+                lastBodyCamRendered.RevertRenderingOverrides();
+                lastBodyCamRendered = null;
+            }
         }
 
         private static void BeforeCullingAnyCamera(ScriptableRenderContext context, Camera camera)
@@ -323,6 +344,23 @@ namespace OpenBodyCams
                 {
                     lastBodyCamCulled = bodyCam;
                     bodyCam.ApplyCullingOverrides();
+                    return;
+                }
+            }
+        }
+
+        internal static void BeforeRenderingAnyCamera(ScriptableRenderContext context, Camera camera)
+        {
+            RevertLastOverrides();
+
+            var bodyCamCount = AllBodyCams.Length;
+            for (int i = 0; i < bodyCamCount; i++)
+            {
+                var bodyCam = AllBodyCams[i];
+                if ((object)bodyCam.Camera == camera)
+                {
+                    lastBodyCamRendered = bodyCam;
+                    bodyCam.ApplyRenderingOverrides();
                     return;
                 }
             }
@@ -703,6 +741,8 @@ namespace OpenBodyCams
             SetRenderersToHide([]);
             UpdateModelReferences();
 
+            cameraPositionGetter = null;
+
             if (CameraObject != null)
             {
                 CameraObject.transform.SetParent(null, false);
@@ -754,6 +794,12 @@ namespace OpenBodyCams
 
                 currentActualTarget = currentPlayer.transform;
                 SetRenderersToHide([]);
+
+                cameraPositionGetter = (in Vector3 _, ref bool isInInterior, ref bool isInShip) =>
+                {
+                    isInInterior = currentPlayer.isInsideFactory;
+                    isInShip = currentPlayer.isInHangarShipRoom;
+                };
             }
             else if (currentPlayer.redirectToEnemy != null)
             {
@@ -777,6 +823,14 @@ namespace OpenBodyCams
 
                 currentActualTarget = currentPlayer.redirectToEnemy.transform;
                 SetRenderersToHide(CollectModelsToHide(currentActualTarget));
+
+                cameraPositionGetter = (in Vector3 _, ref bool isInInterior, ref bool isInShip) =>
+                {
+                    if (currentPlayer.redirectToEnemy == null)
+                        return;
+                    isInInterior = !currentPlayer.redirectToEnemy.isOutside;
+                    isInShip = currentPlayer.redirectToEnemy.isInsidePlayerShip;
+                };
             }
             else if (currentPlayer.deadBody != null)
             {
@@ -797,6 +851,15 @@ namespace OpenBodyCams
                 currentActualTarget = currentPlayer.deadBody.transform;
                 SetRenderersToHide(CollectModelsToHide(obstructingMeshParent));
                 currentObstructingMaterial = currentActualTarget.GetComponent<Renderer>()?.sharedMaterial;
+
+                cameraPositionGetter = (in Vector3 _, ref bool isInInterior, ref bool isInShip) =>
+                {
+                    if (currentPlayer.deadBody == null)
+                        return;
+                    if (currentPlayer.deadBody.grabBodyObject != null)
+                        isInInterior = currentPlayer.deadBody.grabBodyObject.isInFactory;
+                    isInShip = currentPlayer.deadBody.isInShip;
+                };
             }
 
             CameraObject.transform.SetParent(attachmentPoint, false);
@@ -826,11 +889,26 @@ namespace OpenBodyCams
             panCamera = false;
             Vector3 offset = Vector3.zero;
 
-            if (currentActualTarget.GetComponent<RadarBoosterItem>() != null)
+            if (currentActualTarget.GetComponent<RadarBoosterItem>() is { } radarBooster)
             {
                 SetRenderersToHide([currentActualTarget.transform.Find("AnimContainer/Rod").GetComponent<Renderer>()]);
                 offset = new Vector3(0, 1.5f, 0);
                 panCamera = true;
+
+                cameraPositionGetter = (in Vector3 _, ref bool isInInterior, ref bool isInShip) =>
+                {
+                    if (currentActualTarget != radarBooster.transform)
+                        return;
+                    isInInterior = radarBooster.isInFactory;
+                    isInShip = radarBooster.isInShipRoom;
+                };
+            }
+            else
+            {
+                cameraPositionGetter = (in Vector3 position, ref bool isInInterior, ref bool isInShip) =>
+                {
+                    isInInterior = position.y < -80;
+                };
             }
 
             CameraObject.transform.SetParent(currentActualTarget.transform, false);
@@ -862,6 +940,17 @@ namespace OpenBodyCams
                 UpdateTargetStatus();
                 targetDirtyStatus ^= TargetDirtyStatus.UntilRender;
             }
+        }
+
+        private void UpdateOverrides()
+        {
+            var isInInterior = false;
+            var isInShip = false;
+            cameraPositionGetter?.Invoke(Camera.transform.position, ref isInInterior, ref isInShip);
+
+            targetSunlightEnabled = !isInInterior;
+            targetBlackSkyVolumeWeight = isInInterior ? 1 : 0;
+            targetIndirectSunlightDimmer = Mathf.Lerp(targetIndirectSunlightDimmer, isInShip ? 0 : 1, 5 * Time.deltaTime);
         }
 
         private void ApplyCullingOverrides()
@@ -899,6 +988,21 @@ namespace OpenBodyCams
                 currentObstructingMaterialCullMode = currentObstructingMaterial.GetFloat(CullModeProperty);
                 currentObstructingMaterial.SetFloat(CullModeProperty, (float)CullMode.Back);
             }
+
+            var sunDirect = TimeOfDay.Instance.sunDirect;
+            if (sunDirect != null)
+            {
+                var sunIndirect = TimeOfDay.Instance.sunIndirect;
+
+                originalDirectSunlightEnabled = sunDirect.enabled;
+                originalIndirectSunlightEnabled = sunIndirect.enabled;
+                sunDirect.enabled = targetSunlightEnabled;
+                sunIndirect.enabled = targetSunlightEnabled;
+            }
+
+            var blackSkyVolume = StartOfRound.Instance.blackSkyVolume;
+            originalBlackSkyVolumeWeight = blackSkyVolume.weight;
+            blackSkyVolume.weight = targetBlackSkyVolumeWeight;
         }
 
         private void RevertCullingOverrides()
@@ -923,6 +1027,37 @@ namespace OpenBodyCams
             }
 
             currentObstructingMaterial?.SetFloat(CullModeProperty, currentObstructingMaterialCullMode);
+
+            var sunDirect = TimeOfDay.Instance.sunDirect;
+            if (sunDirect != null)
+            {
+                var sunIndirect = TimeOfDay.Instance.sunIndirect;
+
+                sunDirect.enabled = originalDirectSunlightEnabled;
+                sunIndirect.enabled = originalIndirectSunlightEnabled;
+            }
+
+            var blackSkyVolume = StartOfRound.Instance.blackSkyVolume;
+            blackSkyVolume.weight = originalBlackSkyVolumeWeight;
+        }
+
+        private void ApplyRenderingOverrides()
+        {
+            var sunIndirectHDRP = TimeOfDay.Instance.indirectLightData;
+            if (sunIndirectHDRP != null)
+            {
+                originalIndirectSunlightDimmer = sunIndirectHDRP.lightDimmer;
+                sunIndirectHDRP.lightDimmer = targetIndirectSunlightDimmer;
+                // Grab the clamped value from the component.
+                targetIndirectSunlightDimmer = sunIndirectHDRP.lightDimmer;
+            }
+        }
+
+        private void RevertRenderingOverrides()
+        {
+            var sunIndirectHDRP = TimeOfDay.Instance.indirectLightData;
+            if (sunIndirectHDRP != null)
+                sunIndirectHDRP.lightDimmer = originalIndirectSunlightDimmer;
         }
 
         private void UpdateTargetStatusDuringUpdate()
@@ -931,7 +1066,12 @@ namespace OpenBodyCams
                 UpdateTargetStatus();
         }
 
-        void LateUpdate()
+        private void Update()
+        {
+            UpdateOverrides();
+        }
+
+        private void LateUpdate()
         {
             if (!EnsureCameraExistsOrReturnFalse())
                 return;
