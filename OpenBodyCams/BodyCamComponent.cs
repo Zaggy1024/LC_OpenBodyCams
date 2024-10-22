@@ -434,8 +434,16 @@ namespace OpenBodyCams
             if (mainCameraCustomFrameSettings != null)
             {
                 cameraData.customRenderingSettings = true;
-                cameraData.renderingPathCustomFrameSettings = mainCameraCustomFrameSettings;
-                cameraData.renderingPathCustomFrameSettingsOverrideMask = mainCameraCustomFrameSettingsMask;
+                ref var frameSettings = ref cameraData.renderingPathCustomFrameSettings;
+                ref var frameSettingsMask = ref cameraData.renderingPathCustomFrameSettingsOverrideMask;
+                frameSettings = mainCameraCustomFrameSettings;
+                frameSettingsMask = mainCameraCustomFrameSettingsMask;
+
+                frameSettings.SetEnabled(FrameSettingsField.Tonemapping, false);
+                frameSettingsMask.mask[(uint)FrameSettingsField.Tonemapping] = true;
+
+                frameSettings.SetEnabled(FrameSettingsField.ColorGrading, false);
+                frameSettingsMask.mask[(uint)FrameSettingsField.ColorGrading] = true;
             }
 
             // Make camera data persistent so that by setting Camera.enabled we don't incur
