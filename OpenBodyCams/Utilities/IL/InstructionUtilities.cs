@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Reflection;
 using System.Reflection.Emit;
 
@@ -43,7 +43,7 @@ internal static class InstructionUtilities
             StackBehaviour.Popref_popi_popr4 => 3,
             StackBehaviour.Popref_popi_popr8 => 3,
             StackBehaviour.Popref_popi_popref => 3,
-            StackBehaviour.Varpop => throw new NotImplementedException("Variable pop on non-call instruction"),
+            StackBehaviour.Varpop => throw new NotImplementedException($"Variable pop on non-call instruction '{instruction}'"),
             StackBehaviour.Popref_popi_pop1 => 3,
             _ => throw new NotSupportedException($"StackBehaviourPop of {instruction.opcode.StackBehaviourPop} was not a pop for instruction '{instruction}'"),
         };
@@ -69,7 +69,7 @@ internal static class InstructionUtilities
             StackBehaviour.Pushr4 => 1,
             StackBehaviour.Pushr8 => 1,
             StackBehaviour.Pushref => 1,
-            StackBehaviour.Varpush => throw new NotImplementedException("Variable push on non-call instruction"),
+            StackBehaviour.Varpush => throw new NotImplementedException($"Variable push on non-call instruction '{instruction}'"),
             _ => throw new NotSupportedException($"StackBehaviourPush of {instruction.opcode.StackBehaviourPush} was not a push for instruction '{instruction}'"),
         };
     }
