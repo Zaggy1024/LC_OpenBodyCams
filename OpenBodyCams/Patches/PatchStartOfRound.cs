@@ -18,4 +18,11 @@ internal static class PatchStartOfRound
     {
         BodyCamComponent.MarkTargetStatusChangedForAllBodyCams();
     }
+
+    [HarmonyPostfix]
+    [HarmonyPatch(nameof(StartOfRound.SyncShipUnlockablesClientRpc))]
+    private static void SyncShipUnlockablesClientRpcPostfix()
+    {
+        ShipObjects.Overlay?.UpdateText();
+    }
 }
