@@ -35,6 +35,18 @@ public interface ILMatcher
             Plugin.Instance.Logger.LogWarning($"Field passed to ILMatcher.Ldsfld() was null\n{new StackTrace()}");
         return new(OpCodes.Ldsfld, field);
     }
+    public static OpcodeOperandMatcher Stfld(FieldInfo field)
+    {
+        if (field == null)
+            Plugin.Instance.Logger.LogWarning($"Field passed to ILMatcher.Stfld() was null\n{new StackTrace()}");
+        return new(OpCodes.Stfld, field);
+    }
+    public static OpcodeOperandMatcher Stsfld(FieldInfo field)
+    {
+        if (field == null)
+            Plugin.Instance.Logger.LogWarning($"Field passed to ILMatcher.Stsfld() was null\n{new StackTrace()}");
+        return new(OpCodes.Stsfld, field);
+    }
 
     public static OpcodeOperandMatcher Callvirt(MethodBase method)
     {

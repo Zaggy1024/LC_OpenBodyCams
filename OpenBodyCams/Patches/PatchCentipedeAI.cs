@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
 
@@ -8,6 +7,7 @@ using GameNetcodeStuff;
 using HarmonyLib;
 
 using OpenBodyCams.Utilities;
+using OpenBodyCams.Utilities.IL;
 
 namespace OpenBodyCams.Patches;
 
@@ -95,22 +95,26 @@ internal class PatchCentipedeAI
     [HarmonyPatch(nameof(CentipedeAI.UnclingFromPlayer), MethodType.Enumerator)]
     private static IEnumerable<CodeInstruction> UnclingFromPlayerTranspiler(IEnumerable<CodeInstruction> instructions)
     {
-        var clingedToPlayer = typeof(CentipedeAI).GetField(nameof(CentipedeAI.clingingToPlayer));
+        var injector = new ILInjector(instructions);
 
-        var instructionsList = instructions.ToList();
-
-        var clearClingedToPlayer = instructionsList.FindIndexOfSequence(
-            [
-                insn => insn.opcode == OpCodes.Ldnull,
-                insn => insn.StoresField(clingedToPlayer),
+        injector
+            .Find([
+                ILMatcher.Opcode(OpCodes.Ldnull),
+                ILMatcher.Stfld(typeof(CentipedeAI).GetField(nameof(CentipedeAI.clingingToPlayer))),
             ]);
-        instructionsList.InsertRange(clearClingedToPlayer.Start,
-            [
+
+        if (!injector.IsValid)
+        {
+            Plugin.Instance.Logger.LogError($"Failed to patch CentipedeAI.UnclingFromPlayer()");
+            return instructions;
+        }
+
+        return injector
+            .Insert([
                 new CodeInstruction(OpCodes.Ldloc_1),
                 new CodeInstruction(OpCodes.Call, typeof(PatchCentipedeAI).GetMethod(nameof(CentipedeStoppedClingingToPlayer), BindingFlags.NonPublic | BindingFlags.Static, [typeof(CentipedeAI)])),
-            ]);
-
-        return instructionsList;
+            ])
+            .ReleaseInstructions();
     }
 
     internal static void CentipedeStoppedClingingToPlayer(CentipedeAI centipede)
