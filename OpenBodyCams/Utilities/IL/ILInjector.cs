@@ -164,6 +164,7 @@ public class ILInjector(IEnumerable<CodeInstruction> instructions, ILGenerator g
             throw new InvalidOperationException(INVALID + $" ({header})");
 
         var builder = new StringBuilder(header);
+        builder.Append(':');
         if (header.Length > 0)
             builder.AppendLine();
 
