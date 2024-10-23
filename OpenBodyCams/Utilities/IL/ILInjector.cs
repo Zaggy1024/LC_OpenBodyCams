@@ -116,7 +116,12 @@ public class ILInjector(IEnumerable<CodeInstruction> instructions, ILGenerator g
         return this;
     }
 
-    public bool IsValid => instructions != null && index >= 0 && index < instructions.Count;
+    private bool IsIndexInRange(int index)
+    {
+        return index >= 0 && index < instructions.Count;
+    }
+
+    public bool IsValid => instructions != null && IsIndexInRange(index);
 
     public CodeInstruction Instruction => IsValid ? instructions[index] : null;
 
@@ -143,6 +148,27 @@ public class ILInjector(IEnumerable<CodeInstruction> instructions, ILGenerator g
     {
         InsertInPlace(instructions);
         index += instructions.Length;
+        return this;
+    }
+
+    public ILInjector RemoveLastMatch()
+    {
+        if (!IsValid)
+            throw new InvalidOperationException(INVALID);
+        if (!IsIndexInRange(matchEnd))
+            throw new InvalidOperationException(MATCH_END_INVALID);
+
+        var startIndex = Math.Min(index, matchEnd);
+        instructions.RemoveRange(startIndex, Math.Abs(matchEnd - index));
+        index = startIndex;
+
+        return this;
+    }
+
+    public ILInjector ReplaceLastMatch(params CodeInstruction[] instructions)
+    {
+        RemoveLastMatch();
+        Insert(instructions);
         return this;
     }
 
