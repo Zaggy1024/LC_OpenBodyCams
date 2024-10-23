@@ -172,7 +172,21 @@ public class ILInjector(IEnumerable<CodeInstruction> instructions, ILGenerator g
 
     public bool IsValid => instructions != null && IsIndexValid(index);
 
-    public CodeInstruction Instruction => IsIndexInRange(index) ? instructions[index] : null;
+    public CodeInstruction Instruction
+    {
+        get
+        {
+            if (!IsIndexInRange(index))
+                return null;
+            return instructions[index];
+        }
+        set
+        {
+            if (!IsIndexInRange(index))
+                throw new InvalidOperationException($"Current index {index} is out of range of instruction count {instructions.Count}");
+            instructions[index] = value;
+        }
+    }
 
     public CodeInstruction LastMatchedInstruction
     {
@@ -182,6 +196,13 @@ public class ILInjector(IEnumerable<CodeInstruction> instructions, ILGenerator g
             if (!IsIndexInRange(lastMatchIndex))
                 return null;
             return instructions[lastMatchIndex];
+        }
+        set
+        {
+            var lastMatchIndex = matchEnd - 1;
+            if (!IsIndexInRange(lastMatchIndex))
+                throw new InvalidOperationException($"Last matched index {index} is out of range of instruction count {instructions.Count}");
+            instructions[lastMatchIndex] = value;
         }
     }
 

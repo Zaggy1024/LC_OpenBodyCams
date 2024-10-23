@@ -13,24 +13,16 @@ using MoreCompany.Cosmetics;
 
 using OpenBodyCams.Patches;
 using OpenBodyCams.Utilities;
+using OpenBodyCams.Utilities.IL;
 
 namespace OpenBodyCams.Compatibility;
 
 internal static class MoreCompanyCompatibility
 {
-    private static MethodInfo m_CosmeticApplication_ClearCosmetics;
-
     [MethodImpl(MethodImplOptions.NoInlining)]
     internal static bool Initialize(Harmony harmony)
     {
         var m_ClientReceiveMessagePatch_HandleDataMessage = typeof(ClientReceiveMessagePatch).GetMethods(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static).First(method => method.Name == "HandleDataMessage");
-
-        m_CosmeticApplication_ClearCosmetics = typeof(CosmeticApplication).GetMethod(nameof(CosmeticApplication.ClearCosmetics), []);
-        if (m_CosmeticApplication_ClearCosmetics is null)
-        {
-            Plugin.Instance.Logger.LogInfo($"MoreCompany is installed, but `CosmeticApplication.ClearCosmetics()` was not found.");
-            return false;
-        }
 
         var thisType = typeof(MoreCompanyCompatibility);
         harmony.CreateProcessor(m_ClientReceiveMessagePatch_HandleDataMessage)
@@ -58,43 +50,49 @@ internal static class MoreCompanyCompatibility
     {
         // Change cosmetic spawning to keep the cosmetics applied to the local player, but placed into the invisible enemies layer to match
         // other mods that use it to display cosmetics in third person.
-        var instructionsList = instructions.ToList();
 
         // Search for:
         //   bool isLocalPlayer = playerId == StartOfRound.Instance.thisClientPlayerId;
         // Debug IL:
-        var isLocalPlayer = instructionsList.FindIndexOfSequence(
-            [
-                insn => insn.IsLdloc(),
-                insn => insn.Calls(Reflection.m_StartOfRound_get_Instance),
-                insn => insn.LoadsField(Reflection.f_StartOfRound_thisClientPlayerId),
-                insn => insn.opcode == OpCodes.Ceq,
-                insn => insn.IsStloc(),
-                insn => insn.IsLdloc(),
-                insn => insn.opcode == OpCodes.Brfalse_S || insn.opcode == OpCodes.Brfalse
+        var injector = new ILInjector(instructions)
+            .Find([
+                ILMatcher.Ldloc(),
+                ILMatcher.Call(Reflection.m_StartOfRound_get_Instance),
+                ILMatcher.Ldfld(Reflection.f_StartOfRound_thisClientPlayerId),
+                ILMatcher.Opcode(OpCodes.Ceq),
+                ILMatcher.Stloc(),
+                ILMatcher.Ldloc(),
+                ILMatcher.Opcode(OpCodes.Brfalse),
             ]);
         // Release IL:
-        isLocalPlayer ??= instructionsList.FindIndexOfSequence(
-            [
-                insn => insn.IsLdloc(),
-                insn => insn.Calls(Reflection.m_StartOfRound_get_Instance),
-                insn => insn.LoadsField(Reflection.f_StartOfRound_thisClientPlayerId),
-                insn => insn.opcode == OpCodes.Bne_Un_S || insn.opcode == OpCodes.Bne_Un,
+        if (!injector.IsValid)
+        {
+            injector
+                .GoToStart()
+                .Find([
+                    ILMatcher.Ldloc(),
+                    ILMatcher.Call(Reflection.m_StartOfRound_get_Instance),
+                    ILMatcher.Ldfld(Reflection.f_StartOfRound_thisClientPlayerId),
+                    ILMatcher.Opcode(OpCodes.Bne_Un),
+                ]);
+        }
+
+        // - cosmeticApplication.ClearCosmetics();
+        // + MoreCompanyCompatibility.SetUpLocalMoreCompanyCosmetics(cosmeticApplication);
+        injector
+            .Find([
+                ILMatcher.Ldloc(),
+                ILMatcher.Callvirt(typeof(CosmeticApplication).GetMethod(nameof(CosmeticApplication.ClearCosmetics), []))
             ]);
 
-        // Then find:
-        //   cosmeticApplication.ClearCosmetics();
-        var clearCosmetics = instructionsList.FindIndexOfSequence(isLocalPlayer.End,
-            [
-                insn => insn.IsLdloc(),
-                insn => insn.Calls(m_CosmeticApplication_ClearCosmetics),
-            ]);
-        instructionsList.RemoveAt(clearCosmetics.End - 1);
-        // Replace it with:
-        //   MoreCompanyCompatibility.SetUpLocalMoreCompanyCosmetics(cosmeticApplication);
-        instructionsList.Insert(clearCosmetics.End - 1, CodeInstruction.Call(typeof(MoreCompanyCompatibility), nameof(SetUpLocalMoreCompanyCosmetics)));
+        if (!injector.IsValid)
+        {
+            Plugin.Instance.Logger.LogError($"Failed to find where the local player's MoreCompany cosmetics are cleared.");
+            return instructions;
+        }
 
-        return instructionsList;
+        injector.LastMatchedInstruction = new CodeInstruction(OpCodes.Call, typeof(MoreCompanyCompatibility).GetMethod(nameof(SetUpLocalMoreCompanyCosmetics), BindingFlags.NonPublic | BindingFlags.Static, [typeof(CosmeticApplication)]));
+        return injector.ReleaseInstructions();
     }
 
     private static void UpdateCosmetics()
