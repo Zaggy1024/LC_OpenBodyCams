@@ -23,8 +23,18 @@ public interface ILMatcher
     public static StlocMatcher Stloc() => new();
     public static BranchMatcher Branch() => new();
 
-    public static OpcodeOperandMatcher Ldfld(FieldInfo field) => new(OpCodes.Ldfld, field);
-    public static OpcodeOperandMatcher Ldsfld(FieldInfo field) => new(OpCodes.Ldsfld, field);
+    public static OpcodeOperandMatcher Ldfld(FieldInfo field)
+    {
+        if (field == null)
+            Plugin.Instance.Logger.LogWarning($"Field passed to ILMatcher.Ldfld() was null\n{new StackTrace()}");
+        return new(OpCodes.Ldfld, field);
+    }
+    public static OpcodeOperandMatcher Ldsfld(FieldInfo field)
+    {
+        if (field == null)
+            Plugin.Instance.Logger.LogWarning($"Field passed to ILMatcher.Ldsfld() was null\n{new StackTrace()}");
+        return new(OpCodes.Ldsfld, field);
+    }
 
     public static OpcodeOperandMatcher Callvirt(MethodBase method)
     {
