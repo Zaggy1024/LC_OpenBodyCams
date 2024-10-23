@@ -28,7 +28,7 @@ public class ILInjector(IEnumerable<CodeInstruction> instructions, ILGenerator g
 
     public ILInjector GoToEnd()
     {
-        index = instructions.Count - 1;
+        index = instructions.Count;
         return this;
     }
 
@@ -45,7 +45,13 @@ public class ILInjector(IEnumerable<CodeInstruction> instructions, ILGenerator g
         if (!IsValid)
             return;
 
-        var direction = forward ? 1 : -1;
+        var direction = 1;
+
+        if (!forward)
+        {
+            direction = -1;
+            index--;
+        }
 
         while (forward ? index < instructions.Count : index >= 0)
         {
@@ -71,6 +77,8 @@ public class ILInjector(IEnumerable<CodeInstruction> instructions, ILGenerator g
 
             index += direction;
         }
+
+        index = -1;
     }
 
     public ILInjector Find(params ILMatcher[] predicates)
@@ -116,14 +124,19 @@ public class ILInjector(IEnumerable<CodeInstruction> instructions, ILGenerator g
         return this;
     }
 
+    private bool IsIndexValid(int index)
+    {
+        return index != -1;
+    }
+
     private bool IsIndexInRange(int index)
     {
         return index >= 0 && index < instructions.Count;
     }
 
-    public bool IsValid => instructions != null && IsIndexInRange(index);
+    public bool IsValid => instructions != null && IsIndexValid(index);
 
-    public CodeInstruction Instruction => IsValid ? instructions[index] : null;
+    public CodeInstruction Instruction => IsIndexInRange(index) ? instructions[index] : null;
 
     public Label AddLabel()
     {
