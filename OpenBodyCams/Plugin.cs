@@ -231,7 +231,6 @@ namespace OpenBodyCams
             harmony.PatchAll(typeof(PatchUnlockableSuit));
             harmony.PatchAll(typeof(PatchCentipedeAI));
             harmony.PatchAll(typeof(PatchFlowerSnakeEnemy));
-            harmony.PatchAll(typeof(PatchCopyVanillaFlowerSnakeEnemyCode));
             harmony.PatchAll(typeof(PatchHDRenderPipeline));
             harmony.PatchAll(typeof(PatchFixItemDropping));
 

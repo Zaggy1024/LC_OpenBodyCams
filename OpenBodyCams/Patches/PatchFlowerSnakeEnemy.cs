@@ -16,21 +16,8 @@ namespace OpenBodyCams.Patches;
 [HarmonyPatch(typeof(FlowerSnakeEnemy))]
 internal static class PatchFlowerSnakeEnemy
 {
-    internal static List<CodeInstruction> FirstPersonClingingAnimationInstructions;
-    internal static List<CodeInstruction> ThirdPersonClingingAnimationInstructions;
-
     internal static HashSet<FlowerSnakeEnemy>[] FlowerSnakesAttachedToPlayers;
     internal static bool HasWarnedClingingMismatch = false;
-
-    internal static void SetFirstPersonClingingAnimationPosition(FlowerSnakeEnemy flowerSnake)
-    {
-        throw new NotImplementedException($"{nameof(SetFirstPersonClingingAnimationPosition)} stub was called, code was not copied successfully");
-    }
-
-    internal static void SetThirdPersonClingingAnimationPosition(FlowerSnakeEnemy flowerSnake)
-    {
-        throw new NotImplementedException($"{nameof(SetThirdPersonClingingAnimationPosition)} stub was called, code was not copied successfully");
-    }
 
     public static void SetClingingAnimationPositionsForPlayer(PlayerControllerB player, Perspective perspective)
     {
@@ -50,47 +37,20 @@ internal static class PatchFlowerSnakeEnemy
                     continue;
                 }
 
+                var localPlayer = GameNetworkManager.Instance.localPlayerController;
                 switch (perspective)
                 {
-                    case Perspective.Original:
-                        clingingFlowerSnake.SetClingingAnimationPosition();
-                        break;
                     case Perspective.FirstPerson:
-                        SetFirstPersonClingingAnimationPosition(clingingFlowerSnake);
+                        GameNetworkManager.Instance.localPlayerController = player;
                         break;
                     case Perspective.ThirdPerson:
-                        SetThirdPersonClingingAnimationPosition(clingingFlowerSnake);
+                        GameNetworkManager.Instance.localPlayerController = StartOfRound.Instance.allPlayerScripts.First(p => p != localPlayer);
                         break;
                 }
+                clingingFlowerSnake.SetClingingAnimationPosition();
+                GameNetworkManager.Instance.localPlayerController = localPlayer;
             }
         }
-    }
-
-    [HarmonyTranspiler]
-    [HarmonyPatch(nameof(FlowerSnakeEnemy.SetClingingAnimationPosition))]
-    private static IEnumerable<CodeInstruction> SetClingingAnimationPositionTranspiler(IEnumerable<CodeInstruction> instructions)
-    {
-        var matcher = new ILInjector(instructions)
-            .Find([
-                ILMatcher.Opcode(OpCodes.Ldarg_0),
-                ILMatcher.Ldfld(typeof(FlowerSnakeEnemy).GetField(nameof(FlowerSnakeEnemy.clingingToPlayer))),
-                ILMatcher.Call(Reflection.m_GameNetworkManager_get_Instance),
-                ILMatcher.Ldfld(Reflection.f_GameNetworkManager_localPlayerController),
-                ILMatcher.Call(Reflection.m_Object_op_Equality),
-                ILMatcher.Opcode(OpCodes.Brfalse),
-            ])
-            .GoToLastMatchedInstruction();
-
-        if (!matcher.IsValid)
-        {
-            Plugin.Instance.Logger.LogError("Failed to find code block for the flower snake clinging to the local player.");
-            return instructions;
-        }
-
-        FirstPersonClingingAnimationInstructions = matcher.SkipBranch().GetLastMatch();
-        ThirdPersonClingingAnimationInstructions = matcher.GoToEnd().GetLastMatch();
-
-        return instructions;
     }
 
     private static void EnsureFlowerSnakesAttachedToPlayersArrayIsCorrectSize()
@@ -137,28 +97,5 @@ internal static class PatchFlowerSnakeEnemy
         EnsureFlowerSnakesAttachedToPlayersArrayIsCorrectSize();
         if (flowerSnake.clingingToPlayer != null)
             FlowerSnakesAttachedToPlayers[flowerSnake.clingingToPlayer.playerClientId].Remove(flowerSnake);
-    }
-}
-
-[HarmonyPatch(typeof(PatchFlowerSnakeEnemy))]
-internal class PatchCopyVanillaFlowerSnakeEnemyCode
-{
-    private static IEnumerable<CodeInstruction> ConvertInstructions(List<CodeInstruction> instructions)
-    {
-        return instructions.Append(new CodeInstruction(OpCodes.Ret));
-    }
-
-    [HarmonyTranspiler]
-    [HarmonyPatch(nameof(PatchFlowerSnakeEnemy.SetFirstPersonClingingAnimationPosition))]
-    static IEnumerable<CodeInstruction> SetFirstPersonClingingAnimationPositionInjector(MethodBase method, ILGenerator generator)
-    {
-        return Common.TransferLabelsAndVariables(method, ref PatchFlowerSnakeEnemy.FirstPersonClingingAnimationInstructions, generator);
-    }
-
-    [HarmonyTranspiler]
-    [HarmonyPatch(nameof(PatchFlowerSnakeEnemy.SetThirdPersonClingingAnimationPosition))]
-    static IEnumerable<CodeInstruction> SetThirdPersonClingingAnimationPositionInjector(MethodBase method, ILGenerator generator)
-    {
-        return Common.TransferLabelsAndVariables(method, ref PatchFlowerSnakeEnemy.ThirdPersonClingingAnimationInstructions, generator);
     }
 }
