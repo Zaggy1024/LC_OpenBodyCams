@@ -22,18 +22,21 @@ public class ILInjector(IEnumerable<CodeInstruction> instructions, ILGenerator g
 
     public ILInjector GoToStart()
     {
+        matchEnd = index;
         index = 0;
         return this;
     }
 
     public ILInjector GoToEnd()
     {
+        matchEnd = index;
         index = instructions.Count;
         return this;
     }
 
     public ILInjector Forward(int offset)
     {
+        matchEnd = index;
         index = Math.Clamp(index + offset, -1, instructions.Count);
         return this;
     }
