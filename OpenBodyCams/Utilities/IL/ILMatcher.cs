@@ -19,8 +19,11 @@ public interface ILMatcher
     public static OpcodeOperandMatcher OpcodeOperand(OpCode opcode, object operand) => new(opcode, operand);
     public static InstructionMatcher Instruction(CodeInstruction instruction) => new(instruction);
 
-    public static LdlocMatcher Ldloc() => new();
-    public static StlocMatcher Stloc() => new();
+    public static LdargMatcher Ldarg(int? arg = null) => new(arg);
+    public static LdlocMatcher Ldloc(int? loc = null) => new(loc);
+    public static StlocMatcher Stloc(int? loc = null) => new(loc);
+    public static LdcI32Matcher Ldc(int? value = null) => new(value);
+
     public static BranchMatcher Branch() => new();
 
     public static OpcodeOperandMatcher Ldfld(FieldInfo field)
@@ -118,14 +121,32 @@ public class InstructionMatcher(CodeInstruction instruction) : ILMatcher
     }
 }
 
-public class LdlocMatcher : ILMatcher
+public class LdargMatcher(int? arg) : ILMatcher
 {
-    public bool Matches(CodeInstruction instruction) => instruction.IsLdloc();
+    private readonly int? arg = arg;
+
+    public bool Matches(CodeInstruction instruction) => (!arg.HasValue && instruction.GetLdargIndex().HasValue) || instruction.GetLdargIndex() == arg;
 }
 
-public class StlocMatcher : ILMatcher
+public class LdlocMatcher(int? loc) : ILMatcher
 {
-    public bool Matches(CodeInstruction instruction) => instruction.IsStloc();
+    private readonly int? loc = loc;
+
+    public bool Matches(CodeInstruction instruction) => (!loc.HasValue && instruction.GetLdlocIndex().HasValue) || instruction.GetLdlocIndex() == loc;
+}
+
+public class StlocMatcher(int? loc) : ILMatcher
+{
+    private readonly int? loc = loc;
+
+    public bool Matches(CodeInstruction instruction) => (!loc.HasValue && instruction.GetStlocIndex().HasValue) || instruction.GetStlocIndex() == loc;
+}
+
+public class LdcI32Matcher(int? value) : ILMatcher
+{
+    private readonly int? value = value;
+
+    public bool Matches(CodeInstruction instruction) => (!value.HasValue && instruction.GetLdcI32().HasValue) || instruction.GetLdcI32() == value;
 }
 
 public class BranchMatcher : ILMatcher

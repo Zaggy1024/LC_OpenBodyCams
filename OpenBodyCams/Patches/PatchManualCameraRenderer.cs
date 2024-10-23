@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Reflection.Emit;
 
@@ -9,6 +10,7 @@ using Unity.Netcode;
 
 using OpenBodyCams.Compatibility;
 using OpenBodyCams.Utilities;
+using OpenBodyCams.Utilities.IL;
 
 namespace OpenBodyCams.Patches;
 
@@ -95,31 +97,33 @@ internal static class PatchManualCameraRenderer
         // player object that hasn't been taken control of, so the body cam target is invalid.
 
         // We fix this by only setting the target on the owner and allow that to sync the correct target.
-        var m_ManualCameraRenderer_SwitchRadarTargetForward = typeof(ManualCameraRenderer).GetMethod(nameof(ManualCameraRenderer.SwitchRadarTargetForward), [ typeof(bool) ]);
 
-        var m_NetworkBehaviour_IsOwner = typeof(NetworkBehaviour).GetMethod("get_IsOwner");
-
-        var instructionsList = instructions.ToList();
-
-        // SwitchRadarTargetForward(callRPC: false);
-        var switchRadarTargetForward = instructionsList.FindIndexOfSequence(
-            [
-                insn => insn.IsLdarg(0),
-                insn => insn.LoadsConstant(0),
-                insn => insn.Calls(m_ManualCameraRenderer_SwitchRadarTargetForward),
+        // + if (IsOwner)
+        // -     SwitchRadarTargetForward(callRPC: false);
+        // +     SwitchRadarTargetForward(callRPC: true);
+        var injector = new ILInjector(instructions)
+            .Find([
+                ILMatcher.Ldarg(0),
+                ILMatcher.Ldc(0),
+                ILMatcher.Call(typeof(ManualCameraRenderer).GetMethod(nameof(ManualCameraRenderer.SwitchRadarTargetForward), [typeof(bool)])),
             ]);
-        // if (IsOwner)
-        //   SwitchRadarTargetForward(callRPC: true);
-        instructionsList[switchRadarTargetForward.Start + 1] = new(OpCodes.Ldc_I4_1);
+
+        if (!injector.IsValid)
+        {
+            Plugin.Instance.Logger.LogError($"Failed to find call to SwitchRadarTargetForward\n{new StackTrace()}");
+            return instructions;
+        }
+
         var notOwnerLabel = generator.DefineLabel();
-        instructionsList[switchRadarTargetForward.End].labels.Add(notOwnerLabel);
-        instructionsList.InsertRange(switchRadarTargetForward.Start,
-            [
+        injector.RelativeInstruction(1).opcode = OpCodes.Ldc_I4_1;
+        return injector
+            .Insert([
                 new(OpCodes.Ldarg_0),
-                new(OpCodes.Call, m_NetworkBehaviour_IsOwner),
-                new(OpCodes.Brfalse_S, notOwnerLabel),
-            ]);
-
-        return instructionsList;
+                new(OpCodes.Call, typeof(NetworkBehaviour).GetMethod("get_IsOwner")),
+                new(OpCodes.Brfalse, notOwnerLabel),
+            ])
+            .GoToMatchEnd()
+            .AddLabel(notOwnerLabel)
+            .ReleaseInstructions();
     }
 }

@@ -169,6 +169,17 @@ public class ILInjector(IEnumerable<CodeInstruction> instructions, ILGenerator g
 
     public CodeInstruction Instruction => IsIndexInRange(index) ? instructions[index] : null;
 
+    public CodeInstruction RelativeInstruction(int offset)
+    {
+        if (!IsValid)
+            throw new InvalidOperationException(INVALID);
+
+        var offsetIndex = index + offset;
+        if (!IsIndexInRange(offsetIndex))
+            throw new IndexOutOfRangeException($"Offset {offset} would read out of bounds at index {offsetIndex}");
+        return instructions[offsetIndex];
+    }
+
     private void GetLastMatchRange(out int start, out int size)
     {
         start = index;
@@ -201,6 +212,12 @@ public class ILInjector(IEnumerable<CodeInstruction> instructions, ILGenerator g
         return label;
     }
 
+    public ILInjector AddLabel(Label label)
+    {
+        Instruction.labels.Add(label);
+        return this;
+    }
+
     public ILInjector InsertInPlace(params CodeInstruction[] instructions)
     {
         if (!IsValid)
@@ -213,6 +230,8 @@ public class ILInjector(IEnumerable<CodeInstruction> instructions, ILGenerator g
     public ILInjector Insert(params CodeInstruction[] instructions)
     {
         InsertInPlace(instructions);
+        if (matchEnd >= index)
+            matchEnd += instructions.Length;
         index += instructions.Length;
         return this;
     }

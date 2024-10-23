@@ -73,4 +73,80 @@ internal static class InstructionUtilities
             _ => throw new NotSupportedException($"StackBehaviourPush of {instruction.opcode.StackBehaviourPush} was not a push for instruction '{instruction}'"),
         };
     }
+
+    public static int? GetLdargIndex(this CodeInstruction instruction)
+    {
+        var opcode = instruction.opcode;
+        if (opcode == OpCodes.Ldarg_0)
+            return 0;
+        if (opcode == OpCodes.Ldarg_1)
+            return 1;
+        if (opcode == OpCodes.Ldarg_2)
+            return 2;
+        if (opcode == OpCodes.Ldarg_3)
+            return 3;
+        if (opcode == OpCodes.Ldarg || opcode == OpCodes.Ldarg_S)
+            return instruction.operand as int?;
+        return null;
+    }
+
+    public static int? GetLdlocIndex(this CodeInstruction instruction)
+    {
+        var opcode = instruction.opcode;
+        if (opcode == OpCodes.Ldloc_0)
+            return 0;
+        if (opcode == OpCodes.Ldloc_1)
+            return 1;
+        if (opcode == OpCodes.Ldloc_2)
+            return 2;
+        if (opcode == OpCodes.Ldloc_3)
+            return 3;
+        if (opcode == OpCodes.Ldloc || opcode == OpCodes.Ldloc_S)
+            return instruction.operand as int?;
+        return null;
+    }
+
+    public static int? GetStlocIndex(this CodeInstruction instruction)
+    {
+        var opcode = instruction.opcode;
+        if (opcode == OpCodes.Stloc_0)
+            return 0;
+        if (opcode == OpCodes.Stloc_1)
+            return 1;
+        if (opcode == OpCodes.Stloc_2)
+            return 2;
+        if (opcode == OpCodes.Stloc_3)
+            return 3;
+        if (opcode == OpCodes.Stloc || opcode == OpCodes.Stloc_S)
+            return instruction.operand as int?;
+        return null;
+    }
+
+    public static int? GetLdcI32(this CodeInstruction instruction)
+    {
+        var opcode = instruction.opcode;
+        if (opcode == OpCodes.Ldc_I4_M1)
+            return -1;
+        if (opcode == OpCodes.Ldc_I4_0)
+            return 0;
+        if (opcode == OpCodes.Ldc_I4_1)
+            return 1;
+        if (opcode == OpCodes.Ldc_I4_2)
+            return 2;
+        if (opcode == OpCodes.Ldc_I4_3)
+            return 3;
+        if (opcode == OpCodes.Ldc_I4_4)
+            return 4;
+        if (opcode == OpCodes.Ldc_I4_5)
+            return 5;
+        if (opcode == OpCodes.Ldc_I4_6)
+            return 6;
+        if (opcode == OpCodes.Ldc_I4_7)
+            return 7;
+        if (opcode == OpCodes.Ldc_I4_8)
+            return 8;
+        if (opcode == OpCodes.Ldc_I4 || opcode == OpCodes.Ldc_I4_S)
+            return instruction.operand as int?;
+        return null;
+    }
 }
