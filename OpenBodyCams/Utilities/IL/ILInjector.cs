@@ -121,9 +121,37 @@ public class ILInjector(IEnumerable<CodeInstruction> instructions, ILGenerator g
         return this;
     }
 
+    public ILInjector SkipBranch()
+    {
+        if (Instruction == null)
+            return this;
+
+        if (Instruction.operand is not Label label)
+            throw new InvalidOperationException($"Current instruction is not a branch: {Instruction}");
+
+        matchEnd = index + 1;
+
+        for (index = 0; index < instructions.Count; index++)
+        {
+            if (instructions[index].labels.Contains(label))
+                return this;
+        }
+
+        index = -1;
+        return this;
+    }
+
     public ILInjector GoToMatchEnd()
     {
         index = matchEnd;
+        return this;
+    }
+
+    public ILInjector GoToLastMatchedInstruction()
+    {
+        if (!IsIndexValid(matchEnd))
+            return this;
+        index = matchEnd - 1;
         return this;
     }
 
@@ -140,6 +168,28 @@ public class ILInjector(IEnumerable<CodeInstruction> instructions, ILGenerator g
     public bool IsValid => instructions != null && IsIndexValid(index);
 
     public CodeInstruction Instruction => IsIndexInRange(index) ? instructions[index] : null;
+
+    private void GetLastMatchRange(out int start, out int size)
+    {
+        start = index;
+        var end = matchEnd;
+        if (start > end)
+            (start, end) = (end, start);
+
+        if (start < 0 || start >= instructions.Count)
+            throw new InvalidOperationException($"Last match range starts at invalid index {start}");
+
+        if (end < 0 || end > instructions.Count)
+            throw new InvalidOperationException($"Last match range ends at invalid index {end}");
+
+        size = end - start;
+    }
+
+    public List<CodeInstruction> GetLastMatch()
+    {
+        GetLastMatchRange(out var start, out var size);
+        return instructions.GetRange(start, size);
+    }
 
     public Label AddLabel()
     {
@@ -169,15 +219,10 @@ public class ILInjector(IEnumerable<CodeInstruction> instructions, ILGenerator g
 
     public ILInjector RemoveLastMatch()
     {
-        if (!IsValid)
-            throw new InvalidOperationException(INVALID);
-        if (!IsIndexInRange(matchEnd))
-            throw new InvalidOperationException(MATCH_END_INVALID);
-
-        var startIndex = Math.Min(index, matchEnd);
-        instructions.RemoveRange(startIndex, Math.Abs(matchEnd - index));
-        index = startIndex;
-
+        GetLastMatchRange(out var start, out var size);
+        instructions.RemoveRange(start, size);
+        index = start;
+        matchEnd = start;
         return this;
     }
 

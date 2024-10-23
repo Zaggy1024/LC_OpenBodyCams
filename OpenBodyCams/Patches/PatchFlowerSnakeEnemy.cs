@@ -3,11 +3,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection.Emit;
 using System.Reflection;
+using System.Text;
 
 using HarmonyLib;
 using GameNetcodeStuff;
 
 using OpenBodyCams.Utilities;
+using OpenBodyCams.Utilities.IL;
 
 namespace OpenBodyCams.Patches;
 
@@ -68,25 +70,25 @@ internal static class PatchFlowerSnakeEnemy
     [HarmonyPatch(nameof(FlowerSnakeEnemy.SetClingingAnimationPosition))]
     private static IEnumerable<CodeInstruction> SetClingingAnimationPositionTranspiler(IEnumerable<CodeInstruction> instructions)
     {
-        var instructionsList = instructions.ToList();
+        var matcher = new ILInjector(instructions)
+            .Find([
+                ILMatcher.Opcode(OpCodes.Ldarg_0),
+                ILMatcher.Ldfld(typeof(FlowerSnakeEnemy).GetField(nameof(FlowerSnakeEnemy.clingingToPlayer))),
+                ILMatcher.Call(Reflection.m_GameNetworkManager_get_Instance),
+                ILMatcher.Ldfld(Reflection.f_GameNetworkManager_localPlayerController),
+                ILMatcher.Call(Reflection.m_Object_op_Equality),
+                ILMatcher.Opcode(OpCodes.Brfalse),
+            ])
+            .GoToLastMatchedInstruction();
 
-        var m_FlowerSnakeEnemy_clingingToPlayer = typeof(FlowerSnakeEnemy).GetField(nameof(FlowerSnakeEnemy.clingingToPlayer));
+        if (!matcher.IsValid)
+        {
+            Plugin.Instance.Logger.LogError("Failed to find code block for the flower snake clinging to the local player.");
+            return instructions;
+        }
 
-        var checkIsLocalPlayer = instructionsList.FindIndexOfSequence(
-            [
-                insn => insn.opcode == OpCodes.Ldarg_0,
-                insn => insn.LoadsField(m_FlowerSnakeEnemy_clingingToPlayer),
-                insn => insn.Calls(Reflection.m_GameNetworkManager_get_Instance),
-                insn => insn.LoadsField(Reflection.f_GameNetworkManager_localPlayerController),
-                insn => insn.Calls(Reflection.m_Object_op_Equality),
-                insn => insn.opcode == OpCodes.Brfalse_S || insn.opcode == OpCodes.Brfalse,
-            ]);
-        var isNotLocalPlayerLabel = (Label)instructionsList[checkIsLocalPlayer.End - 1].operand;
-
-        var isNotLocalPlayer = instructionsList.FindIndex(checkIsLocalPlayer.End, insn => insn.labels.Contains(isNotLocalPlayerLabel));
-
-        FirstPersonClingingAnimationInstructions = instructionsList.GetRange(checkIsLocalPlayer.End, isNotLocalPlayer - checkIsLocalPlayer.End);
-        ThirdPersonClingingAnimationInstructions = instructionsList.GetRange(isNotLocalPlayer, instructionsList.Count - isNotLocalPlayer);
+        FirstPersonClingingAnimationInstructions = matcher.SkipBranch().GetLastMatch();
+        ThirdPersonClingingAnimationInstructions = matcher.GoToEnd().GetLastMatch();
 
         return instructions;
     }
