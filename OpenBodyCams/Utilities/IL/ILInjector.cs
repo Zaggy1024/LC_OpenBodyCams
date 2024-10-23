@@ -20,13 +20,13 @@ public class ILInjector(IEnumerable<CodeInstruction> instructions, ILGenerator g
 
     private int matchEnd = -1;
 
-    public ILInjector Reset()
+    public ILInjector GoToStart()
     {
         index = 0;
         return this;
     }
 
-    public ILInjector ToEnd()
+    public ILInjector GoToEnd()
     {
         index = instructions.Count - 1;
         return this;
@@ -110,7 +110,7 @@ public class ILInjector(IEnumerable<CodeInstruction> instructions, ILGenerator g
         return this;
     }
 
-    public ILInjector MatchEnd()
+    public ILInjector GoToMatchEnd()
     {
         index = matchEnd;
         return this;

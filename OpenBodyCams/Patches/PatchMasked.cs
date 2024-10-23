@@ -23,7 +23,7 @@ internal static class PatchHauntedMaskItem
     private static IEnumerable<CodeInstruction> waitForMimicEnemySpawnTranspiler(IEnumerable<CodeInstruction> instructions)
     {
         return new ILInjector(instructions)
-            .ToEnd()
+            .GoToEnd()
             .ReverseFind([
                 ILMatcher.Opcode(OpCodes.Ldc_I4_0),
                 ILMatcher.Opcode(OpCodes.Ret),
@@ -52,7 +52,7 @@ internal static class PatchMaskedPlayerEnemy
     private static IEnumerable<CodeInstruction> waitForMimicEnemySpawnTranspiler(IEnumerable<CodeInstruction> instructions)
     {
         return new ILInjector(instructions)
-            .ToEnd()
+            .GoToEnd()
             .ReverseFind([
                 ILMatcher.Opcode(OpCodes.Ldc_I4_0),
                 ILMatcher.Opcode(OpCodes.Ret),
