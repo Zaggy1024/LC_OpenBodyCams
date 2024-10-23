@@ -1,5 +1,5 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
+using System.Diagnostics;
 using System.Reflection;
 using System.Reflection.Emit;
 
@@ -7,6 +7,7 @@ using GameNetcodeStuff;
 using HarmonyLib;
 
 using OpenBodyCams.Utilities;
+using OpenBodyCams.Utilities.IL;
 
 namespace OpenBodyCams.Patches;
 
@@ -17,34 +18,42 @@ internal static class PatchUnlockableSuit
     [HarmonyPatch(nameof(UnlockableSuit.SwitchSuitForPlayer))]
     private static IEnumerable<CodeInstruction> SwitchSuitForPlayerTranspiler(IEnumerable<CodeInstruction> instructions)
     {
-        var instructionsList = instructions.ToList();
-
-        var checkForLocalPlayer = instructionsList.FindIndexOfSequence(
-            [
-                insn => insn.Calls(Reflection.m_GameNetworkManager_get_Instance),
-                insn => insn.LoadsField(Reflection.f_GameNetworkManager_localPlayerController),
-                insn => insn.opcode == OpCodes.Ldarg_0,
-                insn => insn.Calls(Reflection.m_Object_op_Inequality),
-                insn => insn.opcode == OpCodes.Brfalse_S || insn.opcode == OpCodes.Brfalse,
+        var injector = new ILInjector(instructions)
+            .Find([
+                ILMatcher.Call(Reflection.m_GameNetworkManager_get_Instance),
+                ILMatcher.Ldfld(Reflection.f_GameNetworkManager_localPlayerController),
+                ILMatcher.Ldarg(0),
+                ILMatcher.Call(Reflection.m_Object_op_Inequality),
+                ILMatcher.Opcode(OpCodes.Brfalse),
             ]);
-        var isLocalPlayerLabel = (Label)instructionsList[checkForLocalPlayer.End - 1].operand;
-        var isLocalPlayerIndex = instructionsList.FindIndex(checkForLocalPlayer.End, insn => insn.labels.Contains(isLocalPlayerLabel));
 
-        var isNotLocalPlayerJump = instructionsList.FindLastIndex(isLocalPlayerIndex, insn => insn.opcode == OpCodes.Br_S || insn.opcode == OpCodes.Br);
-        var isNotLocalPlayerLabel = (Label)instructionsList[isNotLocalPlayerJump].operand;
+        if (!injector.IsValid)
+        {
+            Plugin.Instance.Logger.LogError($"Failed to find branch to spawn vanilla third-person suit cosmetics.{new StackTrace()}");
+            return instructions;
+        }
 
-        instructionsList.RemoveRange(checkForLocalPlayer);
-        instructionsList.RemoveAt(isNotLocalPlayerJump - checkForLocalPlayer.Size);
+        var isLocalPlayerLabel = (Label)injector.LastMatchedInstruction.operand;
+        injector
+            .RemoveLastMatch()
+            .FindLabel(isLocalPlayerLabel)
+            .ReverseFind(ILMatcher.Opcode(OpCodes.Br));
 
-        var afterCosmeticsSpawned = instructionsList.FindIndex(checkForLocalPlayer.Start, insn => insn.labels.Contains(isNotLocalPlayerLabel));
-        instructionsList.InsertRange(afterCosmeticsSpawned,
-            [
+        if (!injector.IsValid)
+        {
+            Plugin.Instance.Logger.LogError($"Failed to find branch to spawn vanilla first-person suit cosmetics.{new StackTrace()}");
+            return instructions;
+        }
+
+        var isNotLocalPlayerLabel = (Label)injector.LastMatchedInstruction.operand;
+        return injector
+            .Remove()
+            .FindLabel(isNotLocalPlayerLabel)
+            .Insert([
                 new(OpCodes.Ldarg_0),
                 new(OpCodes.Call, typeof(PatchUnlockableSuit).GetMethod(nameof(AfterCosmeticsSpawned), BindingFlags.NonPublic | BindingFlags.Static, [typeof(PlayerControllerB)])),
-            ]);
-
-        Plugin.Instance.Logger.LogInfo("Patched UnlockableSuit to spawn cosmetics for both perspectives on all players.");
-        return instructionsList;
+            ])
+            .ReleaseInstructions();
     }
 
     private static void AfterCosmeticsSpawned(PlayerControllerB player)

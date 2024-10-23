@@ -129,6 +129,11 @@ public class ILInjector(IEnumerable<CodeInstruction> instructions, ILGenerator g
         if (Instruction.operand is not Label label)
             throw new InvalidOperationException($"Current instruction is not a branch: {Instruction}");
 
+        return FindLabel(label);
+    }
+
+    public ILInjector FindLabel(Label label)
+    {
         matchEnd = index + 1;
 
         for (index = 0; index < instructions.Count; index++)
@@ -168,6 +173,17 @@ public class ILInjector(IEnumerable<CodeInstruction> instructions, ILGenerator g
     public bool IsValid => instructions != null && IsIndexValid(index);
 
     public CodeInstruction Instruction => IsIndexInRange(index) ? instructions[index] : null;
+
+    public CodeInstruction LastMatchedInstruction
+    {
+        get
+        {
+            var lastMatchIndex = matchEnd - 1;
+            if (!IsIndexInRange(lastMatchIndex))
+                return null;
+            return instructions[lastMatchIndex];
+        }
+    }
 
     public CodeInstruction RelativeInstruction(int offset)
     {
@@ -233,6 +249,14 @@ public class ILInjector(IEnumerable<CodeInstruction> instructions, ILGenerator g
         if (matchEnd >= index)
             matchEnd += instructions.Length;
         index += instructions.Length;
+        return this;
+    }
+
+    public ILInjector Remove(int count = 1)
+    {
+        instructions.RemoveRange(index, count);
+        if (matchEnd > index)
+            matchEnd = Math.Max(index, matchEnd - count);
         return this;
     }
 
