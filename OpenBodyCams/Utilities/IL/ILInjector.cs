@@ -11,11 +11,14 @@ namespace OpenBodyCams.Utilities.IL;
 public class ILInjector(IEnumerable<CodeInstruction> instructions, ILGenerator generator = null)
 {
     private const string INVALID = "Injector is invalid";
+    private const string MATCH_END_INVALID = "The end of the last search was invalid";
 
     private List<CodeInstruction> instructions = instructions.ToList();
     private ILGenerator generator = generator;
 
     private int index = 0;
+
+    private int matchEnd = -1;
 
     public ILInjector Reset()
     {
@@ -37,7 +40,7 @@ public class ILInjector(IEnumerable<CodeInstruction> instructions, ILGenerator g
 
     public ILInjector Back(int offset) => Forward(-offset);
 
-    private void Search(bool forward, bool cursorAtEnd, ILMatcher[] predicates)
+    private void Search(bool forward, ILMatcher[] predicates)
     {
         if (!IsValid)
             return;
@@ -62,8 +65,7 @@ public class ILInjector(IEnumerable<CodeInstruction> instructions, ILGenerator g
 
             if (predicateIndex == predicates.Length)
             {
-                if (cursorAtEnd)
-                    index += predicateIndex;
+                matchEnd = index + predicateIndex;
                 return;
             }
 
@@ -71,27 +73,15 @@ public class ILInjector(IEnumerable<CodeInstruction> instructions, ILGenerator g
         }
     }
 
-    public ILInjector FindStart(params ILMatcher[] predicates)
+    public ILInjector Find(params ILMatcher[] predicates)
     {
-        Search(forward: true, cursorAtEnd: false, predicates);
+        Search(forward: true, predicates);
         return this;
     }
 
-    public ILInjector FindEnd(params ILMatcher[] predicates)
+    public ILInjector ReverseFind(params ILMatcher[] predicates)
     {
-        Search(forward: true, cursorAtEnd: true, predicates);
-        return this;
-    }
-
-    public ILInjector ReverseFindStart(params ILMatcher[] predicates)
-    {
-        Search(forward: false, cursorAtEnd: false, predicates);
-        return this;
-    }
-
-    public ILInjector ReverseFindEnd(params ILMatcher[] predicates)
-    {
-        Search(forward: false, cursorAtEnd: true, predicates);
+        Search(forward: false, predicates);
         return this;
     }
 
@@ -99,6 +89,8 @@ public class ILInjector(IEnumerable<CodeInstruction> instructions, ILGenerator g
     {
         if (!IsValid)
             return this;
+
+        matchEnd = index;
 
         index--;
         int stackPosition = 0;
@@ -115,6 +107,12 @@ public class ILInjector(IEnumerable<CodeInstruction> instructions, ILGenerator g
             index--;
         }
 
+        return this;
+    }
+
+    public ILInjector MatchEnd()
+    {
+        index = matchEnd;
         return this;
     }
 

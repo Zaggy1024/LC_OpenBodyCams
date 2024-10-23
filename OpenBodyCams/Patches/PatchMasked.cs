@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Reflection.Emit;
 
 using GameNetcodeStuff;
@@ -24,7 +24,7 @@ internal static class PatchHauntedMaskItem
     {
         return new ILInjector(instructions)
             .ToEnd()
-            .ReverseFindStart([
+            .ReverseFind([
                 ILMatcher.Opcode(OpCodes.Ldc_I4_0),
                 ILMatcher.Opcode(OpCodes.Ret),
             ])
@@ -53,7 +53,7 @@ internal static class PatchMaskedPlayerEnemy
     {
         return new ILInjector(instructions)
             .ToEnd()
-            .ReverseFindStart([
+            .ReverseFind([
                 ILMatcher.Opcode(OpCodes.Ldc_I4_0),
                 ILMatcher.Opcode(OpCodes.Ret),
             ])
@@ -73,7 +73,7 @@ internal static class PatchMaskedPlayerEnemy
         var injector = new ILInjector(instructions);
 
         injector
-            .FindStart(ILMatcher.Callvirt(typeof(PlayerControllerB).GetMethod(nameof(PlayerControllerB.KillPlayer))))
+            .Find(ILMatcher.Callvirt(typeof(PlayerControllerB).GetMethod(nameof(PlayerControllerB.KillPlayer))))
             .GoToPush(3);
 
         if (!injector.IsValid || injector.Instruction.opcode != OpCodes.Ldc_I4_0)

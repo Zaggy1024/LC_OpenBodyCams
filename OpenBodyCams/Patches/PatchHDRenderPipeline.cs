@@ -28,7 +28,7 @@ internal static class PatchHDRenderPipeline
         // + BeforeCameraCullingHook(camera, context);
         //   if (PrepareAndCullCamera(camera, xrPass, flag, value, renderContext, out var renderRequest))
         injector.Reset()
-            .FindStart([
+            .Find([
                 ILMatcher.Call(typeof(HDRenderPipeline).GetMethod(nameof(HDRenderPipeline.PrepareAndCullCamera), BindingFlags.NonPublic | BindingFlags.Instance, [typeof(Camera), typeof(XRPass), typeof(bool), typeof(List<HDRenderPipeline.RenderRequest>), typeof(ScriptableRenderContext), typeof(HDRenderPipeline.RenderRequest).MakeByRefType(), typeof(CubemapFace)])),
             ])
             .GoToPush(6)
@@ -52,12 +52,13 @@ internal static class PatchHDRenderPipeline
         //   ..
         //   ExecuteRenderRequest(request, context, commandBuffer, AOVRequestData.defaultAOVRequestDataNonAlloc);
         injector
-            .FindEnd([
+            .Find([
                 ILMatcher.Ldloc(),
                 ILMatcher.Ldloc(),
                 ILMatcher.Callvirt(typeof(List<HDRenderPipeline.RenderRequest>).GetMethod("get_Item", [typeof(int)])),
                 ILMatcher.Stloc(),
-            ]);
+            ])
+            .MatchEnd();
 
         if (!injector.IsValid)
         {
