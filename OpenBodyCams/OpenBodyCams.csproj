@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
         <TargetFramework>netstandard2.1</TargetFramework>
@@ -16,14 +16,14 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Mono.Cecil" Version="0.11.5.0"/>
-        <PackageReference Include="BepInEx.BaseLib" Version="5.4.21.0" Publicize="true"/>
-        <PackageReference Include="BepInEx.Core" Version="5.4.21.0"/>
-        <PackageReference Include="BepInEx.AssemblyPublicizer.MSBuild" Version="0.4.1" PrivateAssets="all"/>
+        <PackageReference Include="Mono.Cecil" Version="0.11.5.0" />
+        <PackageReference Include="BepInEx.BaseLib" Version="5.4.21.0" Publicize="true" />
+        <PackageReference Include="BepInEx.Core" Version="5.4.21.0" />
+        <PackageReference Include="BepInEx.AssemblyPublicizer.MSBuild" Version="0.4.1" PrivateAssets="all" />
     </ItemGroup>
 
     <ItemGroup Condition="'$(TargetFramework.TrimEnd(`0123456789`))' == 'net'">
-        <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.2" PrivateAssets="all"/>
+        <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.2" PrivateAssets="all" />
     </ItemGroup>
 
     <ItemGroup>
