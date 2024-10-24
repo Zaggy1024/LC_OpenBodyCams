@@ -33,20 +33,24 @@ internal static class MoreCompanyCompatibility
         }
     }
 
-    internal static bool InitializeImpl(Harmony harmony)
+    private static bool InitializeImpl(Harmony harmony)
     {
-        var m_ClientReceiveMessagePatch_HandleDataMessage = typeof(ClientReceiveMessagePatch).GetMethods(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static).First(method => method.Name == "HandleDataMessage");
-
-        var thisType = typeof(MoreCompanyCompatibility);
-        harmony.CreateProcessor(m_ClientReceiveMessagePatch_HandleDataMessage)
-            .AddTranspiler(thisType.GetMethod(nameof(ClientReceiveMessagePatch_HandleDataMessageTranspiler), BindingFlags.NonPublic | BindingFlags.Static))
-            .Patch();
+        try
+        {
+            ApplyLocalCosmeticsPatch(harmony);
+            Plugin.Instance.Logger.LogInfo($"Patched MoreCompany to spawn cosmetics on the local player.");
+        }
+        catch (Exception exception)
+        {
+            Plugin.Instance.Logger.LogError("Failed to patch MoreCompany to spawn cosmetics on the local player.");
+            Plugin.Instance.Logger.LogError(exception);
+        }
 
         (string, Type[])[] cosmeticApplicationMethods = [
             (nameof(CosmeticApplication.ClearCosmetics), []),
             (nameof(CosmeticApplication.ApplyCosmetic), [typeof(string), typeof(bool)]),
         ];
-        var m_UpdateCosmetics = thisType.GetMethod(nameof(UpdateCosmetics), BindingFlags.NonPublic | BindingFlags.Static);
+        var m_UpdateCosmetics = typeof(MoreCompanyCompatibility).GetMethod(nameof(UpdateCosmetics), BindingFlags.NonPublic | BindingFlags.Static);
 
         foreach (var (method, parameters) in cosmeticApplicationMethods)
         {
@@ -55,8 +59,15 @@ internal static class MoreCompanyCompatibility
                 .Patch();
         }
 
-        Plugin.Instance.Logger.LogInfo($"Patched MoreCompany to spawn cosmetics on the local player.");
         return true;
+    }
+
+    private static void ApplyLocalCosmeticsPatch(Harmony harmony)
+    {
+        var m_ClientReceiveMessagePatch_HandleDataMessage = typeof(ClientReceiveMessagePatch).GetMethods(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static).First(method => method.Name == "HandleDataMessage");
+        harmony.CreateProcessor(m_ClientReceiveMessagePatch_HandleDataMessage)
+            .AddTranspiler(typeof(MoreCompanyCompatibility).GetMethod(nameof(ClientReceiveMessagePatch_HandleDataMessageTranspiler), BindingFlags.NonPublic | BindingFlags.Static))
+            .Patch();
     }
 
     private static IEnumerable<CodeInstruction> ClientReceiveMessagePatch_HandleDataMessageTranspiler(IEnumerable<CodeInstruction> instructions)
