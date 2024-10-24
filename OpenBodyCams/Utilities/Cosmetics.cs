@@ -20,10 +20,10 @@ namespace OpenBodyCams.Utilities
         enum CompatibilityMode
         {
             None = 0,
-            MoreCompany = 1,
-            AdvancedCompany = 2,
-            ModelReplacementAPI = 4,
-            LethalVRM = 8,
+            MoreCompany = 1 << 0,
+            AdvancedCompany = 1 << 2,
+            ModelReplacementAPI = 1 << 3,
+            LethalVRM = 1 << 4,
         }
 
         private static CompatibilityMode compatibilityMode = CompatibilityMode.None;
