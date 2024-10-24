@@ -12,7 +12,7 @@ using OpenBodyCams.API;
 
 namespace OpenBodyCams.Utilities
 {
-    static class Cosmetics
+    internal static class Cosmetics
     {
         internal static bool PrintDebugInfo = false;
 
