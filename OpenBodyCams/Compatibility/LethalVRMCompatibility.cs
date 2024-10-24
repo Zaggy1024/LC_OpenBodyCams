@@ -71,7 +71,7 @@ internal static class LethalVRMCompatibility
     }
 
     [MethodImpl(MethodImplOptions.NoInlining)]
-    internal static IEnumerable<GameObject> CollectCosmetics(PlayerControllerB player)
+    internal static IEnumerable<GameObject> CollectCosmetics(PlayerControllerB player, List<GameObject> thirdPersonCosmetics)
     {
         foreach (var instance in (ICollection<LethalVRMManager.LethalVRMInstance>)vrmInstances)
         {
@@ -79,8 +79,8 @@ internal static class LethalVRMCompatibility
                 continue;
             if (!ReferenceEquals(instance.PlayerControllerB, player))
                 continue;
-            return instance.renderers
-                .Select(renderer => renderer.gameObject);
+            foreach (var renderer in instance.renderers)
+                thirdPersonCosmetics.Add(renderer.gameObject);
         }
 
         return [];

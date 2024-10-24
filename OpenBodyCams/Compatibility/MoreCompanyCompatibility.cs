@@ -123,13 +123,16 @@ internal static class MoreCompanyCompatibility
     }
 
     [MethodImpl(MethodImplOptions.NoInlining)]
-    internal static IEnumerable<GameObject> CollectCosmetics(PlayerControllerB player)
+    internal static void CollectCosmetics(PlayerControllerB player, List<GameObject> thirdPersonCosmetics)
     {
-        Plugin.Instance.Logger.LogInfo($"Getting MoreCompany cosmetic models for {player.playerUsername}");
-        return player.GetComponentsInChildren<CosmeticApplication>()
-            .SelectMany(cosmeticApplication => cosmeticApplication.spawnedCosmetics)
-            .Where(cosmetic => cosmetic != null)
-            .SelectMany(cosmetic => cosmetic.GetComponentsInChildren<Transform>())
-            .Select(cosmeticObject => cosmeticObject.gameObject);
+        foreach (var cosmetics in player.GetComponentsInChildren<CosmeticApplication>())
+        {
+            foreach (var cosmetic in cosmetics.spawnedCosmetics)
+            {
+                if (cosmetic == null)
+                    continue;
+                Cosmetics.CollectChildCosmetics(cosmetic.gameObject, thirdPersonCosmetics);
+            }
+        }
     }
 }

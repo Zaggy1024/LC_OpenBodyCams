@@ -10,6 +10,8 @@ using HarmonyLib;
 using ModelReplacement;
 using UnityEngine;
 
+using OpenBodyCams.Utilities;
+
 namespace OpenBodyCams.Compatibility;
 
 internal static class ModelReplacementAPICompatibility
@@ -70,11 +72,11 @@ internal static class ModelReplacementAPICompatibility
             return;
 
         if (bodyReplacement.replacementModel != null)
-            thirdPersonCosmetics.AddRange(bodyReplacement.replacementModel.GetComponentsInChildren<Transform>().Select(cosmeticObject => cosmeticObject.gameObject));
+            Cosmetics.CollectChildCosmetics(bodyReplacement.replacementModel, thirdPersonCosmetics);
 
         if (bodyReplacement.replacementViewModel != null)
         {
-            firstPersonCosmetics.AddRange(bodyReplacement.replacementViewModel.GetComponentsInChildren<Transform>().Select(cosmeticObject => cosmeticObject.gameObject));
+            Cosmetics.CollectChildCosmetics(bodyReplacement.replacementViewModel, firstPersonCosmetics);
             hasViewmodelReplacement = true;
         }
     }

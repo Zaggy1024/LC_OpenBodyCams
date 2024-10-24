@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 
@@ -10,6 +9,8 @@ using AdvancedCompany.Objects;
 using GameNetcodeStuff;
 using HarmonyLib;
 using UnityEngine;
+
+using OpenBodyCams.Utilities;
 
 namespace OpenBodyCams.Compatibility;
 
@@ -65,24 +66,31 @@ internal static class AdvancedCompanyCompatibility
         return true;
     }
 
+    private static void AddChildren(IEnumerable<GameObject> objects, List<GameObject> toList)
+    {
+        foreach (var obj in objects)
+        {
+            if (obj == null)
+                continue;
+            Cosmetics.CollectChildCosmetics(obj, toList);
+        }
+    }
+
     [MethodImpl(MethodImplOptions.NoInlining)]
-    internal static IEnumerable<GameObject> CollectCosmetics(PlayerControllerB player)
+    internal static void CollectCosmetics(PlayerControllerB player, List<GameObject> thirdPersonCosmetics)
     {
         Player acPlayer = Player.GetPlayer(player);
-        IEnumerable<GameObject> attachedObjects = acPlayer.AppliedCosmetics.Values;
-
+        AddChildren(acPlayer.AppliedCosmetics.Values, thirdPersonCosmetics);
+        thirdPersonCosmetics.AddRange(acPlayer.AppliedCosmetics.Values);
         if (acPlayer.EquipmentItemsHead is GameObject[] headObjects)
-            attachedObjects = attachedObjects.Concat(headObjects);
+            AddChildren(headObjects, thirdPersonCosmetics);
         if (acPlayer.EquipmentItemsBody is GameObject[] bodyObjects)
-            attachedObjects = attachedObjects.Concat(bodyObjects);
+            AddChildren(bodyObjects, thirdPersonCosmetics);
         if (acPlayer.EquipmentItemsFeet is GameObject[] feetObjects)
-            attachedObjects = attachedObjects.Concat(feetObjects);
+            AddChildren(feetObjects, thirdPersonCosmetics);
 
-        return attachedObjects
-            .Where(cosmetic => cosmetic != null)
-            .SelectMany(cosmetic => cosmetic.GetComponentsInChildren<Transform>())
-            .Select(transform => transform.gameObject)
-            .Concat(acPlayer.HeadMount == null ? [] : [acPlayer.HeadMount]);
+        if (acPlayer.HeadMount)
+            Cosmetics.CollectChildCosmetics(acPlayer.HeadMount, thirdPersonCosmetics);
     }
 
     private static void AfterEquipmentChange()
