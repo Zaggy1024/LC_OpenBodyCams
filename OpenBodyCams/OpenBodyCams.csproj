@@ -36,8 +36,8 @@
     </ItemGroup>
 
     <ItemGroup>
-        <Reference Include="AdvancedCompany" Publicize="true">
-            <HintPath>..\..\Libraries\AdvancedCompany.dll</HintPath>
+        <Reference Include="AdvancedCompany">
+            <HintPath>Deps\AdvancedCompany.dll</HintPath>
             <Private>false</Private>
         </Reference>
         <Reference Include="Assembly-CSharp" Publicize="true">
