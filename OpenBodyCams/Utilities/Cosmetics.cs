@@ -99,12 +99,6 @@ namespace OpenBodyCams.Utilities
             }
         }
 
-        private static void DebugLog(object data)
-        {
-            if (PrintDebugInfo)
-                Plugin.Instance.Logger.LogInfo(data);
-        }
-
         internal static List<GameObject> CollectVanillaFirstPersonCosmetics(PlayerControllerB player)
         {
             var headChildrenTransforms = player.headCostumeContainerLocal.GetComponentsInChildren<Renderer>();
