@@ -134,6 +134,10 @@ namespace OpenBodyCams.Utilities
                 return;
             }
 
+            var startTime = 0d;
+            if (PrintDebugInfo)
+                startTime = Time.realtimeSinceStartupAsDouble;
+
             var thirdPersonCosmeticsList = CollectVanillaThirdPersonCosmetics(player);
             var firstPersonCosmeticsList = CollectVanillaFirstPersonCosmetics(player);
             hasViewmodelReplacement = false;
@@ -159,17 +163,10 @@ namespace OpenBodyCams.Utilities
             thirdPersonCosmetics = [.. thirdPersonCosmeticsList];
             firstPersonCosmetics = [.. firstPersonCosmeticsList];
 
-            Plugin.Instance.Logger.LogInfo($"Collected {thirdPersonCosmetics.Length} third-person and {firstPersonCosmetics.Length} cosmetics for {player.playerUsername} with{(hasViewmodelReplacement ? "" : "out")} a viewmodel replacement.");
-
             if (PrintDebugInfo)
             {
-                Plugin.Instance.Logger.LogInfo($"Stack trace:");
-                var stackFrames = new StackTrace().GetFrames();
-                for (int i = 1; i < stackFrames.Length; i++)
-                {
-                    var frame = stackFrames[i];
-                    Plugin.Instance.Logger.LogInfo($"  {frame.GetMethod().DeclaringType.Name}.{frame.GetMethod().Name}()");
-                }
+                var runTimeMicroseconds = (Time.realtimeSinceStartupAsDouble - startTime) * 1_000_000;
+                Plugin.Instance.Logger.LogInfo($"Collected {thirdPersonCosmetics.Length} third-person and {firstPersonCosmetics.Length} cosmetics for {player.playerUsername} with{(hasViewmodelReplacement ? "" : "out")} a viewmodel replacement in {runTimeMicroseconds:0.##} microseconds.");
             }
         }
 
