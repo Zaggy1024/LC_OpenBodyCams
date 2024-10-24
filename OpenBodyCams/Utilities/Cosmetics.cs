@@ -91,28 +91,27 @@ namespace OpenBodyCams.Utilities
                 Plugin.Instance.Logger.LogInfo(data);
         }
 
-        public static List<GameObject> CollectVanillaFirstPersonCosmetics(PlayerControllerB player)
+        internal static List<GameObject> CollectVanillaFirstPersonCosmetics(PlayerControllerB player)
         {
-            var headChildrenTransforms = player.headCostumeContainerLocal.GetComponentsInChildren<Transform>();
+            var headChildrenTransforms = player.headCostumeContainerLocal.GetComponentsInChildren<Renderer>();
 
-            var objects = new List<GameObject>(headChildrenTransforms.Length - 1);
+            var objects = new List<GameObject>(headChildrenTransforms.Length);
 
-            for (var i = 1; i < headChildrenTransforms.Length; i++)
+            for (var i = 0; i < headChildrenTransforms.Length; i++)
                 objects.Add(headChildrenTransforms[i].gameObject);
             return objects;
         }
 
-        public static List<GameObject> CollectVanillaThirdPersonCosmetics(PlayerControllerB player)
+        internal static List<GameObject> CollectVanillaThirdPersonCosmetics(PlayerControllerB player)
         {
-            var headChildrenTransforms = player.headCostumeContainer.GetComponentsInChildren<Transform>();
-            var lowerTorsoChildrenTransforms = player.lowerTorsoCostumeContainer.GetComponentsInChildren<Transform>();
+            var headChildrenTransforms = player.headCostumeContainer.GetComponentsInChildren<Renderer>();
+            var lowerTorsoChildrenTransforms = player.lowerTorsoCostumeContainer.GetComponentsInChildren<Renderer>();
 
-            var childrenObjects = new List<GameObject>(headChildrenTransforms.Length + lowerTorsoChildrenTransforms.Length - 2);
+            var childrenObjects = new List<GameObject>(headChildrenTransforms.Length + lowerTorsoChildrenTransforms.Length);
 
-            // Start at 1 to skip the container.
-            for (var i = 1; i < headChildrenTransforms.Length; i++)
+            for (var i = 0; i < headChildrenTransforms.Length; i++)
                 childrenObjects.Add(headChildrenTransforms[i].gameObject);
-            for (var i = 1; i < lowerTorsoChildrenTransforms.Length; i++)
+            for (var i = 0; i < lowerTorsoChildrenTransforms.Length; i++)
                 childrenObjects.Add(lowerTorsoChildrenTransforms[i].gameObject);
             return childrenObjects;
         }
