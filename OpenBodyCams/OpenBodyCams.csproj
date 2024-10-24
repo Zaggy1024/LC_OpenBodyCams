@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
         <TargetFramework>netstandard2.1</TargetFramework>
@@ -32,6 +32,7 @@
         <PackageReference Include="notnotnotswipez-MoreCompany" Version="1.10.1" Publicize="true" />
         <PackageReference Include="BunyaPineTree-ModelReplacementAPI" Version="2.4.10" Publicize="true" />
         <PackageReference Include="Ooseykins-LethalVRM" Version="1.0.7" Publicize="true" />
+        <PackageReference Include="FlipMods-ReservedItemSlotCore" Version="2.0.38" Publicize="true" />
     </ItemGroup>
 
     <ItemGroup>

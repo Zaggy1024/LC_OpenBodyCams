@@ -75,6 +75,7 @@ namespace OpenBodyCams
         public static ConfigEntry<bool> EnableAdvancedCompanyCosmeticsCompatibility;
         public static ConfigEntry<bool> EnableModelReplacementAPICompatibility;
         public static ConfigEntry<bool> EnableLethalVRMCompatibility;
+        public static ConfigEntry<bool> EnableReservedItemSlotsCompatibility;
 
         public static ConfigEntry<bool> SwapInternalAndExternalShipCameras;
         public static ConfigEntry<bool> DisableCameraOnSmallMonitor;
@@ -194,6 +195,7 @@ namespace OpenBodyCams
             EnableAdvancedCompanyCosmeticsCompatibility = Config.Bind("Compatibility", "EnableAdvancedCompanyCosmeticsCompatibility", true, "When this is enabled and AdvancedCompany is installed, all cosmetics will be shown and hidden based on the camera's perspective.");
             EnableModelReplacementAPICompatibility = Config.Bind("Compatibility", "EnableModelReplacementAPICompatibility", true, "When enabled, this will get the third person model replacement and hide/show it based on the camera's perspective.");
             EnableLethalVRMCompatibility = Config.Bind("Compatibility", "EnableLethalVRMCompatibility", true, "When enabled, any VRM model will be hidden/shown based on the camera's perspective.");
+            EnableReservedItemSlotsCompatibility = Config.Bind("Compatibility", "EnableReservedItemSlotsCompatibility", true, "When enabled, items holstered in reserved item slots will be hidden/shown based on the perspective.");
 
             // Ship:
             SwapInternalAndExternalShipCameras = Config.Bind("Ship", "SwapInternalAndExternalShipCameras", false, $"Causes the internal ship camera to be placed onto big monitor, and the external one to be placed onto the small monitor. {OptionDisabledWithBetterMonitors}");

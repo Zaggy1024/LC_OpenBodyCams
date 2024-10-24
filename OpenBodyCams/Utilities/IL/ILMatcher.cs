@@ -14,6 +14,8 @@ public interface ILMatcher
 
     private static OpCode[] branchInstructions = [OpCodes.Br, OpCodes.Br_S, OpCodes.Brfalse, OpCodes.Brfalse_S];
 
+    public static NotMatcher Not(ILMatcher matcher) => new(matcher);
+
     public static OpcodeMatcher Opcode(OpCode opcode) => new(opcode);
     public static OpcodesMatcher Opcodes(params OpCode[] opcodes) => new(opcodes);
     public static OpcodeOperandMatcher OpcodeOperand(OpCode opcode, object operand) => new(opcode, operand);
@@ -74,6 +76,13 @@ public interface ILMatcher
             return predicate(field);
         });
     }
+}
+
+public class NotMatcher(ILMatcher matcher) : ILMatcher
+{
+    private readonly ILMatcher matcher = matcher;
+
+    public bool Matches(CodeInstruction instruction) => !matcher.Matches(instruction);
 }
 
 public class OpcodeMatcher(OpCode opcode) : ILMatcher

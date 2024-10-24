@@ -24,6 +24,7 @@ namespace OpenBodyCams.Utilities
             AdvancedCompany = 1 << 2,
             ModelReplacementAPI = 1 << 3,
             LethalVRM = 1 << 4,
+            ReservedItemSlots = 1 << 5,
         }
 
         private static CompatibilityMode compatibilityMode = CompatibilityMode.None;
@@ -81,6 +82,19 @@ namespace OpenBodyCams.Utilities
                 else
                 {
                     Plugin.Instance.Logger.LogWarning("LethalVRM is installed, but the compatibility feature failed to initialize.");
+                }
+            }
+
+            if (Plugin.EnableReservedItemSlotsCompatibility.Value && Chainloader.PluginInfos.ContainsKey(ModGUIDs.ReservedItemSlotCore))
+            {
+                if (ReservedItemSlotsCompatibility.Initialize(harmony))
+                {
+                    compatibilityMode |= CompatibilityMode.ReservedItemSlots;
+                    Plugin.Instance.Logger.LogInfo("ReservedItemSlots compatibility mode is enabled.");
+                }
+                else
+                {
+                    Plugin.Instance.Logger.LogWarning("ReservedItemSlotCore is installed, but the compatibility feature failed to initialize.");
                 }
             }
         }
@@ -144,6 +158,9 @@ namespace OpenBodyCams.Utilities
 
             if (compatibilityMode.HasFlag(CompatibilityMode.ModelReplacementAPI))
                 ModelReplacementAPICompatibility.CollectCosmetics(player, thirdPersonCosmeticsList, firstPersonCosmeticsList, ref hasViewmodelReplacement);
+
+            if (compatibilityMode.HasFlag(CompatibilityMode.ReservedItemSlots))
+                ReservedItemSlotsCompatibility.CollectCosmetics(player, thirdPersonCosmeticsList);
 
             thirdPersonCosmetics = [.. thirdPersonCosmeticsList];
             firstPersonCosmetics = [.. firstPersonCosmeticsList];
