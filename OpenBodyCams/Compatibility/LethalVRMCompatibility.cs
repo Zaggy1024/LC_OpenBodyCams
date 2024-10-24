@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -19,6 +20,20 @@ internal static class LethalVRMCompatibility
 
     [MethodImpl(MethodImplOptions.NoInlining)]
     internal static bool Initialize(Harmony harmony)
+    {
+        try
+        {
+            return InitializeImpl(harmony);
+        }
+        catch (Exception exception)
+        {
+            Plugin.Instance.Logger.LogError(exception);
+            return false;
+        }
+    }
+
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    internal static bool InitializeImpl(Harmony harmony)
     {
         var vrmManager = GameObject.Find("LethalVRM Manager")?.GetComponent<LethalVRMManager>();
         if (vrmManager is null)

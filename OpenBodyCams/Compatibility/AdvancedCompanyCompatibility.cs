@@ -15,19 +15,32 @@ namespace OpenBodyCams.Compatibility;
 
 internal static class AdvancedCompanyCompatibility
 {
+    [MethodImpl(MethodImplOptions.NoInlining)]
     internal static bool Initialize(Harmony harmony)
+    {
+        try
+        {
+            return InitializeImpl(harmony);
+        }
+        catch (Exception exception)
+        {
+            Plugin.Instance.Logger.LogError(exception);
+            return false;
+        }
+    }
+
+    internal static bool InitializeImpl(Harmony harmony)
     {
         var t_Player = typeof(Player);
 
-        (string, Type[])[] postfixToMethods =
-            [
-                (nameof(Player.SetCosmetics), [typeof(string[]), typeof(bool)]),
-                (nameof(Player.AddCosmetic), [typeof(string)]),
-                (nameof(Player.ReequipHead), []),
-                (nameof(Player.ReequipBody), []),
-                (nameof(Player.ReequipFeet), []),
-                (nameof(Player.UnequipAll), []),
-            ];
+        (string, Type[])[] postfixToMethods = [
+            (nameof(Player.SetCosmetics), [typeof(string[]), typeof(bool)]),
+            (nameof(Player.AddCosmetic), [typeof(string)]),
+            (nameof(Player.ReequipHead), []),
+            (nameof(Player.ReequipBody), []),
+            (nameof(Player.ReequipFeet), []),
+            (nameof(Player.UnequipAll), []),
+        ];
         var postfixMethod = typeof(AdvancedCompanyCompatibility).GetMethod(nameof(AfterEquipmentChange), BindingFlags.NonPublic | BindingFlags.Static);
 
         foreach ((string methodName, Type[] types) in postfixToMethods)

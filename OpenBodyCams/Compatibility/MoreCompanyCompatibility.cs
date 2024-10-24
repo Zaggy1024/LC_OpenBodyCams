@@ -22,6 +22,19 @@ internal static class MoreCompanyCompatibility
     [MethodImpl(MethodImplOptions.NoInlining)]
     internal static bool Initialize(Harmony harmony)
     {
+        try
+        {
+            return InitializeImpl(harmony);
+        }
+        catch (Exception exception)
+        {
+            Plugin.Instance.Logger.LogError(exception);
+            return false;
+        }
+    }
+
+    internal static bool InitializeImpl(Harmony harmony)
+    {
         var m_ClientReceiveMessagePatch_HandleDataMessage = typeof(ClientReceiveMessagePatch).GetMethods(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static).First(method => method.Name == "HandleDataMessage");
 
         var thisType = typeof(MoreCompanyCompatibility);

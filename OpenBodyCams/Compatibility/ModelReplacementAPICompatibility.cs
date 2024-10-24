@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
@@ -15,7 +16,21 @@ internal static class ModelReplacementAPICompatibility
 {
     private static MethodInfo m_UpdateModelReplacement;
 
+    [MethodImpl(MethodImplOptions.NoInlining)]
     internal static bool Initialize(Harmony harmony)
+    {
+        try
+        {
+            return InitializeImpl(harmony);
+        }
+        catch (Exception exception)
+        {
+            Plugin.Instance.Logger.LogError(exception);
+            return false;
+        }
+    }
+
+    internal static bool InitializeImpl(Harmony harmony)
     {
         var m_ViewStateManager_ReportBodyReplacementAddition = typeof(ViewStateManager).GetMethod(nameof(ViewStateManager.ReportBodyReplacementAddition), [typeof(BodyReplacementBase)]);
         if (m_ViewStateManager_ReportBodyReplacementAddition is null)
