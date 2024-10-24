@@ -20,6 +20,7 @@
         <PackageReference Include="BepInEx.BaseLib" Version="5.4.21.0" Publicize="true" />
         <PackageReference Include="BepInEx.Core" Version="5.4.21.0" />
         <PackageReference Include="BepInEx.AssemblyPublicizer.MSBuild" Version="0.4.1" PrivateAssets="all" />
+        <PackageReference Include="LethalCompany.GameLibs.Steam" Version="64.0.0-ngd.0" Private="False" Publicize="true" />
     </ItemGroup>
 
     <ItemGroup Condition="'$(TargetFramework.TrimEnd(`0123456789`))' == 'net'">
@@ -38,54 +39,6 @@
     <ItemGroup>
         <Reference Include="AdvancedCompany">
             <HintPath>Deps\AdvancedCompany.dll</HintPath>
-            <Private>false</Private>
-        </Reference>
-        <Reference Include="Assembly-CSharp" Publicize="true">
-            <HintPath>..\..\Libraries\Assembly-CSharp.dll</HintPath>
-            <Private>false</Private>
-        </Reference>
-        <Reference Include="Unity.Netcode.Runtime">
-            <HintPath>..\..\Libraries\Unity.Netcode.Runtime.dll</HintPath>
-            <Private>false</Private>
-        </Reference>
-        <Reference Include="Unity.RenderPipelines.Core.Runtime">
-            <HintPath>..\..\Libraries\Unity.RenderPipelines.Core.Runtime.dll</HintPath>
-            <Private>false</Private>
-        </Reference>
-        <Reference Include="Unity.RenderPipelines.HighDefinition.Runtime" Publicize="true">
-            <HintPath>..\..\Libraries\Unity.RenderPipelines.HighDefinition.Runtime.dll</HintPath>
-            <Private>false</Private>
-        </Reference>
-        <Reference Include="Unity.TextMeshPro">
-            <HintPath>..\..\Libraries\Unity.TextMeshPro.dll</HintPath>
-            <Private>false</Private>
-        </Reference>
-        <Reference Include="UnityEngine">
-            <HintPath>..\..\Libraries\UnityEngine.dll</HintPath>
-            <Private>false</Private>
-        </Reference>
-        <Reference Include="UnityEngine.AnimationModule">
-            <HintPath>..\..\Libraries\UnityEngine.AnimationModule.dll</HintPath>
-            <Private>false</Private>
-        </Reference>
-        <Reference Include="UnityEngine.AssetBundleModule">
-            <HintPath>..\..\Libraries\UnityEngine.AssetBundleModule.dll</HintPath>
-            <Private>false</Private>
-        </Reference>
-        <Reference Include="UnityEngine.CoreModule">
-            <HintPath>..\..\Libraries\UnityEngine.CoreModule.dll</HintPath>
-            <Private>false</Private>
-        </Reference>
-        <Reference Include="UnityEngine.PhysicsModule">
-            <HintPath>..\..\Libraries\UnityEngine.PhysicsModule.dll</HintPath>
-            <Private>false</Private>
-        </Reference>
-        <Reference Include="UnityEngine.UI">
-            <HintPath>..\..\Libraries\UnityEngine.UI.dll</HintPath>
-            <Private>false</Private>
-        </Reference>
-        <Reference Include="UnityEngine.UIModule">
-            <HintPath>..\..\Libraries\UnityEngine.UIModule.dll</HintPath>
             <Private>false</Private>
         </Reference>
     </ItemGroup>
