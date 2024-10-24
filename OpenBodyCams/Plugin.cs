@@ -220,8 +220,6 @@ namespace OpenBodyCams
 
             MigrateSettings();
 
-            Cosmetics.Initialize(harmony);
-
             harmony.PatchAll(typeof(PatchTerminal));
             harmony.PatchAll(typeof(PatchStartOfRound));
             harmony.PatchAll(typeof(PatchManualCameraRenderer));
@@ -237,6 +235,8 @@ namespace OpenBodyCams
             BodyCamComponent.InitializeStatic();
 
             ShipUpgrades.Initialize();
+
+            Cosmetics.Initialize(harmony);
         }
 
         private void UpdateReferencedObjectDestructionDetectionEnabled()
