@@ -1,3 +1,12 @@
+## Version 2.5.0
+- Added a ReservedItemSlotCore compatibility feature to hide/show holstered items based on perspective.
+- Sky effects are changed based on the camera perspective. When a body cam target is looking down a long hallway in the interior, the end of the hallway will now be dark.
+- Added a patch to fix a vanilla bug that prevents players converted by a masked enemy from being targeted by the map.
+- Fixed the overlay text for buying the antenna being visible upon joining a game with the body cam unlocked and placed.
+- Fixed an issue that caused the PiP command to be unusable after restarting a game.
+- Made the MoreCompany compatibility mode continue to function if the patch to spawn cosmetics for the local player fails.
+- Prevented compatibility features from stopping mod initialization.
+
 ## Version 2.4.5
 - Fixed an error that would occur when loading a save with the PiP body cam disabled.
 
