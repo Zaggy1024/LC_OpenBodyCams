@@ -67,14 +67,13 @@ internal static class PatchHDRenderPipeline
             return instructions;
         }
 
-        injector.Back(1)
-            .Insert([
+        return injector.Back(1)
+            .InsertInPlace([
                 new(OpCodes.Dup),
                 new(OpCodes.Ldarg_1),
                 new(OpCodes.Call, typeof(PatchHDRenderPipeline).GetMethod(nameof(BeforeCameraRenderingHook), BindingFlags.NonPublic | BindingFlags.Static, [typeof(HDRenderPipeline.RenderRequest), typeof(ScriptableRenderContext)])),
-            ]);
-
-        return injector.ReleaseInstructions();
+            ])
+            .ReleaseInstructions();
     }
 
     private static void BeforeCameraCullingHook(Camera camera, ScriptableRenderContext context)
