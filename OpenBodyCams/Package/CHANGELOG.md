@@ -1,3 +1,6 @@
+## Version 2.5.2
+- Fixed an issue that would cause the outdoor ambient lighting to flicker when the body cam frame rate was limited.
+
 ## Version 2.5.1
 - Repackaged 2.5.0 to remove some leftover code causing issues on rainy moons.
 
