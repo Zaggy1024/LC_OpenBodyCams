@@ -134,21 +134,21 @@ public class LdargMatcher(int? arg) : ILMatcher
 {
     private readonly int? arg = arg;
 
-    public bool Matches(CodeInstruction instruction) => (!arg.HasValue && instruction.GetLdargIndex().HasValue) || instruction.GetLdargIndex() == arg;
+    public bool Matches(CodeInstruction instruction) => arg.HasValue ? instruction.GetLdargIndex() == arg : instruction.GetLdargIndex().HasValue;
 }
 
 public class LdlocMatcher(int? loc) : ILMatcher
 {
     private readonly int? loc = loc;
 
-    public bool Matches(CodeInstruction instruction) => (!loc.HasValue && instruction.GetLdlocIndex().HasValue) || instruction.GetLdlocIndex() == loc;
+    public bool Matches(CodeInstruction instruction) => loc.HasValue ? instruction.GetLdlocIndex() == loc : instruction.GetLdlocIndex().HasValue;
 }
 
 public class StlocMatcher(int? loc) : ILMatcher
 {
     private readonly int? loc = loc;
 
-    public bool Matches(CodeInstruction instruction) => (!loc.HasValue && instruction.GetStlocIndex().HasValue) || instruction.GetStlocIndex() == loc;
+    public bool Matches(CodeInstruction instruction) => loc.HasValue ? instruction.GetStlocIndex() == loc : instruction.GetStlocIndex().HasValue;
 }
 
 public class LdcI32Matcher(int? value) : ILMatcher
