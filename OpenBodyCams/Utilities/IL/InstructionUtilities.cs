@@ -102,7 +102,7 @@ internal static class InstructionUtilities
         if (opcode == OpCodes.Ldloc_3)
             return 3;
         if (opcode == OpCodes.Ldloc || opcode == OpCodes.Ldloc_S)
-            return instruction.operand as int?;
+            return (instruction.operand as LocalBuilder)?.LocalIndex;
         return null;
     }
 
@@ -118,7 +118,7 @@ internal static class InstructionUtilities
         if (opcode == OpCodes.Stloc_3)
             return 3;
         if (opcode == OpCodes.Stloc || opcode == OpCodes.Stloc_S)
-            return instruction.operand as int?;
+            return (instruction.operand as LocalBuilder)?.LocalIndex;
         return null;
     }
 
