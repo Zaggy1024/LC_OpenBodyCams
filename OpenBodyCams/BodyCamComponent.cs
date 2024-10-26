@@ -950,17 +950,6 @@ namespace OpenBodyCams
             }
         }
 
-        private void UpdateOverrides()
-        {
-            var isInInterior = false;
-            var isInShip = false;
-            cameraPositionGetter?.Invoke(Camera.transform.position, ref isInInterior, ref isInShip);
-
-            targetSunlightEnabled = !isInInterior;
-            targetBlackSkyVolumeWeight = isInInterior ? 1 : 0;
-            targetIndirectSunlightDimmer = Mathf.Lerp(targetIndirectSunlightDimmer, isInShip ? 0 : 1, 5 * Time.deltaTime);
-        }
-
         private void ApplyCullingOverrides()
         {
             UpdateTargetStatusBeforeRender();
@@ -1072,6 +1061,17 @@ namespace OpenBodyCams
         {
             if (targetDirtyStatus.HasFlag(TargetDirtyStatus.Immediate))
                 UpdateTargetStatus();
+        }
+
+        private void UpdateOverrides()
+        {
+            var isInInterior = false;
+            var isInShip = false;
+            cameraPositionGetter?.Invoke(Camera.transform.position, ref isInInterior, ref isInShip);
+
+            targetSunlightEnabled = !isInInterior;
+            targetBlackSkyVolumeWeight = isInInterior ? 1 : 0;
+            targetIndirectSunlightDimmer = Mathf.Lerp(targetIndirectSunlightDimmer, isInShip ? 0 : 1, 5 * Time.deltaTime);
         }
 
         private void Update()
