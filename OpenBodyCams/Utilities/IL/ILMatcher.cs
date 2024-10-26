@@ -165,7 +165,7 @@ public class BranchMatcher : ILMatcher
 
 public class PredicateMatcher(Func<CodeInstruction, bool> predicate) : ILMatcher
 {
-    private Func<CodeInstruction, bool> predicate = predicate;
+    private readonly Func<CodeInstruction, bool> predicate = predicate;
 
     public bool Matches(CodeInstruction instruction) => predicate(instruction);
 }
