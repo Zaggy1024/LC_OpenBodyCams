@@ -43,6 +43,12 @@ public class ILInjector(IEnumerable<CodeInstruction> instructions, ILGenerator g
 
     public ILInjector Back(int offset) => Forward(-offset);
 
+    private void MarkInvalid()
+    {
+        index = -1;
+        matchEnd = -1;
+    }
+
     private void Search(bool forward, ILMatcher[] predicates)
     {
         if (!IsValid)
@@ -81,7 +87,7 @@ public class ILInjector(IEnumerable<CodeInstruction> instructions, ILGenerator g
             index += direction;
         }
 
-        index = -1;
+        MarkInvalid();
     }
 
     public ILInjector Find(params ILMatcher[] predicates)
@@ -142,7 +148,7 @@ public class ILInjector(IEnumerable<CodeInstruction> instructions, ILGenerator g
                 return this;
         }
 
-        index = -1;
+        MarkInvalid();
         return this;
     }
 
