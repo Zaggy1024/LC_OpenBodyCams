@@ -1,3 +1,6 @@
+## Version 2.5.1
+- Repackaged 2.5.0 to remove some leftover code causing issues on rainy moons.
+
 ## Version 2.5.0
 - Added a ReservedItemSlotCore compatibility feature to hide/show holstered items based on perspective.
 - Sky effects are changed based on the camera perspective. When a body cam target is looking down a long hallway in the interior, the end of the hallway will now be dark.
