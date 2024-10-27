@@ -115,7 +115,7 @@ internal static class PatchManualCameraRenderer
         }
 
         var notOwnerLabel = generator.DefineLabel();
-        injector.RelativeInstruction(1).opcode = OpCodes.Ldc_I4_1;
+        injector.GetRelativeInstruction(1).opcode = OpCodes.Ldc_I4_1;
         return injector
             .Insert([
                 new(OpCodes.Ldarg_0),

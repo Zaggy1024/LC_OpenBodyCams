@@ -212,7 +212,7 @@ public class ILInjector(IEnumerable<CodeInstruction> instructions, ILGenerator g
         }
     }
 
-    public CodeInstruction RelativeInstruction(int offset)
+    public CodeInstruction GetRelativeInstruction(int offset)
     {
         if (!IsValid)
             throw new InvalidOperationException(INVALID);
@@ -221,6 +221,17 @@ public class ILInjector(IEnumerable<CodeInstruction> instructions, ILGenerator g
         if (!IsIndexInRange(offsetIndex))
             throw new IndexOutOfRangeException($"Offset {offset} would read out of bounds at index {offsetIndex}");
         return instructions[offsetIndex];
+    }
+
+    public void SetRelativeInstruction(int offset, CodeInstruction instruction)
+    {
+        if (!IsValid)
+            throw new InvalidOperationException(INVALID);
+
+        var offsetIndex = index + offset;
+        if (!IsIndexInRange(offsetIndex))
+            throw new IndexOutOfRangeException($"Offset {offset} would write out of bounds at index {offsetIndex}");
+        instructions[offsetIndex] = instruction;
     }
 
     private void GetLastMatchRange(out int start, out int size)
