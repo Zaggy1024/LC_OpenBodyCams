@@ -4,6 +4,7 @@ using System.Reflection;
 using System.Reflection.Emit;
 using System.Runtime.CompilerServices;
 
+using BepInEx.Bootstrap;
 using GameNetcodeStuff;
 using HarmonyLib;
 using UnityEngine;
@@ -24,6 +25,12 @@ internal static class MoreCompanyCompatibility
     {
         try
         {
+            if (Chainloader.PluginInfos[ModGUIDs.MoreCompany].Metadata.Version < new Version(1, 11, 0))
+            {
+                Plugin.Instance.Logger.LogError($"The MoreCompany cosmetics compatibility mode requires v1.11.0+. Please upgrade MoreCompany.");
+                return false;
+            }
+
             return InitializeImpl(harmony);
         }
         catch (Exception exception)
