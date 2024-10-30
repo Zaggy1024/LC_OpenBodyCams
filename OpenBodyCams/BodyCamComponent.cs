@@ -152,7 +152,8 @@ namespace OpenBodyCams
         #endregion
 
         #region Camera info
-        internal GameObject CameraObject;
+        private Transform CameraContainer;
+        internal Transform CameraTransform;
         internal Camera Camera;
         #endregion
 
@@ -186,6 +187,7 @@ namespace OpenBodyCams
         private PlayerModelState currentPlayerModelState;
 
         private Transform currentActualTarget;
+        private Transform currentAttachmentPoint;
         private Renderer[] currentRenderersToHide = [];
 
         private Material currentObstructingMaterial;
@@ -426,18 +428,22 @@ namespace OpenBodyCams
         {
             if (!HasFinishedGameStartSetup())
                 return false;
-            if (CameraObject != null)
+            if (CameraContainer != null)
                 return true;
 
             Plugin.Instance.Logger.LogInfo("Camera has been destroyed, recreating it.");
             UpdateScreenMaterial();
 
-            CameraObject = new GameObject("BodyCam");
-            Camera = CameraObject.AddComponent<Camera>();
+            CameraContainer = new GameObject("BodyCamContainer").transform;
+
+            var cameraObject = new GameObject("BodyCam");
+            CameraTransform = cameraObject.transform;
+            CameraTransform.SetParent(CameraContainer, false);
+            Camera = cameraObject.AddComponent<Camera>();
             Camera.nearClipPlane = 0.01f;
             Camera.cullingMask = bodyCamCullingMask;
 
-            var cameraData = CameraObject.AddComponent<HDAdditionalCameraData>();
+            var cameraData = cameraObject.AddComponent<HDAdditionalCameraData>();
             cameraData.volumeLayerMask = 1;
             if (mainCameraCustomFrameSettings != null)
             {
@@ -461,14 +467,14 @@ namespace OpenBodyCams
             cameraData.hasPersistentHistory = true;
 
             var nightVision = Instantiate(nightVisionPrefab);
-            nightVision.transform.SetParent(CameraObject.transform, false);
+            nightVision.transform.SetParent(CameraTransform, false);
             nightVision.SetActive(true);
             nightVisionLight = nightVision.GetComponent<Light>();
 
             UpdateSettings();
 
             var greenFlashParent = new GameObject("CameraGreenTransitionScaler");
-            greenFlashParent.transform.SetParent(CameraObject.transform, false);
+            greenFlashParent.transform.SetParent(CameraTransform, false);
             greenFlashParent.transform.localScale = new Vector3(1, 0.004f, 1);
 
             var greenFlashObject = Instantiate(StartOfRound.Instance.mapScreen.mapCameraAnimator.gameObject);
@@ -488,7 +494,7 @@ namespace OpenBodyCams
 
             var fogShaderPlane = GameObject.CreatePrimitive(PrimitiveType.Quad);
             Destroy(fogShaderPlane.GetComponent<MeshCollider>());
-            fogShaderPlane.transform.SetParent(CameraObject.transform, false);
+            fogShaderPlane.transform.SetParent(CameraTransform, false);
             fogShaderPlane.transform.localPosition = new Vector3(0, 0, Camera.nearClipPlane * 2);
             fogShaderPlane.transform.localRotation = Quaternion.Euler(0, 0, 0);
             fogShaderPlaneRenderer = fogShaderPlane.GetComponent<MeshRenderer>();
@@ -676,7 +682,7 @@ namespace OpenBodyCams
             // invisible to the body cam.
             foreach (var bodyCam in AllBodyCams)
             {
-                if (parent == bodyCam.CameraObject.transform)
+                if (parent == bodyCam.CameraTransform)
                     return;
             }
 
@@ -754,17 +760,15 @@ namespace OpenBodyCams
 
             currentPlayer = null;
             currentActualTarget = null;
+            currentAttachmentPoint = null;
             SetRenderersToHide([]);
             UpdateModelReferences();
 
             cameraPositionGetter = null;
 
-            if (CameraObject != null)
-            {
-                CameraObject.transform.SetParent(null, false);
-                CameraObject.transform.localPosition = Vector3.zero;
-                CameraObject.transform.localRotation = Quaternion.identity;
-            }
+            currentObstructingMaterial = null;
+
+            CameraTransform.SetLocalPositionAndRotation(Vector3.zero, Quaternion.identity);
 
             TargetHasChanged();
         }
@@ -786,25 +790,21 @@ namespace OpenBodyCams
             UpdateModelReferences();
 
             panCamera = false;
-            Vector3 offset = Vector3.zero;
-
-            currentActualTarget = null;
-            Transform attachmentPoint = null;
-
-            currentRenderersToHide = [];
 
             currentObstructingMaterial = null;
+
+            var offset = Vector3.zero;
 
             if (!currentPlayer.isPlayerDead)
             {
                 if (Plugin.CameraMode.Value == CameraModeOptions.Head)
                 {
-                    attachmentPoint = currentPlayer.gameplayCamera.transform;
+                    currentAttachmentPoint = currentPlayer.gameplayCamera.transform;
                     offset = CAMERA_CONTAINER_OFFSET;
                 }
                 else
                 {
-                    attachmentPoint = currentPlayer.playerGlobalHead.transform.parent;
+                    currentAttachmentPoint = currentPlayer.playerGlobalHead.transform.parent;
                     offset = BODY_CAM_OFFSET;
                 }
 
@@ -823,18 +823,18 @@ namespace OpenBodyCams
                 {
                     if (Plugin.CameraMode.Value == CameraModeOptions.Head)
                     {
-                        attachmentPoint = masked.headTiltTarget;
+                        currentAttachmentPoint = masked.headTiltTarget;
                         offset = CAMERA_CONTAINER_OFFSET;
                     }
                     else
                     {
-                        attachmentPoint = masked.animationContainer.Find("metarig/spine/spine.001/spine.002/spine.003");
+                        currentAttachmentPoint = masked.animationContainer.Find("metarig/spine/spine.001/spine.002/spine.003");
                         offset = BODY_CAM_OFFSET;
                     }
                 }
                 else
                 {
-                    attachmentPoint = currentPlayer.redirectToEnemy.eye;
+                    currentAttachmentPoint = currentPlayer.redirectToEnemy.eye;
                 }
 
                 currentActualTarget = currentPlayer.redirectToEnemy.transform;
@@ -853,14 +853,14 @@ namespace OpenBodyCams
                 Transform obstructingMeshParent;
                 if (Plugin.CameraMode.Value == CameraModeOptions.Head)
                 {
-                    attachmentPoint = currentPlayer.deadBody.transform.Find("spine.001/spine.002/spine.003/spine.004/spine.004_end");
-                    obstructingMeshParent = attachmentPoint.parent;
+                    currentAttachmentPoint = currentPlayer.deadBody.transform.Find("spine.001/spine.002/spine.003/spine.004/spine.004_end");
+                    obstructingMeshParent = currentAttachmentPoint.parent;
                     offset = CAMERA_CONTAINER_OFFSET;
                 }
                 else
                 {
-                    attachmentPoint = currentPlayer.deadBody.transform.Find("spine.001/spine.002/spine.003");
-                    obstructingMeshParent = attachmentPoint;
+                    currentAttachmentPoint = currentPlayer.deadBody.transform.Find("spine.001/spine.002/spine.003");
+                    obstructingMeshParent = currentAttachmentPoint;
                     offset = BODY_CAM_OFFSET;
                 }
 
@@ -878,9 +878,7 @@ namespace OpenBodyCams
                 };
             }
 
-            CameraObject.transform.SetParent(attachmentPoint, false);
-            CameraObject.transform.localPosition = offset;
-            CameraObject.transform.localRotation = Quaternion.identity;
+            CameraTransform.SetLocalPositionAndRotation(offset, Quaternion.identity);
 
             TargetHasChanged();
         }
@@ -900,14 +898,17 @@ namespace OpenBodyCams
 
             currentPlayer = null;
             currentActualTarget = transform;
+            currentAttachmentPoint = null;
             UpdateModelReferences();
 
             panCamera = false;
-            Vector3 offset = Vector3.zero;
+
+            var offset = Vector3.zero;
 
             if (currentActualTarget.GetComponent<RadarBoosterItem>() is { } radarBooster)
             {
                 SetRenderersToHide([currentActualTarget.transform.Find("AnimContainer/Rod").GetComponent<Renderer>()]);
+                currentAttachmentPoint = currentActualTarget;
                 offset = new Vector3(0, 1.5f, 0);
                 panCamera = true;
 
@@ -925,11 +926,10 @@ namespace OpenBodyCams
                 {
                     isInInterior = position.y < -80;
                 };
+                currentAttachmentPoint = currentActualTarget;
             }
 
-            CameraObject.transform.SetParent(currentActualTarget.transform, false);
-            CameraObject.transform.localPosition = offset;
-            CameraObject.transform.localRotation = Quaternion.identity;
+            CameraTransform.SetLocalPositionAndRotation(offset, Quaternion.identity);
 
             TargetHasChanged();
         }
@@ -1146,12 +1146,14 @@ namespace OpenBodyCams
                 return;
             }
 
+            CameraContainer.SetPositionAndRotation(currentAttachmentPoint.position, currentAttachmentPoint.rotation);
+
             if (radarBoosterPanSpeed != 0)
                 panAngle = (panAngle + (Time.deltaTime * radarBoosterPanSpeed)) % 360;
             else
                 panAngle = RADAR_BOOSTER_INITIAL_PAN;
             if (panCamera)
-                CameraObject.transform.localRotation = Quaternion.Euler(0, panAngle, 0);
+                CameraTransform.localRotation = Quaternion.Euler(0, panAngle, 0);
 
             if (timePerFrame > 0)
             {
@@ -1180,7 +1182,7 @@ namespace OpenBodyCams
 
         void OnDestroy()
         {
-            Destroy(CameraObject);
+            Destroy(CameraContainer.gameObject);
 
             AllBodyCams = AllBodyCams.Where(bodyCam => (object)bodyCam != this).ToArray();
 
