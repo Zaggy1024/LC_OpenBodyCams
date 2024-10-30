@@ -234,6 +234,17 @@ public class ILInjector(IEnumerable<CodeInstruction> instructions, ILGenerator g
         instructions[offsetIndex] = instruction;
     }
 
+    public IEnumerable<CodeInstruction> GetRelativeInstructions(int offset, int size)
+    {
+        for (var i = 0; i < size; i++)
+            yield return instructions[index + offset + i];
+    }
+
+    public IEnumerable<CodeInstruction> GetRelativeInstructions(int size)
+    {
+        return GetRelativeInstructions(0, size);
+    }
+
     private void GetLastMatchRangeAbsolute(out int start, out int end)
     {
         start = index;
