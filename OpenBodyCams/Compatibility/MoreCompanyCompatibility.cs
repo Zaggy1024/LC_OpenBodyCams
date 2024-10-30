@@ -1,4 +1,6 @@
+using System;
 using System.Collections.Generic;
+using System.Reflection;
 using System.Runtime.CompilerServices;
 
 using GameNetcodeStuff;
@@ -8,6 +10,7 @@ using MoreCompany;
 using MoreCompany.Cosmetics;
 
 using OpenBodyCams.Utilities;
+using OpenBodyCams.Patches;
 
 namespace OpenBodyCams.Compatibility;
 
@@ -16,13 +19,49 @@ internal static class MoreCompanyCompatibility
     [MethodImpl(MethodImplOptions.NoInlining)]
     internal static bool Initialize(Harmony harmony)
     {
-        harmony.PatchAll(typeof(MoreCompanyCompatibility));
+        try
+        {
+            return InitializeImpl(harmony);
+        }
+        catch (Exception exception)
+        {
+            Plugin.Instance.Logger.LogError(exception);
+            return true;
+        }
+    }
+
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    private static bool InitializeImpl(Harmony harmony)
+    {
+        try
+        {
+            ApplyLocalCosmeticsPatch(harmony);
+            Plugin.Instance.Logger.LogInfo($"Patched MoreCompany to spawn cosmetics on the local player.");
+        }
+        catch (Exception exception)
+        {
+            Plugin.Instance.Logger.LogError("Failed to patch MoreCompany to spawn cosmetics on the local player.");
+            Plugin.Instance.Logger.LogError("The MoreCompany cosmetics compatibility will continue to function, but only other clients' cosmetics will be visible.");
+            Plugin.Instance.Logger.LogError(exception);
+        }
+
         return true;
+    }
+
+    private static void ApplyLocalCosmeticsPatch(Harmony harmony)
+    {
+        var targetMethod = typeof(CosmeticApplication).GetMethod(nameof(CosmeticApplication.UpdateAllCosmeticVisibilities), BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance, [typeof(bool)]);
+        if (targetMethod == null)
+            throw new MemberNotFoundException("CosmeticApplication.UpdateAllCosmeticVisibilities");
+
+        harmony.CreateProcessor(targetMethod)
+            .AddPostfix(typeof(MoreCompanyCompatibility).GetMethod(nameof(UpdateAllCosmeticVisibilitiesPostfix), BindingFlags.NonPublic | BindingFlags.Static))
+            .Patch();
     }
 
     [HarmonyPostfix]
     [HarmonyPatch(typeof(CosmeticApplication), nameof(CosmeticApplication.UpdateAllCosmeticVisibilities))]
-    private static void UpdateAllCosmeticVisibilities(CosmeticApplication __instance, bool isLocalPlayer)
+    private static void UpdateAllCosmeticVisibilitiesPostfix(CosmeticApplication __instance, bool isLocalPlayer)
     {
         if (__instance.parentType != ParentType.Player)
             return;
