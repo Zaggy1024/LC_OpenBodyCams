@@ -9,6 +9,19 @@ namespace OpenBodyCams.Utilities.IL;
 internal static class InstructionUtilities
 {
 
+    public static CodeInstruction MakeLdarg(int index)
+    {
+        return index switch
+        {
+            0 => new CodeInstruction(OpCodes.Ldarg_0),
+            1 => new CodeInstruction(OpCodes.Ldarg_1),
+            2 => new CodeInstruction(OpCodes.Ldarg_2),
+            3 => new CodeInstruction(OpCodes.Ldarg_3),
+            < 256 => new CodeInstruction(OpCodes.Ldarg_S, index),
+            _ => new CodeInstruction(OpCodes.Ldarg, index),
+        };
+    }
+
     public static int PopCount(this CodeInstruction instruction)
     {
         if (instruction.opcode == OpCodes.Call || instruction.opcode == OpCodes.Callvirt)

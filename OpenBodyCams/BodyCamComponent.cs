@@ -298,6 +298,15 @@ namespace OpenBodyCams
                 bodyCam.MarkTargetDirtyUntilRender(target);
         }
 
+        public static void MarkAnyParentDirtyUntilRenderForAllBodyCams(Transform target)
+        {
+            while (target != null)
+            {
+                MarkTargetDirtyUntilRenderForAllBodyCams(target);
+                target = target.parent;
+            }
+        }
+
         public static void MarkTargetDirtyUntilRenderForAllBodyCams()
         {
             foreach (var bodyCam in AllBodyCams)

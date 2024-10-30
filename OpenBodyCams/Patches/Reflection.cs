@@ -18,4 +18,15 @@ public static class Reflection
     {
         return type.GetMethod(name, bindingFlags, null, parameters, null);
     }
+
+    public static int GetParameterIndex(this MethodBase method, string name)
+    {
+        var parameters = method.GetParameters();
+        for (int i = 0; i < parameters.Length; i++)
+        {
+            if (parameters[i].Name == name)
+                return i;
+        }
+        return -1;
+    }
 }

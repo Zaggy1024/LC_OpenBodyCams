@@ -1,21 +1,24 @@
 using System;
 using System.Collections.Generic;
 using System.Reflection;
+using System.Reflection.Emit;
 using System.Runtime.CompilerServices;
 
 using GameNetcodeStuff;
 using HarmonyLib;
 using UnityEngine;
-using MoreCompany;
 using MoreCompany.Cosmetics;
 
 using OpenBodyCams.Utilities;
 using OpenBodyCams.Patches;
+using OpenBodyCams.Utilities.IL;
 
 namespace OpenBodyCams.Compatibility;
 
 internal static class MoreCompanyCompatibility
 {
+    private static readonly MethodInfo m_CosmeticApplication_UpdateAllCosmeticVisibilities = typeof(CosmeticApplication).GetMethod(nameof(CosmeticApplication.UpdateAllCosmeticVisibilities), BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
+
     [MethodImpl(MethodImplOptions.NoInlining)]
     internal static bool Initialize(Harmony harmony)
     {
@@ -45,41 +48,83 @@ internal static class MoreCompanyCompatibility
             Plugin.Instance.Logger.LogError(exception);
         }
 
+        harmony.CreateProcessor(m_CosmeticApplication_UpdateAllCosmeticVisibilities)
+            .AddPostfix(typeof(MoreCompanyCompatibility).GetMethod(nameof(UpdateCosmetics), BindingFlags.NonPublic | BindingFlags.Static))
+            .Patch();
+
         return true;
+    }
+
+    private static void UpdateCosmetics(Component __instance)
+    {
+        BodyCamComponent.MarkAnyParentDirtyUntilRenderForAllBodyCams(__instance.transform);
     }
 
     private static void ApplyLocalCosmeticsPatch(Harmony harmony)
     {
-        var targetMethod = typeof(CosmeticApplication).GetMethod(nameof(CosmeticApplication.UpdateAllCosmeticVisibilities), BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance, [typeof(bool)]);
-        if (targetMethod == null)
-            throw new MemberNotFoundException("CosmeticApplication.UpdateAllCosmeticVisibilities");
-
-        harmony.CreateProcessor(targetMethod)
-            .AddPostfix(typeof(MoreCompanyCompatibility).GetMethod(nameof(UpdateAllCosmeticVisibilitiesPostfix), BindingFlags.NonPublic | BindingFlags.Static))
+        harmony.CreateProcessor(m_CosmeticApplication_UpdateAllCosmeticVisibilities)
+            .AddTranspiler(typeof(MoreCompanyCompatibility).GetMethod(nameof(UpdateAllCosmeticVisibilitiesPostfix), BindingFlags.NonPublic | BindingFlags.Static))
             .Patch();
     }
 
-    [HarmonyPostfix]
+    [HarmonyTranspiler]
     [HarmonyPatch(typeof(CosmeticApplication), nameof(CosmeticApplication.UpdateAllCosmeticVisibilities))]
-    private static void UpdateAllCosmeticVisibilitiesPostfix(CosmeticApplication __instance, bool isLocalPlayer)
+    private static IEnumerable<CodeInstruction> UpdateAllCosmeticVisibilitiesPostfix(IEnumerable<CodeInstruction> instructions, ILGenerator generator, MethodBase method)
     {
-        if (__instance.parentType != ParentType.Player)
-            return;
-        if (!isLocalPlayer)
-            return;
-        if (!MainClass.cosmeticsSyncOther.Value)
-            return;
+        // - isActive = MainClass.cosmeticsSyncOther.Value && !isLocalPlayer;
+        // + isActive = MainClass.cosmeticsSyncOther.Value;
+        var isLocalPlayerArg = method.GetParameterIndex("isLocalPlayer") + 1;
+        if (isLocalPlayerArg == 0)
+            throw new Exception($"Failed to find the 'isLocalPlayer' parameter of {nameof(CosmeticApplication.UpdateAllCosmeticVisibilities)}");
 
-        foreach (var spawnedCosmetic in __instance.spawnedCosmetics)
-        {
-            if (spawnedCosmetic.cosmeticType == CosmeticType.HAT && __instance.detachedHead)
-                continue;
+        var injector = new ILInjector(instructions)
+            .Find([
+                ILMatcher.Opcode(OpCodes.Brfalse),
+                ILMatcher.Ldarg(isLocalPlayerArg),
+                ILMatcher.Ldc(0),
+                ILMatcher.Opcode(OpCodes.Ceq),
+                ILMatcher.Opcode(OpCodes.Br),
+                ILMatcher.Ldc(0),
+            ]);
 
-            spawnedCosmetic.gameObject.SetActive(true);
-            CosmeticRegistry.RecursiveLayerChange(spawnedCosmetic.transform, ViewPerspective.ENEMIES_NOT_RENDERED_LAYER);
-        }
+        if (!injector.IsValid)
+            throw new Exception("Failed to find check for local player when spawning cosmetics");
 
-        BodyCamComponent.MarkTargetDirtyUntilRenderForAllBodyCams();
+        injector
+            .RemoveLastMatch();
+
+        //   spawnedCosmetic.gameObject.SetActive(isActive)
+        // + if (isLocalPlayer)
+        // +     SetLocalCosmeticsLayers(spawnedCosmetic);
+        injector
+            .Find([
+                ILMatcher.Ldloc(),
+                ILMatcher.Callvirt(AccessTools.DeclaredPropertyGetter(typeof(Component), nameof(Component.gameObject))),
+                ILMatcher.Ldloc(),
+                ILMatcher.Callvirt(typeof(GameObject).GetMethod(nameof(GameObject.SetActive))),
+            ]);
+
+        if (!injector.IsValid)
+            throw new Exception("Failed to find setting active state of cosmetics");
+
+        var loadCosmetic = injector.Instruction.Clone();
+        var notLocalPlayerLabel = generator.DefineLabel();
+        return injector
+            .GoToMatchEnd()
+            .AddLabel(notLocalPlayerLabel)
+            .InsertInPlace([
+                InstructionUtilities.MakeLdarg(isLocalPlayerArg),
+                new CodeInstruction(OpCodes.Brfalse, notLocalPlayerLabel),
+                loadCosmetic,
+                new CodeInstruction(OpCodes.Call, typeof(MoreCompanyCompatibility).GetMethod(nameof(SetLocalCosmeticsLayers), BindingFlags.NonPublic | BindingFlags.Static)),
+            ])
+            .ReleaseInstructions();
+    }
+
+    private static void SetLocalCosmeticsLayers(Component root)
+    {
+        foreach (var transform in root.GetComponentsInChildren<Transform>())
+            transform.gameObject.layer = ViewPerspective.ENEMIES_NOT_RENDERED_LAYER;
     }
 
     [MethodImpl(MethodImplOptions.NoInlining)]
