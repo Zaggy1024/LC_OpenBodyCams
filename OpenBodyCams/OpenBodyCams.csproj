@@ -30,7 +30,7 @@
     <ItemGroup>
         <PackageReference Include="Evaisa-LethalLib" Version="0.16.1" />
         <PackageReference Include="ShaosilGaming-GeneralImprovements" Version="1.4.4" />
-        <PackageReference Include="notnotnotswipez-MoreCompany" Version="1.10.1" Publicize="true" />
+        <PackageReference Include="notnotnotswipez-MoreCompany" Version="1.11.0" Publicize="true" />
         <PackageReference Include="BunyaPineTree-ModelReplacementAPI" Version="2.4.10" Publicize="true" />
         <PackageReference Include="Ooseykins-LethalVRM" Version="1.0.7" Publicize="true" />
         <PackageReference Include="FlipMods-ReservedItemSlotCore" Version="2.0.38" Publicize="true" />
