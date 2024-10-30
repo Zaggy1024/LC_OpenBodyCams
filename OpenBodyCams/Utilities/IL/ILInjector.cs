@@ -234,12 +234,17 @@ public class ILInjector(IEnumerable<CodeInstruction> instructions, ILGenerator g
         instructions[offsetIndex] = instruction;
     }
 
-    private void GetLastMatchRange(out int start, out int size)
+    private void GetLastMatchRangeAbsolute(out int start, out int end)
     {
         start = index;
-        var end = matchEnd;
+        end = matchEnd;
         if (start > end)
             (start, end) = (end, start);
+    }
+
+    private void GetLastMatchRange(out int start, out int size)
+    {
+        GetLastMatchRangeAbsolute(out start, out var end);
 
         if (start < 0 || start >= instructions.Count)
             throw new InvalidOperationException($"Last match range starts at invalid index {start}");
@@ -337,12 +342,28 @@ public class ILInjector(IEnumerable<CodeInstruction> instructions, ILGenerator g
             builder.AppendLine();
 
         var end = Math.Min(index + 1 + context, instructions.Count);
+
+        GetLastMatchRangeAbsolute(out var matchStart, out var matchEnd);
+
         for (var i = Math.Max(index - context, 0); i < end; i++)
         {
-            if (i == index)
-                builder.Append("-> ");
+            if (matchEnd == -1 && i == index)
+            {
+                builder.Append("\u2576> ");
+            }
             else
-                builder.Append("   ");
+            {
+                if (i >= matchStart && i < matchEnd)
+                    builder.Append("\u2502");
+                else
+                    builder.Append(" ");
+
+                if (i == index)
+                    builder.Append("\u2576> ");
+                else
+                    builder.Append("   ");
+            }
+
             builder.AppendLine($"{i}: {instructions[i]}");
         }
 
