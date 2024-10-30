@@ -20,6 +20,18 @@ namespace OpenBodyCams
         #nullable enable
         public static BodyCamComponent[] GetAllBodyCams() { return [.. AllBodyCams]; }
 
+        public delegate bool TargetChangedToTransform(BodyCamComponent bodyCam, Transform target, ref Transform attachmentPoint, ref Vector3 offset, ref Quaternion angle);
+        // Called before the target is assigned to a transform. Currently, this will not be called
+        // for players, masked enemies, or radar boosters.
+        //
+        // This can be used to override the attachment point and offset of the body cam on any
+        // custom radar targets. Return true if you have set the attachment point, or if you
+        // would like the body cam to attach to the root of your radar target.
+        //
+        // If you are only interested in reacting to the target of a body cam changing, please
+        // use OnTargetChanged instead.
+        public static event TargetChangedToTransform? BeforeTargetChangedToTransform;
+
         public delegate void RenderersToHideTransformer(BodyCamComponent bodyCam, ref Renderer[] renderers);
         // This can be used to append to or override the renderers that are hidden for non-player
         // targets. Any renderers in the list passed by reference to this event's handler will be
@@ -895,6 +907,7 @@ namespace OpenBodyCams
             panCamera = false;
 
             var offset = Vector3.zero;
+            var angle = Quaternion.identity;
 
             if (currentActualTarget.GetComponent<RadarBoosterItem>() is { } radarBooster)
             {
@@ -917,10 +930,20 @@ namespace OpenBodyCams
                 {
                     isInInterior = position.y < -80;
                 };
+
                 currentAttachmentPoint = currentActualTarget;
+
+                if (BeforeTargetChangedToTransform != null)
+                {
+                    foreach (var handler in BeforeTargetChangedToTransform.GetInvocationList())
+                    {
+                        if (((TargetChangedToTransform)handler).Invoke(this, currentActualTarget, ref currentAttachmentPoint, ref offset, ref angle))
+                            break;
+                    }
+                }
             }
 
-            CameraTransform.SetLocalPositionAndRotation(offset, Quaternion.identity);
+            CameraTransform.SetLocalPositionAndRotation(offset, angle);
 
             TargetHasChanged();
         }
@@ -1066,7 +1089,7 @@ namespace OpenBodyCams
         {
             var isInInterior = false;
             var isInShip = false;
-            cameraPositionGetter?.Invoke(Camera.transform.position, ref isInInterior, ref isInShip);
+            cameraPositionGetter?.Invoke(CameraTransform.position, ref isInInterior, ref isInShip);
 
             targetSunlightEnabled = !isInInterior;
             targetBlackSkyVolumeWeight = isInInterior ? 1 : 0;
