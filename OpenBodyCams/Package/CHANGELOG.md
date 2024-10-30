@@ -1,3 +1,6 @@
+## Version 2.6.0
+- Updated the MoreCompany compatibility patch to spawn cosmetics on the local player. The compatibility feature now requires MoreCompany version 1.11.0 and above.
+
 ## Version 2.5.2
 - Fixed an issue that would cause the outdoor ambient lighting to flicker when the body cam frame rate was limited.
 
