@@ -398,8 +398,9 @@ namespace OpenBodyCams
 
         void Start()
         {
-            if (!EnsureCameraExistsOrReturnFalse())
+            if (!HasFinishedGameStartSetup())
                 return;
+            CreateCamera();
 
             SyncBodyCamToRadarMap.UpdateBodyCamTarget(this);
         }
@@ -424,13 +425,8 @@ namespace OpenBodyCams
                 MonitorOffMaterial = ShipObjects.BlackScreenMaterial;
         }
 
-        private bool EnsureCameraExistsOrReturnFalse()
+        private void CreateCamera()
         {
-            if (!HasFinishedGameStartSetup())
-                return false;
-            if (CameraContainer != null)
-                return true;
-
             Plugin.Instance.Logger.LogInfo("Camera has been destroyed, recreating it.");
             UpdateScreenMaterial();
 
@@ -504,14 +500,6 @@ namespace OpenBodyCams
             fogShaderPlaneRenderer.forceRenderingOff = true;
 
             OnCameraCreated?.Invoke(Camera);
-            return true;
-        }
-
-        // This method was public before, but is kept as a private method to prevent compatibility issues with existing API users.
-        [Obsolete]
-        private void EnsureCameraExists()
-        {
-            EnsureCameraExistsOrReturnFalse();
         }
 
         public void UpdateSettings()
@@ -756,6 +744,9 @@ namespace OpenBodyCams
 
         public void SetTargetToNone()
         {
+            if (CameraContainer == null)
+                return;
+
             ClearTargetDirtyImmediate();
 
             currentPlayer = null;
@@ -775,14 +766,14 @@ namespace OpenBodyCams
 
         public void SetTargetToPlayer(PlayerControllerB player)
         {
+            if (CameraContainer == null)
+                return;
+
             if (player == null)
             {
                 SetTargetToNone();
                 return;
             }
-
-            if (!EnsureCameraExistsOrReturnFalse())
-                return;
 
             ClearTargetDirtyImmediate();
 
@@ -885,14 +876,14 @@ namespace OpenBodyCams
 
         public void SetTargetToTransform(Transform transform)
         {
+            if (CameraContainer == null)
+                return;
+
             if (transform == null || transform.gameObject == null)
             {
                 SetTargetToNone();
                 return;
             }
-
-            if (!EnsureCameraExistsOrReturnFalse())
-                return;
 
             ClearTargetDirtyImmediate();
 
@@ -1089,9 +1080,6 @@ namespace OpenBodyCams
 
         private void LateUpdate()
         {
-            if (!EnsureCameraExistsOrReturnFalse())
-                return;
-
             UpdateTargetStatusDuringUpdate();
 
             var spectatedPlayer = StartOfRound.Instance.localPlayerController;
