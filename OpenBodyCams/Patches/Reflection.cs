@@ -29,4 +29,15 @@ public static class Reflection
         }
         return -1;
     }
+
+    public static int GetFirstParameterIndexOfType(this MethodBase method, Type type)
+    {
+        var parameters = method.GetParameters();
+        for (int i = 0; i < parameters.Length; i++)
+        {
+            if (parameters[i].ParameterType == type)
+                return i;
+        }
+        return -1;
+    }
 }
