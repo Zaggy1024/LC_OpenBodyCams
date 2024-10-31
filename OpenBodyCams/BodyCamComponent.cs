@@ -1098,11 +1098,6 @@ namespace OpenBodyCams
             targetIndirectSunlightDimmer = Mathf.Lerp(targetIndirectSunlightDimmer, isInShip ? 0 : 1, 5 * Time.deltaTime);
         }
 
-        private void Update()
-        {
-            UpdateOverrides();
-        }
-
         private void LateUpdate()
         {
             UpdateTargetStatusDuringUpdate();
@@ -1112,6 +1107,9 @@ namespace OpenBodyCams
                 return;
             if (spectatedPlayer.spectatedPlayerScript != null)
                 spectatedPlayer = spectatedPlayer.spectatedPlayerScript;
+
+            UpdateOverrides();
+
             bool enableCameraThisFrame = keepCameraOn ||
                 (MonitorRenderer != null
                 && MonitorRenderer.isVisible
