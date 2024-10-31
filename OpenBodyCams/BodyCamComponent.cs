@@ -1193,7 +1193,8 @@ namespace OpenBodyCams
 
         void OnDestroy()
         {
-            Destroy(CameraContainer.gameObject);
+            if (CameraContainer != null)
+                Destroy(CameraContainer.gameObject);
 
             AllBodyCams = AllBodyCams.Where(bodyCam => (object)bodyCam != this).ToArray();
 
