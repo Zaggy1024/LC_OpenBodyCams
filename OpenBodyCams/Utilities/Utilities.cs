@@ -1,41 +1,40 @@
 ﻿using UnityEngine;
 
-namespace OpenBodyCams.Utilities
+namespace OpenBodyCams.Utilities;
+
+public static class Utilities
 {
-    public static class Utilities
+    private static Camera[] allCameras = [];
+    private static readonly Plane[] frustumPlanes = new Plane[6];
+
+    public static bool IsVisibleToAnyCameraExcept(this Renderer renderer, Camera cameraToSkip)
     {
-        private static Camera[] allCameras = [];
-        private static readonly Plane[] frustumPlanes = new Plane[6];
+        if (allCameras.Length != Camera.allCamerasCount)
+            allCameras = new Camera[Camera.allCamerasCount];
+        Camera.GetAllCameras(allCameras);
 
-        public static bool IsVisibleToAnyCameraExcept(this Renderer renderer, Camera cameraToSkip)
+        var bounds = renderer.bounds;
+        var layer = renderer.gameObject.layer;
+
+        foreach (var camera in allCameras)
         {
-            if (allCameras.Length != Camera.allCamerasCount)
-                allCameras = new Camera[Camera.allCamerasCount];
-            Camera.GetAllCameras(allCameras);
+            if (camera is not null && (object)camera == cameraToSkip)
+                continue;
+            if ((camera.cullingMask & (1 << layer)) == 0)
+                continue;
 
-            var bounds = renderer.bounds;
-            var layer = renderer.gameObject.layer;
-
-            foreach (var camera in allCameras)
-            {
-                if (camera is not null && (object)camera == cameraToSkip)
-                    continue;
-                if ((camera.cullingMask & (1 << layer)) == 0)
-                    continue;
-
-                GeometryUtility.CalculateFrustumPlanes(camera, frustumPlanes);
-                if (GeometryUtility.TestPlanesAABB(frustumPlanes, bounds))
-                    return true;
-            }
-
-            return false;
+            GeometryUtility.CalculateFrustumPlanes(camera, frustumPlanes);
+            if (GeometryUtility.TestPlanesAABB(frustumPlanes, bounds))
+                return true;
         }
 
-        public static void SetMaterial(this Renderer renderer, int index, Material material)
-        {
-            var materials = renderer.sharedMaterials;
-            materials[index] = material;
-            renderer.sharedMaterials = materials;
-        }
+        return false;
+    }
+
+    public static void SetMaterial(this Renderer renderer, int index, Material material)
+    {
+        var materials = renderer.sharedMaterials;
+        materials[index] = material;
+        renderer.sharedMaterials = materials;
     }
 }
