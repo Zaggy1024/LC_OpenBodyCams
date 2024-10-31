@@ -751,6 +751,8 @@ namespace OpenBodyCams
 
         private void TargetHasChanged()
         {
+            UpdateOverrides(float.PositiveInfinity);
+
             OnTargetChanged?.Invoke(this);
         }
 
@@ -1087,7 +1089,7 @@ namespace OpenBodyCams
                 UpdateTargetStatus();
         }
 
-        private void UpdateOverrides()
+        private void UpdateOverrides(float deltaTime)
         {
             var isInInterior = false;
             var isInShip = false;
@@ -1095,7 +1097,7 @@ namespace OpenBodyCams
 
             targetSunlightEnabled = !isInInterior;
             targetBlackSkyVolumeWeight = isInInterior ? 1 : 0;
-            targetIndirectSunlightDimmer = Mathf.Lerp(targetIndirectSunlightDimmer, isInShip ? 0 : 1, 5 * Time.deltaTime);
+            targetIndirectSunlightDimmer = Mathf.Lerp(targetIndirectSunlightDimmer, isInShip ? 0 : 1, Mathf.Clamp01(5 * deltaTime));
         }
 
         private void LateUpdate()
@@ -1108,7 +1110,7 @@ namespace OpenBodyCams
             if (spectatedPlayer.spectatedPlayerScript != null)
                 spectatedPlayer = spectatedPlayer.spectatedPlayerScript;
 
-            UpdateOverrides();
+            UpdateOverrides(Time.deltaTime);
 
             bool enableCameraThisFrame = keepCameraOn ||
                 (MonitorRenderer != null
