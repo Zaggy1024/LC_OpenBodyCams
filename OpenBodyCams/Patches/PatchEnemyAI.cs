@@ -1,4 +1,4 @@
-﻿using HarmonyLib;
+using HarmonyLib;
 
 namespace OpenBodyCams.Patches;
 
@@ -7,7 +7,7 @@ internal static class PatchEnemyAI
 {
     [HarmonyPrefix]
     [HarmonyPatch(typeof(EnemyAI), nameof(EnemyAI.OnDestroy))]
-    private static void UnloadSceneObjectsEarly(EnemyAI __instance)
+    private static void OnDestroyPrefix(EnemyAI __instance)
     {
         if (__instance is FlowerSnakeEnemy flowerSnake)
         {
