@@ -976,6 +976,8 @@ namespace OpenBodyCams
         {
             UpdateTargetStatusBeforeRender();
 
+            CameraContainer.SetPositionAndRotation(currentAttachmentPoint.position, currentAttachmentPoint.rotation);
+
             vanillaMapNightVisionLightWasEnabled = vanillaMapNightVisionLight.enabled;
             vanillaMapNightVisionLight.enabled = false;
 
@@ -1156,8 +1158,6 @@ namespace OpenBodyCams
                 Camera.enabled = false;
                 return;
             }
-
-            CameraContainer.SetPositionAndRotation(currentAttachmentPoint.position, currentAttachmentPoint.rotation);
 
             if (radarBoosterPanSpeed != 0)
                 panAngle = (panAngle + (Time.deltaTime * radarBoosterPanSpeed)) % 360;
