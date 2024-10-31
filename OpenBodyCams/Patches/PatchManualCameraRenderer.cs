@@ -1,14 +1,16 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
+using System.Reflection;
 using System.Reflection.Emit;
 
 using GameNetcodeStuff;
 using HarmonyLib;
 using Unity.Netcode;
+using UnityEngine;
 
 using OpenBodyCams.Compatibility;
+using OpenBodyCams.Components;
 using OpenBodyCams.Utilities;
 using OpenBodyCams.Utilities.IL;
 
@@ -86,6 +88,23 @@ internal static class PatchManualCameraRenderer
             __result = ShipObjects.DoorScreenRenderer.IsVisibleToAnyCameraExcept(ShipObjects.InternalCameraRenderer.cam);
             return;
         }
+    }
+
+    [HarmonyTranspiler]
+    [HarmonyPatch(nameof(ManualCameraRenderer.AddTransformAsTargetToRadar))]
+    private static IEnumerable<CodeInstruction> AddTransformAsTargetToRadarTranspiler(IEnumerable<CodeInstruction> instructions, MethodBase method)
+    {
+        var transformArg = method.GetFirstParameterIndexOfType(typeof(Transform)) + 1;
+        return new ILInjector(instructions).GoToEnd()
+            .ReverseFind([
+                ILMatcher.Opcode(OpCodes.Ret),
+            ])
+            .Insert([
+                InstructionUtilities.MakeLdarg(transformArg),
+                new(OpCodes.Ldnull),
+                new(OpCodes.Call, typeof(ReverbTriggerTracker).GetMethod(nameof(ReverbTriggerTracker.AddTrackersToTarget), BindingFlags.NonPublic | BindingFlags.Static, [typeof(Transform), typeof(AudioReverbTrigger)])),
+            ])
+            .ReleaseInstructions();
     }
 
     [HarmonyTranspiler]

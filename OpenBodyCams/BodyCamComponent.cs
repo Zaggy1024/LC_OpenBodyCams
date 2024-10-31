@@ -5,12 +5,14 @@ using System.Linq;
 
 using GameNetcodeStuff;
 using UnityEngine;
+using UnityEngine.InputSystem.Utilities;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.HighDefinition;
 
 using OpenBodyCams.Utilities;
 using OpenBodyCams.API;
 using OpenBodyCams.Patches;
+using OpenBodyCams.Components;
 
 namespace OpenBodyCams
 {
@@ -204,9 +206,6 @@ namespace OpenBodyCams
 
         private Material currentObstructingMaterial;
         private float currentObstructingMaterialCullMode;
-
-        private delegate void GetCameraPosition(in Vector3 position, ref bool isInInterior, ref bool isInShip);
-        private GetCameraPosition cameraPositionGetter;
 
         private bool originalDirectSunlightEnabled;
         private bool originalIndirectSunlightEnabled;
@@ -769,8 +768,6 @@ namespace OpenBodyCams
             SetRenderersToHide([]);
             UpdateModelReferences();
 
-            cameraPositionGetter = null;
-
             currentObstructingMaterial = null;
 
             CameraTransform.SetLocalPositionAndRotation(Vector3.zero, Quaternion.identity);
@@ -815,12 +812,6 @@ namespace OpenBodyCams
 
                 currentActualTarget = currentPlayer.transform;
                 SetRenderersToHide([]);
-
-                cameraPositionGetter = (in Vector3 _, ref bool isInInterior, ref bool isInShip) =>
-                {
-                    isInInterior = currentPlayer.isInsideFactory;
-                    isInShip = currentPlayer.isInHangarShipRoom;
-                };
             }
             else if (currentPlayer.redirectToEnemy != null)
             {
@@ -844,14 +835,6 @@ namespace OpenBodyCams
 
                 currentActualTarget = currentPlayer.redirectToEnemy.transform;
                 SetRenderersToHide(CollectModelsToHide(currentActualTarget));
-
-                cameraPositionGetter = (in Vector3 _, ref bool isInInterior, ref bool isInShip) =>
-                {
-                    if (currentPlayer.redirectToEnemy == null)
-                        return;
-                    isInInterior = !currentPlayer.redirectToEnemy.isOutside;
-                    isInShip = currentPlayer.redirectToEnemy.isInsidePlayerShip;
-                };
             }
             else if (currentPlayer.deadBody != null)
             {
@@ -872,15 +855,6 @@ namespace OpenBodyCams
                 currentActualTarget = currentPlayer.deadBody.transform;
                 SetRenderersToHide(CollectModelsToHide(obstructingMeshParent));
                 currentObstructingMaterial = currentActualTarget.GetComponent<Renderer>()?.sharedMaterial;
-
-                cameraPositionGetter = (in Vector3 _, ref bool isInInterior, ref bool isInShip) =>
-                {
-                    if (currentPlayer.deadBody == null)
-                        return;
-                    if (currentPlayer.deadBody.grabBodyObject != null)
-                        isInInterior = currentPlayer.deadBody.grabBodyObject.isInFactory;
-                    isInShip = currentPlayer.deadBody.isInShip;
-                };
             }
 
             CameraTransform.SetLocalPositionAndRotation(offset, Quaternion.identity);
@@ -917,22 +891,9 @@ namespace OpenBodyCams
                 currentAttachmentPoint = currentActualTarget;
                 offset = new Vector3(0, 1.5f, 0);
                 panCamera = true;
-
-                cameraPositionGetter = (in Vector3 _, ref bool isInInterior, ref bool isInShip) =>
-                {
-                    if (currentActualTarget != radarBooster.transform)
-                        return;
-                    isInInterior = radarBooster.isInFactory;
-                    isInShip = radarBooster.isInShipRoom;
-                };
             }
             else
             {
-                cameraPositionGetter = (in Vector3 position, ref bool isInInterior, ref bool isInShip) =>
-                {
-                    isInInterior = position.y < -80;
-                };
-
                 currentAttachmentPoint = currentActualTarget;
 
                 if (BeforeTargetChangedToTransform != null)
@@ -1091,13 +1052,13 @@ namespace OpenBodyCams
 
         private void UpdateOverrides(float deltaTime)
         {
-            var isInInterior = false;
-            var isInShip = false;
-            cameraPositionGetter?.Invoke(CameraTransform.position, ref isInInterior, ref isInShip);
+            var reverbTrigger = ReverbTriggerTracker.GetCurrentReverbTrigger(currentActualTarget);
+
+            var isInInterior = currentActualTarget.position.y < -80;
 
             targetSunlightEnabled = !isInInterior;
             targetBlackSkyVolumeWeight = isInInterior ? 1 : 0;
-            targetIndirectSunlightDimmer = Mathf.Lerp(targetIndirectSunlightDimmer, isInShip ? 0 : 1, Mathf.Clamp01(5 * deltaTime));
+            targetIndirectSunlightDimmer = Mathf.Lerp(targetIndirectSunlightDimmer, (reverbTrigger?.insideLighting ?? false) ? 0 : 1, Mathf.Clamp01(5 * deltaTime));
         }
 
         private void LateUpdate()

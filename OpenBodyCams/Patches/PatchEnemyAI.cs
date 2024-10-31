@@ -1,10 +1,30 @@
+﻿using GameNetcodeStuff;
 using HarmonyLib;
+
+using OpenBodyCams.Components;
 
 namespace OpenBodyCams.Patches;
 
 [HarmonyPatch(typeof(EnemyAI))]
 internal static class PatchEnemyAI
 {
+    [HarmonyPostfix]
+    [HarmonyPatch(nameof(EnemyAI.Start))]
+    private static void StartPostfix(EnemyAI __instance)
+    {
+        PlayerControllerB playerMimicking = null;
+        foreach (var player in StartOfRound.Instance.allPlayerScripts)
+        {
+            if (player.redirectToEnemy == __instance)
+            {
+                playerMimicking = player;
+                break;
+            }
+        }
+
+        ReverbTriggerTracker.AddTrackersToTarget(__instance.NetworkObject.transform, playerMimicking?.currentAudioTrigger);
+    }
+
     [HarmonyPrefix]
     [HarmonyPatch(typeof(EnemyAI), nameof(EnemyAI.OnDestroy))]
     private static void OnDestroyPrefix(EnemyAI __instance)

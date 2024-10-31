@@ -232,6 +232,8 @@ namespace OpenBodyCams
             harmony.PatchAll(typeof(PatchCentipedeAI));
             harmony.PatchAll(typeof(PatchFlowerSnakeEnemy));
             harmony.PatchAll(typeof(PatchHDRenderPipeline));
+            harmony.PatchAll(typeof(PatchRadarBoosterItem));
+            harmony.PatchAll(typeof(PatchDeadBodyInfo));
             harmony.PatchAll(typeof(PatchFixItemDropping));
 
             BodyCamComponent.InitializeStatic();

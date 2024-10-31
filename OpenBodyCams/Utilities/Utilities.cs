@@ -1,4 +1,7 @@
-﻿using UnityEngine;
+﻿using System;
+using System.Collections.Generic;
+
+using UnityEngine;
 
 namespace OpenBodyCams.Utilities;
 
@@ -36,5 +39,27 @@ public static class Utilities
         var materials = renderer.sharedMaterials;
         materials[index] = material;
         renderer.sharedMaterials = materials;
+    }
+
+    private static Queue<Transform> transformQueue = [];
+
+    public static T GetComponentInChildrenBreadthFirst<T>(this Component self, Func<T, bool> predicate) where T : Component
+    {
+        transformQueue.Clear();
+        transformQueue.Enqueue(self.transform);
+
+        while (transformQueue.TryDequeue(out var current))
+        {
+            foreach (var component in current.GetComponents<T>())
+            {
+                if (predicate == null || predicate(component))
+                    return component;
+            }
+
+            for (var i = 0; i < current.childCount; i++)
+                transformQueue.Enqueue(current.GetChild(i));
+        }
+
+        return null;
     }
 }
