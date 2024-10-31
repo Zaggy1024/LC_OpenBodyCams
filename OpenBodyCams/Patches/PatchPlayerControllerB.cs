@@ -32,7 +32,7 @@ internal static class PatchPlayerControllerB
     }
 
     [HarmonyPostfix]
-    [HarmonyPatch("KillPlayerClientRpc")]
+    [HarmonyPatch(nameof(PlayerControllerB.KillPlayerClientRpc))]
     private static void KillPlayerClientRpcPostfix(PlayerControllerB __instance)
     {
         if (!__instance.IsOwner)
