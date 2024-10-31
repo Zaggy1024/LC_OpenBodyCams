@@ -210,13 +210,13 @@ namespace OpenBodyCams
 
         private bool originalDirectSunlightEnabled;
         private bool originalIndirectSunlightEnabled;
-        private bool targetSunlightEnabled;
+        private bool targetSunlightEnabled = true;
 
         private float originalBlackSkyVolumeWeight;
-        private float targetBlackSkyVolumeWeight;
+        private float targetBlackSkyVolumeWeight = 0;
 
         private float originalIndirectSunlightDimmer;
-        private float targetIndirectSunlightDimmer;
+        private float targetIndirectSunlightDimmer = 0;
         #endregion
 
         #region Objects for body cam rendering
