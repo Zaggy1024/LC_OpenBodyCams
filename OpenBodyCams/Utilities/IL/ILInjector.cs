@@ -334,9 +334,6 @@ public class ILInjector(IEnumerable<CodeInstruction> instructions, ILGenerator g
 
     public List<CodeInstruction> ReleaseInstructions()
     {
-        if (!IsValid)
-            throw new InvalidOperationException(INVALID);
-
         var instructions = this.instructions;
         this.instructions = null;
         return instructions;
