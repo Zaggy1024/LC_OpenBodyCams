@@ -8,6 +8,7 @@ using UnityEngine;
 using UnityEngine.InputSystem.Utilities;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.HighDefinition;
+using UnityEngine.SceneManagement;
 
 using OpenBodyCams.Utilities;
 using OpenBodyCams.API;
@@ -154,6 +155,9 @@ namespace OpenBodyCams
 
         private static BodyCamComponent lastBodyCamCulled;
         private static BodyCamComponent lastBodyCamRendered;
+
+        private static Transform sunRootTransform = null;
+        private static MatchLocalPlayerPosition[] matchLocalPlayerPositions = [];
         #endregion
 
         #region Global options
@@ -215,6 +219,8 @@ namespace OpenBodyCams
 
         private float originalIndirectSunlightDimmer;
         private float targetIndirectSunlightDimmer = 0;
+
+        private Vector3 originalSunRootScale = Vector3.one;
         #endregion
 
         #region Objects for body cam rendering
@@ -250,6 +256,15 @@ namespace OpenBodyCams
             PatchHDRenderPipeline.BeforeCameraCulling += BeforeCullingAnyCamera;
             PatchHDRenderPipeline.BeforeCameraRendering += BeforeRenderingAnyCamera;
             RenderPipelineManager.endCameraRendering += AfterRenderingAnyCamera;
+
+            SceneManager.sceneLoaded += (_, _) => UpdateSceneStaticObjects();
+            SceneManager.sceneUnloaded += _ => UpdateSceneStaticObjects();
+        }
+
+        private static void UpdateSceneStaticObjects()
+        {
+            sunRootTransform = FindAnyObjectByType<animatedSun>()?.GetComponentInParent<MatchLocalPlayerPosition>().transform;
+            matchLocalPlayerPositions = FindObjectsByType<MatchLocalPlayerPosition>(FindObjectsSortMode.None);
         }
 
         internal static void InitializeAtStartOfGame()
@@ -988,6 +1003,14 @@ namespace OpenBodyCams
             var blackSkyVolume = StartOfRound.Instance.blackSkyVolume;
             originalBlackSkyVolumeWeight = blackSkyVolume.weight;
             blackSkyVolume.weight = targetBlackSkyVolumeWeight;
+
+            if (sunRootTransform != null)
+            {
+                originalSunRootScale = sunRootTransform.localScale;
+                sunRootTransform.localScale *= Math.Min(Camera.farClipPlane * (1 / 200f), 1);
+            }
+
+            SetMatchLocalPlayerPositions(Camera.transform.position);
         }
 
         private void RevertCullingOverrides()
@@ -1024,6 +1047,21 @@ namespace OpenBodyCams
 
             var blackSkyVolume = StartOfRound.Instance.blackSkyVolume;
             blackSkyVolume.weight = originalBlackSkyVolumeWeight;
+
+            if (sunRootTransform != null)
+                sunRootTransform.localScale = originalSunRootScale;
+
+            SetMatchLocalPlayerPositions(GameNetworkManager.Instance.localPlayerController.transform.position);
+        }
+
+        private static void SetMatchLocalPlayerPositions(Vector3 position)
+        {
+            foreach (var matchLocalPlayerPosition in matchLocalPlayerPositions)
+            {
+                if (matchLocalPlayerPosition == null)
+                    continue;
+                matchLocalPlayerPosition.transform.position = position;
+            }
         }
 
         private void ApplyRenderingOverrides()
