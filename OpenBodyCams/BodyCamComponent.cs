@@ -65,11 +65,6 @@ namespace OpenBodyCams
         // This event is fired when the screen is powered off or on.
         public event Action<bool>? OnScreenPowerChanged;
 
-        [Obsolete]
-        public delegate Renderer[] GetRenderersToHide(Renderer[] renderers);
-        [Obsolete("Use RenderersToHideTransformers")]
-        public event GetRenderersToHide? OnRenderersToHideChanged;
-
         public event BodyCam.BodyCamStatusUpdate? OnTargetChanged;
 
         // Used by API users to indicate whether the camera this component controls is remote, i.e.
@@ -744,9 +739,6 @@ namespace OpenBodyCams
 
         private void SetRenderersToHide(Renderer[] renderers)
         {
-            if (currentActualTarget != null && OnRenderersToHideChanged != null)
-                renderers = OnRenderersToHideChanged(renderers);
-
             RenderersToHideTransformers?.Invoke(this, ref renderers);
 
             currentRenderersToHide = renderers;
