@@ -1144,7 +1144,8 @@ namespace OpenBodyCams
         {
             SetStatus(CameraRenderingStatus.Disabled);
             UpdateScreenMaterial();
-            Camera.enabled = false;
+            if (Camera != null)
+                Camera.enabled = false;
         }
 
         void OnEnable()
