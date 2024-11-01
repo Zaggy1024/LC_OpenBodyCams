@@ -89,7 +89,7 @@ internal static class PatchHDRenderPipeline
 
         //   RenderRequest request;
         // - request = flattenedRequests[requestIndex];
-        // + BeforeCameraCullingHook(request = flattenedRequests[requestIndex]);
+        // + BeforeCameraRenderingHook(request = flattenedRequests[requestIndex]);
         //   ..
         //   ExecuteRenderRequest(request, context, commandBuffer, AOVRequestData.defaultAOVRequestDataNonAlloc);
         injector
