@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 
 using UnityEngine;
 
@@ -130,5 +130,10 @@ internal class ReverbTriggerTracker : MonoBehaviour
             return;
 
         info.lastTrigger = trigger;
+    }
+
+    private void OnDestroy()
+    {
+        targetReverbTriggers.Remove(info.root);
     }
 }
