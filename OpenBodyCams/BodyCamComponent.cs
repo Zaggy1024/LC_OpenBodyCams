@@ -22,7 +22,7 @@ namespace OpenBodyCams
         #nullable enable
         public static BodyCamComponent[] GetAllBodyCams() { return [.. AllBodyCams]; }
 
-        public delegate bool TargetChangedToTransform(BodyCamComponent bodyCam, Transform target, ref Transform attachmentPoint, ref Vector3 offset, ref Quaternion angle);
+        public delegate bool TargetChangedToTransform(MonoBehaviour bodyCam, Transform target, ref Transform attachmentPoint, ref Vector3 offset, ref Quaternion angle, ref Renderer[] renderersToHide);
         // Called before the target is assigned to a transform. Currently, this will not be called
         // for players, masked enemies, or radar boosters.
         //
@@ -32,6 +32,8 @@ namespace OpenBodyCams
         //
         // If you are only interested in reacting to the target of a body cam changing, please
         // use OnTargetChanged instead.
+        //
+        // The bodyCam parameter is always a non-null instance of BodyCamComponent.
         public static event TargetChangedToTransform? BeforeTargetChangedToTransform;
 
         public delegate void RenderersToHideTransformer(BodyCamComponent bodyCam, ref Renderer[] renderers);
@@ -885,6 +887,8 @@ namespace OpenBodyCams
             var offset = Vector3.zero;
             var angle = Quaternion.identity;
 
+            currentRenderersToHide = [];
+
             if (currentActualTarget.GetComponent<RadarBoosterItem>() is { } radarBooster)
             {
                 SetRenderersToHide([currentActualTarget.transform.Find("AnimContainer/Rod").GetComponent<Renderer>()]);
@@ -900,8 +904,11 @@ namespace OpenBodyCams
                 {
                     foreach (var handler in BeforeTargetChangedToTransform.GetInvocationList())
                     {
-                        if (((TargetChangedToTransform)handler).Invoke(this, currentActualTarget, ref currentAttachmentPoint, ref offset, ref angle))
+                        if (((TargetChangedToTransform)handler).Invoke(this, currentActualTarget, ref currentAttachmentPoint, ref offset, ref angle, ref currentRenderersToHide))
+                        {
+                            SetRenderersToHide(currentRenderersToHide);
                             break;
+                        }
                     }
                 }
             }
