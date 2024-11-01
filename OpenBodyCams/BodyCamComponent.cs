@@ -5,7 +5,6 @@ using System.Linq;
 
 using GameNetcodeStuff;
 using UnityEngine;
-using UnityEngine.InputSystem.Utilities;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.HighDefinition;
 using UnityEngine.SceneManagement;
