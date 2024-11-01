@@ -16,9 +16,15 @@ public static class BodyCam
     public static event MainBodyCamStatusUpdate? OnBodyCamReceiverBecameEnabled;
     public static event MainBodyCamStatusUpdate? OnBodyCamReceiverBecameDisabled;
 
-    public delegate void BodyCamStatusUpdate(BodyCamComponent bodyCam);
+    public delegate void BodyCamStatusUpdate(MonoBehaviour bodyCam);
 
+    // Called when a body cam is created.
+    //
+    // The bodyCam parameter is always a non-null instance of BodyCamComponent.
     public static event BodyCamStatusUpdate? OnBodyCamInstantiated;
+    // Called when a body cam is destroyed.
+    //
+    // The bodyCam parameter is always a non-null instance of BodyCamComponent.
     public static event BodyCamStatusUpdate? OnBodyCamDestroyed;
 
     public static bool BodyCamsAreAvailable

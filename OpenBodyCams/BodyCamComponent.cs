@@ -36,13 +36,15 @@ namespace OpenBodyCams
         // The bodyCam parameter is always a non-null instance of BodyCamComponent.
         public static event TargetChangedToTransform? BeforeTargetChangedToTransform;
 
-        public delegate void RenderersToHideTransformer(BodyCamComponent bodyCam, ref Renderer[] renderers);
+        public delegate void RenderersToHideTransformer(MonoBehaviour bodyCam, ref Renderer[] renderers);
         // This can be used to append to or override the renderers that are hidden for non-player
         // targets. Any renderers in the list passed by reference to this event's handler will be
         // hidden when the body cam this component controls is rendered.
         //
         // The list provided to the event will be empty for players, but the renderers returned
         // will still be hidden, along with all the player models that are hidden/shown by default.
+        //
+        // The bodyCam parameter is always a non-null instance of BodyCamComponent.
         public static event RenderersToHideTransformer? RenderersToHideTransformers;
 
         public Camera? GetCamera() { return Camera; }
