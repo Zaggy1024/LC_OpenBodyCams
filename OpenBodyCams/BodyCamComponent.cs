@@ -11,7 +11,6 @@ using UnityEngine.SceneManagement;
 
 using OpenBodyCams.Utilities;
 using OpenBodyCams.API;
-using OpenBodyCams.Patches;
 using OpenBodyCams.Components;
 
 namespace OpenBodyCams
@@ -252,10 +251,6 @@ namespace OpenBodyCams
 
         internal static void InitializeStatic()
         {
-            PatchHDRenderPipeline.BeforeCameraCulling += BeforeCullingAnyCamera;
-            PatchHDRenderPipeline.BeforeCameraRendering += BeforeRenderingAnyCamera;
-            RenderPipelineManager.endCameraRendering += AfterRenderingAnyCamera;
-
             SceneManager.sceneLoaded += (_, _) => UpdateSceneStaticObjects();
             SceneManager.sceneUnloaded += _ => UpdateSceneStaticObjects();
         }
@@ -366,7 +361,7 @@ namespace OpenBodyCams
             }
         }
 
-        private static void BeforeCullingAnyCamera(ScriptableRenderContext context, Camera camera)
+        internal static void BeforeCullingAnyCamera(Camera camera)
         {
             RevertLastOverrides();
 
@@ -383,7 +378,7 @@ namespace OpenBodyCams
             }
         }
 
-        internal static void BeforeRenderingAnyCamera(ScriptableRenderContext context, Camera camera)
+        internal static void BeforeRenderingAnyCamera(Camera camera)
         {
             RevertLastOverrides();
 
@@ -400,7 +395,7 @@ namespace OpenBodyCams
             }
         }
 
-        internal static void AfterRenderingAnyCamera(ScriptableRenderContext context, Camera camera)
+        internal static void AfterRenderingAnyCamera(Camera camera)
         {
             RevertLastOverrides();
         }

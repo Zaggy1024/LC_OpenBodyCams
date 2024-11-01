@@ -1,15 +1,19 @@
 using System;
+using System.Linq;
 
 using TMPro;
 using UnityEngine;
 using UnityEngine.Rendering.HighDefinition;
 
 using OpenBodyCams.Utilities;
+using OpenBodyCams.Patches;
 
 namespace OpenBodyCams.Overlay;
 
 internal class OverlayManager : MonoBehaviour
 {
+    private static OverlayManager[] Instances = [];
+
     internal BodyCamComponent BodyCam;
 
     private Camera camera;
@@ -28,16 +32,6 @@ internal class OverlayManager : MonoBehaviour
 
         var volume = camera.gameObject.AddComponent<CustomPassVolume>();
         volume.targetCamera = camera;
-
-        var pass = (TransparentRenderTexturePass)volume.AddPassOfType<TransparentRenderTexturePass>();
-        pass.targetColorBuffer = CustomPass.TargetBuffer.Custom;
-        pass.targetDepthBuffer = CustomPass.TargetBuffer.Custom;
-        pass.clearFlags = UnityEngine.Rendering.ClearFlag.All;
-        pass.targetTexture = camera.targetTexture;
-        camera.targetTexture = new RenderTexture(camera.targetTexture)
-        {
-            name = "Dummy Overlay Camera Output",
-        };
 
         var hdCamera = camera.GetComponent<HDAdditionalCameraData>();
         hdCamera.customRenderingSettings = true;
@@ -60,6 +54,26 @@ internal class OverlayManager : MonoBehaviour
 
         UpdatePreferences();
         UpdateText();
+
+        Instances = [.. Instances, this];
+    }
+
+    internal static void BeforeRenderingAnyCamera(Camera camera)
+    {
+        foreach (var instance in Instances)
+        {
+            if (instance.camera == camera)
+                PatchHDRenderPipeline.ForceEnableAlpha = true;
+        }
+    }
+
+    internal static void AfterRenderingAnyCamera(Camera camera)
+    {
+        foreach (var instance in Instances)
+        {
+            if (instance.camera == camera)
+                PatchHDRenderPipeline.ForceEnableAlpha = false;
+        }
     }
 
     private void CreateOverlayMesh()
@@ -136,5 +150,7 @@ internal class OverlayManager : MonoBehaviour
         BodyCam.OnScreenPowerChanged -= BodyCamScreenPowerChanged;
         API.BodyCam.OnBodyCamReceiverBecameEnabled -= UpdateText;
         API.BodyCam.OnBodyCamReceiverBecameDisabled -= UpdateText;
+
+        Instances = Instances.Where(manager => manager != this).ToArray();
     }
 }

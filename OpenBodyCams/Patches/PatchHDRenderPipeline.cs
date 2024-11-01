@@ -11,6 +11,8 @@ using UnityEngine.Rendering.HighDefinition;
 using OpenBodyCams.Utilities.IL;
 using UnityEngine.Experimental.Rendering;
 
+using static UnityEngine.Rendering.HighDefinition.RenderPipelineSettings;
+
 namespace OpenBodyCams.Patches;
 
 [HarmonyPatch(typeof(HDRenderPipeline))]
@@ -18,6 +20,44 @@ internal static class PatchHDRenderPipeline
 {
     internal static Action<ScriptableRenderContext, Camera> BeforeCameraCulling;
     internal static Action<ScriptableRenderContext, Camera> BeforeCameraRendering;
+
+    private static ColorBufferFormat? originalColorBufferFormat = null;
+    internal static bool ForceEnableAlpha
+    {
+        get
+        {
+            return originalColorBufferFormat.HasValue;
+        }
+        set
+        {
+            ref var settings = ref ((HDRenderPipelineAsset)GraphicsSettings.currentRenderPipeline).m_RenderPipelineSettings;
+
+            var prevFormat = settings.colorBufferFormat;
+
+            if (!value)
+            {
+                if (originalColorBufferFormat.HasValue)
+                {
+                    settings.colorBufferFormat = originalColorBufferFormat.Value;
+                    originalColorBufferFormat = null;
+                }
+            }
+            else
+            {
+                if (!originalColorBufferFormat.HasValue)
+                    originalColorBufferFormat = settings.colorBufferFormat;
+                settings.colorBufferFormat = ColorBufferFormat.R16G16B16A16;
+            }
+
+            if (settings.colorBufferFormat != prevFormat)
+            {
+                var pipeline = (HDRenderPipeline)RenderPipelineManager.currentPipeline;
+                var alpha = settings.SupportsAlpha();
+                pipeline.m_EnableAlpha = alpha && settings.postProcessSettings.supportsAlpha;
+                pipeline.m_KeepAlpha = alpha;
+            }
+        }
+    }
 
     [HarmonyTranspiler]
     [HarmonyPatch(nameof(HDRenderPipeline.Render), [typeof(ScriptableRenderContext), typeof(List<Camera>)])]

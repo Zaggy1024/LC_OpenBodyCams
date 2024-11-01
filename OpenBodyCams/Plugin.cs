@@ -10,8 +10,10 @@ using BepInEx.Configuration;
 using BepInEx.Logging;
 using HarmonyLib;
 using UnityEngine;
+using UnityEngine.Rendering;
 
 using OpenBodyCams.Compatibility;
+using OpenBodyCams.Overlay;
 using OpenBodyCams.Patches;
 using OpenBodyCams.Utilities;
 
@@ -238,6 +240,8 @@ public class Plugin : BaseUnityPlugin
 
         BodyCamComponent.InitializeStatic();
 
+        SetUpCameraCallbacks();
+
         ShipUpgrades.Initialize();
 
         Cosmetics.Initialize(harmony);
@@ -330,5 +334,29 @@ public class Plugin : BaseUnityPlugin
             Instance.Logger.LogWarning($"Failed to parse the external camera screen's emissive color: {e}");
             return null;
         }
+    }
+
+    private void SetUpCameraCallbacks()
+    {
+        PatchHDRenderPipeline.BeforeCameraCulling += BeforeCullingAnyCamera;
+        PatchHDRenderPipeline.BeforeCameraRendering += BeforeRenderingAnyCamera;
+        RenderPipelineManager.endCameraRendering += AfterRenderingAnyCamera;
+    }
+
+    private void BeforeCullingAnyCamera(ScriptableRenderContext context, Camera camera)
+    {
+        BodyCamComponent.BeforeCullingAnyCamera(camera);
+    }
+
+    private void BeforeRenderingAnyCamera(ScriptableRenderContext context, Camera camera)
+    {
+        BodyCamComponent.BeforeRenderingAnyCamera(camera);
+        OverlayManager.BeforeRenderingAnyCamera(camera);
+    }
+
+    private void AfterRenderingAnyCamera(ScriptableRenderContext context, Camera camera)
+    {
+        BodyCamComponent.AfterRenderingAnyCamera(camera);
+        OverlayManager.AfterRenderingAnyCamera(camera);
     }
 }
