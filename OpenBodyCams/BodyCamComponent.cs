@@ -1053,6 +1053,9 @@ namespace OpenBodyCams
 
         private void UpdateOverrides(float deltaTime)
         {
+            if (currentActualTarget == null)
+                return;
+
             var reverbTrigger = ReverbTriggerTracker.GetCurrentReverbTrigger(currentActualTarget);
 
             var isInInterior = currentActualTarget.position.y < -80;
