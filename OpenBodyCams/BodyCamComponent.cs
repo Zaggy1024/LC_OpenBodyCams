@@ -597,7 +597,7 @@ namespace OpenBodyCams
 
                 var components = new WeatherEffectComponents(originalWeather.weatherType, newEffect);
 
-                if (weather == (LevelWeatherType)i && PositionIsInInterior(CameraTransform.position))
+                if (weather == (LevelWeatherType)i && !PositionIsInInterior(CameraTransform.position))
                     components.enabled = true;
 
                 targetWeatherComponents[i] = components;
