@@ -1,4 +1,6 @@
 using System;
+using System.Diagnostics;
+using System.Text;
 
 using UnityEngine.Rendering;
 using UnityEngine;
@@ -37,15 +39,21 @@ namespace OpenBodyCams.Utilities
             {
                 state.thirdPersonCosmetics = [];
                 state.thirdPersonCosmeticsLayers = [];
+                state.thirdPersonCosmeticNames = [];
 
                 state.firstPersonCosmetics = [];
                 state.firstPersonCosmeticsLayers = [];
+                state.firstPersonCosmeticNames = [];
                 return;
             }
 
             Cosmetics.CollectCosmetics(player, out state.thirdPersonCosmetics, out state.firstPersonCosmetics, out state.hasViewmodelReplacement);
+
             state.thirdPersonCosmeticsLayers = new int[state.thirdPersonCosmetics.Length];
+            state.thirdPersonCosmeticNames = GetCosmeticsPaths(state.thirdPersonCosmetics, player.playerBodyAnimator.transform);
+
             state.firstPersonCosmeticsLayers = new int[state.firstPersonCosmetics.Length];
+            state.firstPersonCosmeticNames = GetCosmeticsPaths(state.firstPersonCosmetics, player.playerBodyAnimator.transform);
         }
 
         public static void Apply(ref PlayerModelState state, Perspective perspective)
@@ -80,9 +88,33 @@ namespace OpenBodyCams.Utilities
             }
 
             for (int i = 0; i < state.thirdPersonCosmetics.Length; i++)
+            {
+                if (state.thirdPersonCosmetics[i] == null)
+                {
+                    ref var debugName = ref state.thirdPersonCosmeticNames[i];
+                    if (debugName != null)
+                    {
+                        Plugin.Instance.Logger.LogWarning($"{player.playerUsername}'s third-person cosmetic {debugName} is null.\n{new StackTrace()}");
+                        debugName = null;
+                    }
+                    continue;
+                }
                 state.thirdPersonCosmeticsLayers[i] = state.thirdPersonCosmetics[i].layer;
+            }
             for (int i = 0; i < state.firstPersonCosmetics.Length; i++)
+            {
+                if (state.firstPersonCosmetics[i] == null)
+                {
+                    ref var debugName = ref state.firstPersonCosmeticNames[i];
+                    if (debugName != null)
+                    {
+                        Plugin.Instance.Logger.LogWarning($"{player.playerUsername}'s first-person cosmetic {debugName} is null.\n{new StackTrace()}");
+                        debugName = null;
+                    }
+                    continue;
+                }
                 state.firstPersonCosmeticsLayers[i] = state.firstPersonCosmetics[i].layer;
+            }
 
             // Modify
             static void AttachItem(GrabbableObject item, Transform holder)
@@ -116,9 +148,17 @@ namespace OpenBodyCams.Utilities
                 }
 
                 foreach (var cosmetic in state.thirdPersonCosmetics)
+                {
+                    if (cosmetic == null)
+                        continue;
                     SetCosmeticHidden(cosmetic, true);
+                }
                 foreach (var cosmetic in state.firstPersonCosmetics)
+                {
+                    if (cosmetic == null)
+                        continue;
                     SetCosmeticHidden(cosmetic, false);
+                }
             }
             else if (perspective == Perspective.ThirdPerson)
             {
@@ -144,9 +184,17 @@ namespace OpenBodyCams.Utilities
                 }
 
                 foreach (var cosmetic in state.thirdPersonCosmetics)
+                {
+                    if (cosmetic == null)
+                        continue;
                     SetCosmeticHidden(cosmetic, false);
+                }
                 foreach (var cosmetic in state.firstPersonCosmetics)
+                {
+                    if (cosmetic == null)
+                        continue;
                     SetCosmeticHidden(cosmetic, true);
+                }
             }
 
             PatchFlowerSnakeEnemy.SetClingingAnimationPositionsForPlayer(player, perspective);
@@ -169,9 +217,17 @@ namespace OpenBodyCams.Utilities
             player.thisPlayerModelArms.gameObject.layer = state.firstPersonArmsLayer;
 
             for (int i = 0; i < state.thirdPersonCosmetics.Length; i++)
+            {
+                if (state.thirdPersonCosmetics[i] == null)
+                    continue;
                 state.thirdPersonCosmetics[i].layer = state.thirdPersonCosmeticsLayers[i];
+            }
             for (int i = 0; i < state.firstPersonCosmetics.Length; i++)
+            {
+                if (state.firstPersonCosmetics[i] == null)
+                    continue;
                 state.firstPersonCosmetics[i].layer = state.firstPersonCosmeticsLayers[i];
+            }
 
             if (player.currentlyHeldObjectServer != null)
             {
@@ -191,6 +247,31 @@ namespace OpenBodyCams.Utilities
 
             state.lastPerspective = Perspective.Original;
         }
+
+        private static string[] GetCosmeticsPaths(GameObject[] objects, Transform root)
+        {
+            var result = new string[objects.Length];
+
+            for (var i = 0; i < objects.Length; i++)
+            {
+                var transform = objects[i].transform;
+                var builder = new StringBuilder(transform.name);
+
+                while (true)
+                {
+                    transform = transform.parent;
+                    if (transform == null || transform == root)
+                        break;
+                    builder.Insert(0, '/');
+                    builder.Insert(0, transform.name);
+                    if (transform.name.EndsWith("(Clone)"))
+                        break;
+                }
+                result[i] = builder.ToString();
+            }
+
+            return result;
+        }
     }
 
     public struct PlayerModelState()
@@ -207,9 +288,11 @@ namespace OpenBodyCams.Utilities
 
         internal GameObject[] thirdPersonCosmetics = [];
         internal int[] thirdPersonCosmeticsLayers = [];
+        internal string[] thirdPersonCosmeticNames = [];
 
         internal GameObject[] firstPersonCosmetics = [];
         internal int[] firstPersonCosmeticsLayers = [];
+        internal string[] firstPersonCosmeticNames = [];
 
         internal bool hasViewmodelReplacement = false;
 
