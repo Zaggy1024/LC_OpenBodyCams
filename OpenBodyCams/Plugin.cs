@@ -96,7 +96,6 @@ public class Plugin : BaseUnityPlugin
     public static ConfigEntry<BoolWithDefault> DisplayWeatherBasedOnPerspective;
 
     public static ConfigEntry<bool> PrintCosmeticsDebugInfo;
-    public static ConfigEntry<bool> BruteForcePreventFreezes;
     public static ConfigEntry<bool> ReferencedObjectDestructionDetectionEnabled;
     public static ConfigEntry<string> LastConfigVersion;
 
@@ -224,13 +223,11 @@ public class Plugin : BaseUnityPlugin
 
         // Debug:
         PrintCosmeticsDebugInfo = Config.Bind("Debug", "PrintCosmeticsDebugInfo", false, "Prints extra information about the cosmetics being collected for each player, as well as the code that is causing the collection.");
-        BruteForcePreventFreezes = Config.Bind("Debug", "BruteForcePreventFreezes", false, "Enable a brute force approach to preventing errors in the camera setup callback that can cause the screen to freeze.");
         ReferencedObjectDestructionDetectionEnabled = Config.Bind("Debug", "ModelDestructionDebuggingPatchEnabled", false, "Enable this option when reproducing a camera freeze. This will cause a debug message to be printed when a model that a body cam is tracking is destroyed.");
         LastConfigVersion = Config.Bind("Debug", "LastConfigVersion", "", "The last version of the mod that loaded/saved this config file. Used for setting migration.");
 
         PrintCosmeticsDebugInfo.SettingChanged += (_, _) => Cosmetics.PrintDebugInfo = PrintCosmeticsDebugInfo.Value;
         Cosmetics.PrintDebugInfo = PrintCosmeticsDebugInfo.Value;
-        BruteForcePreventFreezes.SettingChanged += (_, _) => BodyCamComponent.UpdateStaticSettings();
         ReferencedObjectDestructionDetectionEnabled.SettingChanged += (_, _) => UpdateReferencedObjectDestructionDetectionEnabled();
         UpdateReferencedObjectDestructionDetectionEnabled();
 
@@ -299,6 +296,9 @@ public class Plugin : BaseUnityPlugin
             Logger.LogInfo($"{ShipUpgradeEnabled.Definition} was set to its 2.0.0 default value 'false', resetting it to 'true'.");
             ShipUpgradeEnabled.Value = true;
         }
+
+        if (lastVersion < new Version(2, 7, 0))
+            orphans.Remove(new ConfigDefinition("Debug", "BruteForcePreventFreezes"));
 
         LastConfigVersion.Value = MOD_VERSION;
     }

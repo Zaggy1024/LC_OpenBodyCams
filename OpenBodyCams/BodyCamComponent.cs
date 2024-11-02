@@ -164,8 +164,6 @@ namespace OpenBodyCams
         private static bool disableCameraWhileTargetIsOnShip = false;
 
         private static float radarBoosterPanSpeed;
-
-        private static bool bruteForcePreventNullModels;
         #endregion
 
         #region Camera info
@@ -326,8 +324,6 @@ namespace OpenBodyCams
             disableCameraWhileTargetIsOnShip = Plugin.DisableCameraWhileTargetIsOnShip.Value;
 
             radarBoosterPanSpeed = Plugin.RadarBoosterPanRPM.Value * 360 / 60;
-
-            bruteForcePreventNullModels = Plugin.BruteForcePreventFreezes.Value;
         }
 
         internal static void CreateTargetWeatherEffectsForAllCams()
@@ -1278,32 +1274,6 @@ namespace OpenBodyCams
                     newStatus = CameraRenderingStatus.Rendering;
                 SetStatus(newStatus);
                 enableCameraThisFrame = !IsBlanked;
-            }
-
-            if (enableCameraThisFrame && bruteForcePreventNullModels)
-            {
-                // Brute force check if all models are still valid to prevent rendering from failing and
-                // causing a frozen screen.
-                bool foundNull = false;
-
-                if (currentPlayer != null && !currentPlayerModelState.VerifyCosmeticsExist(currentPlayer.playerUsername))
-                    foundNull = true;
-                var localPlayer = StartOfRound.Instance.localPlayerController;
-                if ((object)currentPlayer != localPlayer && !localPlayerModelState.VerifyCosmeticsExist(localPlayer.playerUsername))
-                    foundNull = true;
-
-                foreach (var renderer in currentRenderersToHide)
-                {
-                    if (renderer == null)
-                    {
-                        Plugin.Instance.Logger.LogError($"A mesh attached to non-player target {currentActualTarget.name} is null, marking dirty.");
-                        foundNull = true;
-                        break;
-                    }
-                }
-
-                if (foundNull)
-                    UpdateTargetStatus();
             }
 
             if (!enableCameraThisFrame)
