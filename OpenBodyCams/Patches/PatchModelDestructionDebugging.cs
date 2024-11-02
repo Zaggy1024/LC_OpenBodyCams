@@ -1,4 +1,4 @@
-﻿using System.Diagnostics;
+using System.Diagnostics;
 
 using HarmonyLib;
 using UnityEngine;
@@ -46,10 +46,7 @@ namespace OpenBodyCams.Patches
         private static void DestroyingObject(Object obj, float t)
         {
             if (IsReferencedObject(obj))
-            {
-                Plugin.Instance.Logger.LogWarning($"In {t} seconds, {obj.name} will be destroyed while it is referenced by a body cam.");
-                Plugin.Instance.Logger.LogWarning(new StackTrace());
-            }
+                Plugin.Instance.Logger.LogWarning($"In {t} seconds, {obj.name} will be destroyed while it is referenced by a body cam.\n{new StackTrace(2)}");
         }
 
         [HarmonyPrefix]
@@ -57,10 +54,7 @@ namespace OpenBodyCams.Patches
         private static void DestroyingObjectImmediately(Object obj)
         {
             if (IsReferencedObject(obj))
-            {
-                Plugin.Instance.Logger.LogWarning($"Immediately destroying {obj.name} which is referenced by a body cam.");
-                Plugin.Instance.Logger.LogWarning(new StackTrace());
-            }
+                Plugin.Instance.Logger.LogWarning($"Immediately destroying {obj.name} which is referenced by a body cam.\n{new StackTrace(2)}");
         }
     }
 }
