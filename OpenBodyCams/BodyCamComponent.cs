@@ -794,6 +794,8 @@ namespace OpenBodyCams
             ClearTargetDirtyImmediate();
 
             currentPlayer = player;
+            currentActualTarget = null;
+            currentAttachmentPoint = null;
             UpdateModelReferences();
 
             panCamera = false;
