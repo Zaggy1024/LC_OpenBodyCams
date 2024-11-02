@@ -156,6 +156,8 @@ namespace OpenBodyCams
 
         private static Transform sunRootTransform = null;
         private static MatchLocalPlayerPosition[] matchLocalPlayerPositions = [];
+
+        internal static WeatherEffectComponents[] weatherEffects = [];
         #endregion
 
         #region Global options
@@ -219,6 +221,9 @@ namespace OpenBodyCams
         private float targetIndirectSunlightDimmer = 0;
 
         private Vector3 originalSunRootScale = Vector3.one;
+
+        private Transform targetWeatherParent;
+        private WeatherEffectComponents[] targetWeatherComponents;
         #endregion
 
         #region Objects for body cam rendering
@@ -259,6 +264,18 @@ namespace OpenBodyCams
         {
             sunRootTransform = FindAnyObjectByType<animatedSun>()?.GetComponentInParent<MatchLocalPlayerPosition>().transform;
             matchLocalPlayerPositions = FindObjectsByType<MatchLocalPlayerPosition>(FindObjectsSortMode.None);
+
+            if (TimeOfDay.Instance != null)
+            {
+                var effectsCount = TimeOfDay.Instance.effects.Length;
+                weatherEffects = new WeatherEffectComponents[effectsCount];
+                for (var i = 0; i < effectsCount; i++)
+                    weatherEffects[i] = new WeatherEffectComponents((LevelWeatherType)i);
+            }
+            else
+            {
+                weatherEffects = [];
+            }
         }
 
         internal static void InitializeAtStartOfGame()
@@ -313,6 +330,12 @@ namespace OpenBodyCams
             bruteForcePreventNullModels = Plugin.BruteForcePreventFreezes.Value;
         }
 
+        internal static void CreateTargetWeatherEffectsForAllCams()
+        {
+            foreach (var bodyCam in AllBodyCams)
+                bodyCam.CreateTargetWeatherEffects();
+        }
+
         public static void MarkTargetDirtyUntilRenderForAllBodyCams(Transform target)
         {
             foreach (var bodyCam in AllBodyCams)
@@ -344,6 +367,15 @@ namespace OpenBodyCams
         {
             foreach (var bodyCam in AllBodyCams)
                 bodyCam.MarkTargetStatusChanged();
+        }
+
+        public static void UpdateTargetReverbTriggerForAllBodyCams(Transform target, AudioReverbTrigger trigger)
+        {
+            foreach (var bodyCam in AllBodyCams)
+            {
+                if (bodyCam.currentActualTarget == target)
+                    bodyCam.UpdateTargetReverbTrigger(trigger);
+            }
         }
 
         private static void RevertLastOverrides()
@@ -420,6 +452,7 @@ namespace OpenBodyCams
             if (!HasFinishedGameStartSetup())
                 return;
             CreateCamera();
+            CreateTargetWeatherEffects();
 
             SyncBodyCamToRadarMap.UpdateBodyCamTarget(this);
         }
@@ -526,6 +559,56 @@ namespace OpenBodyCams
             return position.y < -80;
         }
 
+        private void CreateTargetWeatherEffects()
+        {
+            DestroyTargetWeatherEffects();
+
+            if (Plugin.DisplayWeatherBasedOnPerspective.Value != BoolWithDefault.True)
+                return;
+
+            targetWeatherComponents = new WeatherEffectComponents[weatherEffects.Length];
+            targetWeatherParent = new GameObject($"BodyCam_{name}_TargetWeathers").transform;
+
+            var weather = TimeOfDay.Instance?.currentLevelWeather ?? LevelWeatherType.None;
+
+            var newEffects = new Dictionary<GameObject, GameObject>();
+            for (var i = 0; i < targetWeatherComponents.Length; i++)
+            {
+                var originalWeather = weatherEffects[i];
+                GameObject newEffect = null;
+
+                if (originalWeather.effectObject != null && !newEffects.TryGetValue(originalWeather.effectObject, out newEffect))
+                {
+                    newEffect = Instantiate(originalWeather.effectObject);
+                    newEffect.transform.SetParent(targetWeatherParent, false);
+
+                    foreach (var occlude in newEffect.GetComponentsInChildren<OccludeAudio>())
+                        Destroy(occlude);
+                    foreach (var filter in newEffect.GetComponentsInChildren<AudioLowPassFilter>())
+                        Destroy(filter);
+                    foreach (var audio in newEffect.GetComponentsInChildren<AudioSource>())
+                        Destroy(audio);
+
+                    newEffects.Add(originalWeather.effectObject, newEffect);
+                }
+
+                var components = new WeatherEffectComponents(originalWeather.weatherType, newEffect);
+
+                if (weather == (LevelWeatherType)i && PositionIsInInterior(CameraTransform.position))
+                    components.enabled = true;
+
+                targetWeatherComponents[i] = components;
+            }
+        }
+
+        private void DestroyTargetWeatherEffects()
+        {
+            targetWeatherComponents = [];
+            if (targetWeatherParent != null)
+                Destroy(targetWeatherParent.gameObject);
+            targetWeatherParent = null;
+        }
+
         public void UpdateSettings()
         {
             if (Camera == null)
@@ -550,6 +633,8 @@ namespace OpenBodyCams
             nightVisionLight.range = Plugin.NightVisionRangeBase * Plugin.NightVisionBrightness.Value;
 
             OnRenderTextureCreated?.Invoke(Camera.targetTexture);
+
+            CreateTargetWeatherEffects();
         }
 
         public void StartTargetTransition()
@@ -952,6 +1037,20 @@ namespace OpenBodyCams
             }
         }
 
+        private void SetTargetWeathersVisible(bool visible)
+        {
+            for (var i = 0; i < targetWeatherComponents.Length; i++)
+            {
+                var originalWeather = weatherEffects[i];
+                var targetWeather = targetWeatherComponents[i];
+                if (originalWeather == null || targetWeather == null)
+                    continue;
+
+                originalWeather.SetVisibility(!visible);
+                targetWeather.SetVisibility(visible);
+            }
+        }
+
         private void ApplyCullingOverrides()
         {
             UpdateTargetStatusBeforeRender();
@@ -1012,6 +1111,8 @@ namespace OpenBodyCams
             }
 
             SetMatchLocalPlayerPositions(Camera.transform.position);
+
+            SetTargetWeathersVisible(true);
         }
 
         private void RevertCullingOverrides()
@@ -1053,6 +1154,8 @@ namespace OpenBodyCams
                 sunRootTransform.localScale = originalSunRootScale;
 
             SetMatchLocalPlayerPositions(GameNetworkManager.Instance.localPlayerController.transform.position);
+
+            SetTargetWeathersVisible(false);
         }
 
         private static void SetMatchLocalPlayerPositions(Vector3 position)
@@ -1075,6 +1178,8 @@ namespace OpenBodyCams
                 // Grab the clamped value from the component.
                 targetIndirectSunlightDimmer = sunIndirectHDRP.lightDimmer;
             }
+
+            SetTargetWeathersVisible(true);
         }
 
         private void RevertRenderingOverrides()
@@ -1082,12 +1187,49 @@ namespace OpenBodyCams
             var sunIndirectHDRP = TimeOfDay.Instance.indirectLightData;
             if (sunIndirectHDRP != null)
                 sunIndirectHDRP.lightDimmer = originalIndirectSunlightDimmer;
+
+            SetTargetWeathersVisible(false);
         }
 
         private void UpdateTargetStatusDuringUpdate()
         {
             if (targetDirtyStatus.HasFlag(TargetDirtyStatus.Immediate))
                 UpdateTargetStatus();
+        }
+
+        private void UpdateTargetReverbTrigger(AudioReverbTrigger trigger)
+        {
+            // Based on AudioReverbTrigger.ChangeAudioReverbForPlayer().
+
+            if (trigger.usePreset != -1)
+            {
+                var presets = FindAnyObjectByType<AudioReverbPresets>();
+                if (trigger.usePreset < 0 || trigger.usePreset >= presets.audioPresets.Length)
+                    return;
+
+                UpdateTargetReverbTrigger(presets.audioPresets[trigger.usePreset]);
+                return;
+            }
+
+            var disableAllWeather = PositionIsInInterior(CameraTransform.position) || trigger.disableAllWeather;
+
+            if (disableAllWeather)
+            {
+                foreach (var targetWeather in targetWeatherComponents)
+                    targetWeather.enabled = false;
+            }
+            else
+            {
+                if (trigger.weatherEffect >= 0 && trigger.weatherEffect < targetWeatherComponents.Length)
+                    targetWeatherComponents[trigger.weatherEffect].enabled = trigger.effectEnabled;
+
+                if (trigger.enableCurrentLevelWeather)
+                {
+                    var currentWeather = (int)TimeOfDay.Instance.currentLevelWeather;
+                    if (currentWeather >= 0 && currentWeather < targetWeatherComponents.Length)
+                        targetWeatherComponents[currentWeather].enabled = true;
+                }
+            }
         }
 
         private void UpdateOverrides(float deltaTime)
@@ -1102,6 +1244,13 @@ namespace OpenBodyCams
             targetSunlightEnabled = !isInInterior;
             targetBlackSkyVolumeWeight = isInInterior ? 1 : 0;
             targetIndirectSunlightDimmer = Mathf.Lerp(targetIndirectSunlightDimmer, (reverbTrigger?.insideLighting ?? false) ? 0 : 1, Mathf.Clamp01(5 * deltaTime));
+
+            foreach (var targetWeather in targetWeatherComponents)
+            {
+                if (targetWeather == null)
+                    continue;
+                targetWeather.Update(currentActualTarget, deltaTime);
+            }
         }
 
         private void LateUpdate()
@@ -1201,6 +1350,8 @@ namespace OpenBodyCams
                 Destroy(CameraContainer.gameObject);
 
             AllBodyCams = AllBodyCams.Where(bodyCam => (object)bodyCam != this).ToArray();
+
+            DestroyTargetWeatherEffects();
 
             SyncBodyCamToRadarMap.OnBodyCamDestroyed(this);
 

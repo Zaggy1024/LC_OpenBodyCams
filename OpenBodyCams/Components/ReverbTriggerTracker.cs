@@ -129,6 +129,9 @@ internal class ReverbTriggerTracker : MonoBehaviour
         if (!other.TryGetComponent<AudioReverbTrigger>(out var trigger))
             return;
 
+        if (info.lastTrigger != trigger)
+            BodyCamComponent.UpdateTargetReverbTriggerForAllBodyCams(info.root, trigger);
+
         info.lastTrigger = trigger;
     }
 

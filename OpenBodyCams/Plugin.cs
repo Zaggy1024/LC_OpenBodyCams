@@ -25,6 +25,13 @@ public enum CameraModeOptions
     Head,
 }
 
+public enum BoolWithDefault
+{
+    False,
+    True,
+    Default,
+}
+
 [BepInPlugin(MOD_UNIQUE_NAME, MOD_NAME, MOD_VERSION)]
 [BepInDependency(ModGUIDs.AdvancedCompany, BepInDependency.DependencyFlags.SoftDependency)]
 [BepInDependency(ModGUIDs.LethalLib, BepInDependency.DependencyFlags.SoftDependency)]
@@ -85,6 +92,8 @@ public class Plugin : BaseUnityPlugin
 
     public static ConfigEntry<bool> FixDroppedItemRotation;
     public static ConfigEntry<bool> FixMaskedConversionForClients;
+
+    public static ConfigEntry<BoolWithDefault> DisplayWeatherBasedOnPerspective;
 
     public static ConfigEntry<bool> PrintCosmeticsDebugInfo;
     public static ConfigEntry<bool> BruteForcePreventFreezes;
@@ -209,6 +218,11 @@ public class Plugin : BaseUnityPlugin
         // Misc:
         FixDroppedItemRotation = Config.Bind("Misc", "FixDroppedItemRotation", true, "If enabled, the mod will patch a bug that causes the rotation of dropped items to be desynced between clients.");
         FixMaskedConversionForClients = Config.Bind("Misc", "FixMaskedConversionForClients", true, "If enabled, the mod will patch a bug that causes maps and body cams to be unable to target a player that was converted into a masked enemy.");
+
+        // Experimental:
+        DisplayWeatherBasedOnPerspective = Config.Bind("Experimental", "DisplayWeatherBasedOnPerspective", BoolWithDefault.Default, "If enabled, a clone of each weather effect will be simulated on the body cam target. This allows rain and fog effects to be visible on body cams when far from the viewer. This may cause issues with some modded weathers.\n\nThe Default value ");
+
+        DisplayWeatherBasedOnPerspective.SettingChanged += (_, _) => BodyCamComponent.CreateTargetWeatherEffectsForAllCams();
 
         // Debug:
         PrintCosmeticsDebugInfo = Config.Bind("Debug", "PrintCosmeticsDebugInfo", false, "Prints extra information about the cosmetics being collected for each player, as well as the code that is causing the collection.");
