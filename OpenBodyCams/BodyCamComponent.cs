@@ -263,6 +263,11 @@ namespace OpenBodyCams
             sunRootTransform = FindAnyObjectByType<animatedSun>()?.GetComponentInParent<MatchLocalPlayerPosition>().transform;
             matchLocalPlayerPositions = FindObjectsByType<MatchLocalPlayerPosition>(FindObjectsSortMode.None);
 
+            UpdateWeathers();
+        }
+
+        internal static void UpdateWeathers()
+        {
             if (TimeOfDay.Instance != null)
             {
                 var effectsCount = TimeOfDay.Instance.effects.Length;
@@ -274,6 +279,8 @@ namespace OpenBodyCams
             {
                 weatherEffects = [];
             }
+
+            CreateTargetWeatherEffectsForAllCams();
         }
 
         internal static void InitializeAtStartOfGame()
