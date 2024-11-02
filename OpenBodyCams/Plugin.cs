@@ -100,8 +100,6 @@ public class Plugin : BaseUnityPlugin
     public static ConfigEntry<bool> ReferencedObjectDestructionDetectionEnabled;
     public static ConfigEntry<string> LastConfigVersion;
 
-    internal static bool DisplayBodyCamUpgradeTip = false;
-
     private static readonly Harmony DestructionDetectionPatch = new(MOD_UNIQUE_NAME + ".DestructionDetectionPatch");
 
     internal static AssetBundle Assets;
@@ -301,9 +299,6 @@ public class Plugin : BaseUnityPlugin
             Logger.LogInfo($"{ShipUpgradeEnabled.Definition} was set to its 2.0.0 default value 'false', resetting it to 'true'.");
             ShipUpgradeEnabled.Value = true;
         }
-
-        if (lastVersion < new Version(2, 0, 4))
-            DisplayBodyCamUpgradeTip = true;
 
         LastConfigVersion.Value = MOD_VERSION;
     }
