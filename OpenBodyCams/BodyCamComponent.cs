@@ -521,6 +521,11 @@ namespace OpenBodyCams
             OnCameraCreated?.Invoke(Camera);
         }
 
+        private bool PositionIsInInterior(Vector3 position)
+        {
+            return position.y < -80;
+        }
+
         public void UpdateSettings()
         {
             if (Camera == null)
@@ -1092,7 +1097,7 @@ namespace OpenBodyCams
 
             var reverbTrigger = ReverbTriggerTracker.GetCurrentReverbTrigger(currentActualTarget);
 
-            var isInInterior = currentActualTarget.position.y < -80;
+            var isInInterior = PositionIsInInterior(CameraTransform.position);
 
             targetSunlightEnabled = !isInInterior;
             targetBlackSkyVolumeWeight = isInInterior ? 1 : 0;
