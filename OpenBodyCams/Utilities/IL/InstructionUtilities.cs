@@ -135,6 +135,38 @@ internal static class InstructionUtilities
         return null;
     }
 
+    public static CodeInstruction LdlocToStloc(this CodeInstruction instruction)
+    {
+        var opcode = instruction.opcode;
+        if (opcode == OpCodes.Ldloc_0)
+            return new CodeInstruction(OpCodes.Stloc_0);
+        if (opcode == OpCodes.Ldloc_1)
+            return new CodeInstruction(OpCodes.Stloc_1);
+        if (opcode == OpCodes.Ldloc_2)
+            return new CodeInstruction(OpCodes.Stloc_2);
+        if (opcode == OpCodes.Ldloc_3)
+            return new CodeInstruction(OpCodes.Stloc_3);
+        if (opcode == OpCodes.Ldloc || opcode == OpCodes.Ldloc_S)
+            return new CodeInstruction(OpCodes.Stloc, instruction.operand);
+        return null;
+    }
+
+    public static CodeInstruction StlocToLdloc(this CodeInstruction instruction)
+    {
+        var opcode = instruction.opcode;
+        if (opcode == OpCodes.Stloc_0)
+            return new CodeInstruction(OpCodes.Ldloc_0);
+        if (opcode == OpCodes.Stloc_1)
+            return new CodeInstruction(OpCodes.Ldloc_1);
+        if (opcode == OpCodes.Stloc_2)
+            return new CodeInstruction(OpCodes.Ldloc_2);
+        if (opcode == OpCodes.Stloc_3)
+            return new CodeInstruction(OpCodes.Ldloc_3);
+        if (opcode == OpCodes.Stloc || opcode == OpCodes.Stloc_S)
+            return new CodeInstruction(OpCodes.Ldloc, instruction.operand);
+        return null;
+    }
+
     public static int? GetLdcI32(this CodeInstruction instruction)
     {
         var opcode = instruction.opcode;

@@ -86,10 +86,9 @@ internal static class PatchHDRenderPipeline
                 new(OpCodes.Call, typeof(PatchHDRenderPipeline).GetMethod(nameof(BeforeCameraCullingHook), BindingFlags.NonPublic | BindingFlags.Static, [typeof(Camera), typeof(ScriptableRenderContext)])),
             ]);
 
-
         //   RenderRequest request;
-        // - request = flattenedRequests[requestIndex];
-        // + BeforeCameraRenderingHook(request = flattenedRequests[requestIndex]);
+        //   request = flattenedRequests[requestIndex];
+        // + BeforeCameraRenderingHook(request);
         //   ..
         //   ExecuteRenderRequest(request, context, commandBuffer, AOVRequestData.defaultAOVRequestDataNonAlloc);
         injector
@@ -107,9 +106,10 @@ internal static class PatchHDRenderPipeline
             return instructions;
         }
 
-        return injector.Back(1)
+        var loadRenderRequest = injector.GetRelativeInstruction(-1).StlocToLdloc();
+        return injector
             .InsertInPlace([
-                new(OpCodes.Dup),
+                loadRenderRequest,
                 new(OpCodes.Ldarg_1),
                 new(OpCodes.Call, typeof(PatchHDRenderPipeline).GetMethod(nameof(BeforeCameraRenderingHook), BindingFlags.NonPublic | BindingFlags.Static, [typeof(HDRenderPipeline.RenderRequest), typeof(ScriptableRenderContext)])),
             ])
