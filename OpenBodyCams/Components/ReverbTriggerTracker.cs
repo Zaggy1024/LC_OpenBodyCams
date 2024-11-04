@@ -120,6 +120,9 @@ internal class ReverbTriggerTracker : MonoBehaviour
 
     private void Start()
     {
+        if (info?.root == null)
+            Destroy(this);
+
         if (!TryGetComponent<Collider>(out _))
             Plugin.Instance.Logger.LogError($"{this} was added to an object without a collider.");
     }
@@ -137,6 +140,7 @@ internal class ReverbTriggerTracker : MonoBehaviour
 
     private void OnDestroy()
     {
-        targetReverbTriggers.Remove(info.root);
+        if (info != null)
+            targetReverbTriggers.Remove(info.root);
     }
 }
