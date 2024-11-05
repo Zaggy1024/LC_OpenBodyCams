@@ -270,8 +270,6 @@ namespace OpenBodyCams
         {
             sunRootTransform = FindAnyObjectByType<animatedSun>()?.GetComponentInParent<MatchLocalPlayerPosition>().transform;
             matchLocalPlayerPositions = FindObjectsByType<MatchLocalPlayerPosition>(FindObjectsSortMode.None);
-
-            UpdateWeathers();
         }
 
         internal static void UpdateWeathers()
