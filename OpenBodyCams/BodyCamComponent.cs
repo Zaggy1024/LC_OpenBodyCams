@@ -139,7 +139,10 @@ namespace OpenBodyCams
         private const float RADAR_BOOSTER_INITIAL_PAN = 270;
 
         private static readonly Vector3 BODY_CAM_OFFSET = new(0.07f, 0, 0.16f);
-        private static readonly Vector3 CAMERA_CONTAINER_OFFSET = new(0.07f, 0, 0.125f);
+
+        private static readonly Vector3 PLAYER_HEAD_CAM_OFFSET = new(0.07f, 0, 0.125f);
+        private static readonly Vector3 CORPSE_HEAD_CAM_OFFSET = new(0.07f, -0.1f, 0.125f);
+        private static readonly Vector3 MASKED_HEAD_CAM_OFFSET = new(0.07f, 0.1f, 0.031f);
         #endregion
 
         #region Per-game constants
@@ -908,7 +911,7 @@ namespace OpenBodyCams
                 if (Plugin.CameraMode.Value == CameraModeOptions.Head)
                 {
                     currentAttachmentPoint = currentPlayer.gameplayCamera.transform;
-                    offset = CAMERA_CONTAINER_OFFSET;
+                    offset = PLAYER_HEAD_CAM_OFFSET;
                 }
                 else
                 {
@@ -925,8 +928,8 @@ namespace OpenBodyCams
                 {
                     if (Plugin.CameraMode.Value == CameraModeOptions.Head)
                     {
-                        currentAttachmentPoint = masked.headTiltTarget;
-                        offset = CAMERA_CONTAINER_OFFSET;
+                        currentAttachmentPoint = masked.eye;
+                        offset = MASKED_HEAD_CAM_OFFSET;
                     }
                     else
                     {
@@ -949,7 +952,7 @@ namespace OpenBodyCams
                 {
                     currentAttachmentPoint = currentPlayer.deadBody.transform.Find("spine.001/spine.002/spine.003/spine.004/spine.004_end");
                     obstructingMeshParent = currentAttachmentPoint.parent;
-                    offset = CAMERA_CONTAINER_OFFSET;
+                    offset = CORPSE_HEAD_CAM_OFFSET;
                 }
                 else
                 {
