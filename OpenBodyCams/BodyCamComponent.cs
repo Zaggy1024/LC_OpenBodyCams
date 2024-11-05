@@ -1270,6 +1270,9 @@ namespace OpenBodyCams
 
         private void LateUpdate()
         {
+            if (Camera == null)
+                return;
+
             UpdateTargetStatusDuringUpdate();
 
             var spectatedPlayer = StartOfRound.Instance.localPlayerController;
