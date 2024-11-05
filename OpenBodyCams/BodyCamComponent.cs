@@ -963,6 +963,9 @@ namespace OpenBodyCams
                 currentObstructingMaterial = currentActualTarget.GetComponent<Renderer>()?.sharedMaterial;
             }
 
+            if (currentAttachmentPoint == null)
+                currentAttachmentPoint = currentActualTarget;
+
             CameraTransform.SetLocalPositionAndRotation(offset, Quaternion.identity);
 
             TargetHasChanged();
