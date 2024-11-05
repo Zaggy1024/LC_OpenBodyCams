@@ -46,7 +46,12 @@ namespace OpenBodyCams
         // The bodyCam parameter is always a non-null instance of BodyCamComponent.
         public static event RenderersToHideTransformer? RenderersToHideTransformers;
 
-        public Camera? GetCamera() { return Camera; }
+        public Camera? GetCamera()
+        {
+            if (Camera == null)
+                CreateCamera();
+            return Camera;
+        }
 
         // This event is fired whenever the camera is created/recreated. No settings from the old
         // camera instances will carry over to a new camera, so this should be used to apply any
@@ -454,7 +459,8 @@ namespace OpenBodyCams
         {
             if (!HasFinishedGameStartSetup())
                 return;
-            CreateCamera();
+            if (Camera == null)
+                CreateCamera();
             CreateTargetWeatherEffects();
 
             SyncBodyCamToRadarMap.UpdateBodyCamTarget(this);
