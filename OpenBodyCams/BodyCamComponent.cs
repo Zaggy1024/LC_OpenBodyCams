@@ -491,7 +491,7 @@ namespace OpenBodyCams
             Plugin.Instance.Logger.LogInfo("Camera has been destroyed, recreating it.");
             UpdateScreenMaterial();
 
-            CameraContainer = new GameObject("BodyCamContainer").transform;
+            CameraContainer = new GameObject($"BodyCam_{name}_Container").transform;
 
             var cameraObject = new GameObject("BodyCam");
             CameraTransform = cameraObject.transform;
