@@ -22,7 +22,7 @@ internal static class PatchEnemyAI
             }
         }
 
-        ReverbTriggerTracker.AddTrackersToTarget(__instance.NetworkObject.transform, playerMimicking?.currentAudioTrigger);
+        TargetTracker.AddTrackersToTarget(__instance.NetworkObject.transform, playerMimicking?.currentAudioTrigger);
     }
 
     [HarmonyPrefix]

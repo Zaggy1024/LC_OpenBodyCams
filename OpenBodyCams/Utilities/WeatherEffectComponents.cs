@@ -16,6 +16,7 @@ internal class WeatherEffectComponents
 
     internal bool enabled = false;
     internal bool active = false;
+    internal bool visible = true;
     internal Vector3 transitionPoint = Vector3.zero;
     internal int transitionFrame = -1;
 
@@ -35,6 +36,8 @@ internal class WeatherEffectComponents
 
     internal void SetVisibility(bool show)
     {
+        visible = show;
+
         if (effectObject == null || !effectObject.activeInHierarchy)
             return;
 
@@ -44,13 +47,18 @@ internal class WeatherEffectComponents
             renderer.enabled = show;
     }
 
-    internal void Update(Transform target, float deltaTime)
+    internal void Update(Transform target, bool isInInterior, float deltaTime)
     {
         void SetActive(bool value)
         {
-            if (value != active)
-                effectObject?.SetActive(value);
+            if (value == active)
+                return;
+
+            effectObject?.SetActive(value);
             active = value;
+
+            if (value)
+                SetVisibility(visible);
         }
 
         if (enabled)

@@ -12,7 +12,7 @@ internal static class PatchPlayerControllerB
     [HarmonyPatch(nameof(PlayerControllerB.Start))]
     private static void StartPostfix(PlayerControllerB __instance)
     {
-        ReverbTriggerTracker.AddTrackersToTarget(__instance.NetworkObject.transform);
+        TargetTracker.AddTrackersToTarget(__instance.NetworkObject.transform);
     }
 
     [HarmonyFinalizer]

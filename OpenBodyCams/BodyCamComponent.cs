@@ -378,15 +378,6 @@ namespace OpenBodyCams
                 bodyCam.MarkTargetStatusChanged();
         }
 
-        public static void UpdateTargetReverbTriggerForAllBodyCams(Transform target, AudioReverbTrigger trigger)
-        {
-            foreach (var bodyCam in AllBodyCams)
-            {
-                if (bodyCam.currentActualTarget == target)
-                    bodyCam.UpdateTargetReverbTrigger(trigger);
-            }
-        }
-
         private static void RevertLastOverrides()
         {
             if (lastBodyCamCulled != null)
@@ -603,7 +594,7 @@ namespace OpenBodyCams
                 }
 
                 var components = new WeatherEffectComponents(originalWeather.weatherType, newEffect);
-
+                components.SetVisibility(false);
                 if (weather == (LevelWeatherType)i && !PositionIsInInterior(CameraTransform.position))
                     components.enabled = true;
 
@@ -1210,59 +1201,37 @@ namespace OpenBodyCams
                 UpdateTargetStatus();
         }
 
-        private void UpdateTargetReverbTrigger(AudioReverbTrigger trigger)
-        {
-            // Based on AudioReverbTrigger.ChangeAudioReverbForPlayer().
-
-            if (trigger.usePreset != -1)
-            {
-                var presets = FindAnyObjectByType<AudioReverbPresets>();
-                if (trigger.usePreset < 0 || trigger.usePreset >= presets.audioPresets.Length)
-                    return;
-
-                UpdateTargetReverbTrigger(presets.audioPresets[trigger.usePreset]);
-                return;
-            }
-
-            var disableAllWeather = PositionIsInInterior(CameraTransform.position) || trigger.disableAllWeather;
-
-            if (disableAllWeather)
-            {
-                foreach (var targetWeather in targetWeatherComponents)
-                    targetWeather.enabled = false;
-            }
-            else
-            {
-                if (trigger.weatherEffect >= 0 && trigger.weatherEffect < targetWeatherComponents.Length)
-                    targetWeatherComponents[trigger.weatherEffect].enabled = trigger.effectEnabled;
-
-                if (trigger.enableCurrentLevelWeather)
-                {
-                    var currentWeather = (int)TimeOfDay.Instance.currentLevelWeather;
-                    if (currentWeather >= 0 && currentWeather < targetWeatherComponents.Length)
-                        targetWeatherComponents[currentWeather].enabled = true;
-                }
-            }
-        }
-
         private void UpdateOverrides(float deltaTime)
         {
             if (currentActualTarget == null)
                 return;
 
-            var reverbTrigger = ReverbTriggerTracker.GetCurrentReverbTrigger(currentActualTarget);
+            var targetInfo = TargetTracker.GetCurrentInfo(currentActualTarget);
 
             var isInInterior = PositionIsInInterior(CameraTransform.position);
+            var insideLighting = false;
+
+            if (targetInfo.lastTrigger != null)
+                insideLighting = targetInfo.lastTrigger.insideLighting;
 
             targetSunlightEnabled = !isInInterior;
             targetBlackSkyVolumeWeight = isInInterior ? 1 : 0;
-            targetIndirectSunlightDimmer = Mathf.Lerp(targetIndirectSunlightDimmer, (reverbTrigger?.insideLighting ?? false) ? 0 : 1, Mathf.Clamp01(5 * deltaTime));
+            targetIndirectSunlightDimmer = Mathf.Lerp(targetIndirectSunlightDimmer, insideLighting ? 0 : 1, Mathf.Clamp01(5 * deltaTime));
 
-            foreach (var targetWeather in targetWeatherComponents)
+            for (var i = 0; i < targetWeatherComponents.Length; i++)
             {
+                var targetWeather = targetWeatherComponents[i];
                 if (targetWeather == null)
                     continue;
-                targetWeather.Update(currentActualTarget, deltaTime);
+
+                if (isInInterior)
+                    targetWeather.enabled = false;
+                else if (i < targetInfo.enabledWeathers.Length)
+                    targetWeather.enabled = targetInfo.enabledWeathers[i];
+                else
+                    targetWeather.enabled = false;
+
+                targetWeather.Update(currentActualTarget, isInInterior, deltaTime);
             }
         }
 
