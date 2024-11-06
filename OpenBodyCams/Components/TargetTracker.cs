@@ -32,7 +32,7 @@ internal class TargetTracker : MonoBehaviour
 
     internal static GameObject CreateColliderObjectAsChildOf(Collider collider)
     {
-        const string name = "OpenBodyCams_ReverbTriggerTracker";
+        const string name = $"OpenBodyCams_{nameof(TargetTracker)}";
         const float minHeight = 2.5f;
 
         if (collider is BoxCollider boxCollider)
