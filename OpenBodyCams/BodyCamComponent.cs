@@ -1055,6 +1055,16 @@ namespace OpenBodyCams
             }
         }
 
+        private static void SetMatchLocalPlayerPositions(Vector3 position)
+        {
+            foreach (var matchLocalPlayerPosition in matchLocalPlayerPositions)
+            {
+                if (matchLocalPlayerPosition == null)
+                    continue;
+                matchLocalPlayerPosition.transform.position = position;
+            }
+        }
+
         private void ApplyCullingOverrides()
         {
             UpdateTargetStatusBeforeRender();
@@ -1160,16 +1170,6 @@ namespace OpenBodyCams
             SetMatchLocalPlayerPositions(GameNetworkManager.Instance.localPlayerController.transform.position);
 
             SetTargetWeathersVisible(false);
-        }
-
-        private static void SetMatchLocalPlayerPositions(Vector3 position)
-        {
-            foreach (var matchLocalPlayerPosition in matchLocalPlayerPositions)
-            {
-                if (matchLocalPlayerPosition == null)
-                    continue;
-                matchLocalPlayerPosition.transform.position = position;
-            }
         }
 
         private void ApplyRenderingOverrides()
