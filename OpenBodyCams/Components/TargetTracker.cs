@@ -150,6 +150,8 @@ internal class TargetTracker : MonoBehaviour
         if (trigger.usePreset != -1)
         {
             var presets = FindAnyObjectByType<AudioReverbPresets>();
+            if (presets == null)
+                return;
             if (trigger.usePreset < 0 || trigger.usePreset >= presets.audioPresets.Length)
                 return;
 
