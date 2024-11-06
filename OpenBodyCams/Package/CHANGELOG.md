@@ -1,3 +1,16 @@
+## Version 3.0.0
+- Added an experimental feature to make weather effects visible on the camera regardless of distance from the local player. It is disabled by default for the moment, and may cause custom weathers to behave unexpectedly.
+- Made the sun always visible on the body cam, regardless of the render distance.
+- Adjusted head cam attachment points to be more consistent.
+- Switched to a more accurate method of tracking the environmental visuals that should be visible on body cams.
+- Prevented destroyed cosmetics from causing rendering to stop working. The BruteForcePreventFreezes option has been removed.
+- Prevented errors that could occur in EnableItemMeshes() when the body cam is switched away from a masked enemy.
+- Changed overlay rendering to a better method of getting a transparent texture, no longer relying on a custom pass.
+- API changes:
+    - Changed all events that receive BodyCamComponent parameters to receive them as MonoBehaviours. This prevents the generated lambda classes from causing an error when using those delegates in soft dependency code. Any users of these events will have to add a cast to BodyCamComponent and rebuild.
+    - Added an API to set the attachment point for custom radar targets.
+    - Removed the obsolete OnRenderersToHideChanged event.
+
 ## Version 2.6.0
 - Updated the MoreCompany compatibility patch to spawn cosmetics on the local player. The compatibility feature now requires MoreCompany version 1.11.0 and above.
 
