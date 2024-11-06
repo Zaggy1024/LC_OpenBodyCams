@@ -1223,7 +1223,7 @@ namespace OpenBodyCams
             var isInInterior = PositionIsInInterior(CameraTransform.position);
             var insideLighting = false;
 
-            if (targetInfo.lastTrigger != null)
+            if (targetInfo?.lastTrigger != null)
                 insideLighting = targetInfo.lastTrigger.insideLighting;
 
             targetSunlightEnabled = !isInInterior;
@@ -1238,7 +1238,7 @@ namespace OpenBodyCams
 
                 if (isInInterior)
                     targetWeather.enabled = false;
-                else if (i < targetInfo.enabledWeathers.Length)
+                else if (targetInfo != null && i < targetInfo.enabledWeathers.Length)
                     targetWeather.enabled = targetInfo.enabledWeathers[i];
                 else
                     targetWeather.enabled = false;
