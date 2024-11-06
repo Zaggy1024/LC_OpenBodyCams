@@ -9,11 +9,22 @@ namespace OpenBodyCams.Components;
 
 internal class TargetTracker : MonoBehaviour
 {
-    internal class TargetInfo(Transform root, AudioReverbTrigger initialTrigger)
+    internal class TargetInfo
     {
-        internal Transform root = root;
-        internal AudioReverbTrigger lastTrigger = initialTrigger;
+        internal Transform root;
+        internal AudioReverbTrigger lastTrigger;
         internal BitArray enabledWeathers = new(0);
+
+        internal TargetInfo(Transform root, TargetInfo copyFrom = null)
+        {
+            this.root = root;
+
+            if (copyFrom != null)
+            {
+                lastTrigger = copyFrom.lastTrigger;
+                enabledWeathers = new BitArray(copyFrom.enabledWeathers);
+            }
+        }
     }
 
     private static readonly int triggersLayer = LayerMask.NameToLayer("Triggers");
@@ -54,7 +65,7 @@ internal class TargetTracker : MonoBehaviour
         return null;
     }
 
-    internal static void AddTrackersToTarget(Transform target, AudioReverbTrigger initialTrigger = null)
+    internal static void AddTrackersToTarget(Transform target, Transform copyFrom = null)
     {
         if (targetReverbTriggers.ContainsKey(target))
             return;
@@ -100,7 +111,7 @@ internal class TargetTracker : MonoBehaviour
 
         tracker = trackerObject.AddComponent<TargetTracker>();
 
-        tracker.info = new TargetInfo(target, initialTrigger);
+        tracker.info = new TargetInfo(target, copyFrom != null ? GetCurrentInfo(copyFrom) : null);
         targetReverbTriggers.Add(target, tracker.info);
     }
 

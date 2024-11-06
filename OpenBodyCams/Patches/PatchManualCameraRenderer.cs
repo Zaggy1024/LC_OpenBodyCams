@@ -102,7 +102,7 @@ internal static class PatchManualCameraRenderer
             .Insert([
                 InstructionUtilities.MakeLdarg(transformArg),
                 new(OpCodes.Ldnull),
-                new(OpCodes.Call, typeof(TargetTracker).GetMethod(nameof(TargetTracker.AddTrackersToTarget), BindingFlags.NonPublic | BindingFlags.Static, [typeof(Transform), typeof(AudioReverbTrigger)])),
+                new(OpCodes.Call, typeof(TargetTracker).GetMethod(nameof(TargetTracker.AddTrackersToTarget), BindingFlags.NonPublic | BindingFlags.Static, [typeof(Transform), typeof(Transform)])),
             ])
             .ReleaseInstructions();
     }
