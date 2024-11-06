@@ -298,7 +298,7 @@ public class Plugin : BaseUnityPlugin
             ShipUpgradeEnabled.Value = true;
         }
 
-        if (lastVersion < new Version(2, 7, 0))
+        if (lastVersion < new Version(3, 0, 0))
             orphans.Remove(new ConfigDefinition("Debug", "BruteForcePreventFreezes"));
 
         LastConfigVersion.Value = MOD_VERSION;
