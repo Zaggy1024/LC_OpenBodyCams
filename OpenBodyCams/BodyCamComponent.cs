@@ -1069,6 +1069,9 @@ namespace OpenBodyCams
         {
             UpdateTargetStatusBeforeRender();
 
+            if (currentAttachmentPoint == null)
+                return;
+
             CameraContainer.SetPositionAndRotation(currentAttachmentPoint.position, currentAttachmentPoint.rotation);
 
             vanillaMapNightVisionLightWasEnabled = vanillaMapNightVisionLight.enabled;
@@ -1131,6 +1134,9 @@ namespace OpenBodyCams
 
         private void RevertCullingOverrides()
         {
+            if (currentAttachmentPoint == null)
+                return;
+
             vanillaMapNightVisionLight.enabled = vanillaMapNightVisionLightWasEnabled;
 
             nightVisionLight.enabled = false;
@@ -1174,6 +1180,9 @@ namespace OpenBodyCams
 
         private void ApplyRenderingOverrides()
         {
+            if (currentAttachmentPoint == null)
+                return;
+
             var sunIndirectHDRP = TimeOfDay.Instance.indirectLightData;
             if (sunIndirectHDRP != null)
             {
@@ -1188,6 +1197,9 @@ namespace OpenBodyCams
 
         private void RevertRenderingOverrides()
         {
+            if (currentAttachmentPoint == null)
+                return;
+
             var sunIndirectHDRP = TimeOfDay.Instance.indirectLightData;
             if (sunIndirectHDRP != null)
                 sunIndirectHDRP.lightDimmer = originalIndirectSunlightDimmer;
