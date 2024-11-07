@@ -48,8 +48,7 @@ namespace OpenBodyCams
 
         public Camera? GetCamera()
         {
-            if (Camera == null)
-                CreateCamera();
+            CreateCameraIfNotCreated();
             return Camera;
         }
 
@@ -451,8 +450,7 @@ namespace OpenBodyCams
         {
             if (!HasFinishedGameStartSetup())
                 return;
-            if (Camera == null)
-                CreateCamera();
+            CreateCameraIfNotCreated();
             CreateTargetWeatherEffects();
 
             SyncBodyCamToRadarMap.UpdateBodyCamTarget(this);
@@ -478,9 +476,12 @@ namespace OpenBodyCams
                 MonitorOffMaterial = ShipObjects.BlackScreenMaterial;
         }
 
-        private void CreateCamera()
+        private void CreateCameraIfNotCreated()
         {
-            Plugin.Instance.Logger.LogInfo("Camera has been destroyed, recreating it.");
+            if (Camera != null)
+                return;
+
+            Plugin.Instance.Logger.LogInfo($"Creating a new camera for {name}.");
             UpdateScreenMaterial();
 
             CameraContainer = new GameObject($"BodyCam_{name}_Container").transform;
@@ -853,8 +854,7 @@ namespace OpenBodyCams
 
         public void SetTargetToNone()
         {
-            if (CameraContainer == null)
-                return;
+            CreateCameraIfNotCreated();
 
             ClearTargetDirtyImmediate();
 
@@ -873,8 +873,7 @@ namespace OpenBodyCams
 
         public void SetTargetToPlayer(PlayerControllerB player)
         {
-            if (CameraContainer == null)
-                return;
+            CreateCameraIfNotCreated();
 
             if (player == null)
             {
@@ -965,8 +964,7 @@ namespace OpenBodyCams
 
         public void SetTargetToTransform(Transform transform)
         {
-            if (CameraContainer == null)
-                return;
+            CreateCameraIfNotCreated();
 
             if (transform == null || transform.gameObject == null)
             {
