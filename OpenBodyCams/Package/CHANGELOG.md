@@ -1,3 +1,6 @@
+## Version 3.0.1
+- Fixed an issue preventing API users from setting a body cam's target before it has started.
+
 ## Version 3.0.0
 - Added an experimental feature to make weather effects visible on the camera regardless of distance from the local player. It is disabled by default for the moment, and may cause custom weathers to behave unexpectedly.
 - Made the sun always visible on the body cam, regardless of the render distance.
