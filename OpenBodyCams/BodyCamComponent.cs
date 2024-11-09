@@ -267,7 +267,7 @@ namespace OpenBodyCams
 
         private static void UpdateSceneStaticObjects()
         {
-            sunRootTransform = FindAnyObjectByType<animatedSun>()?.GetComponentInParent<MatchLocalPlayerPosition>().transform;
+            sunRootTransform = FindAnyObjectByType<animatedSun>()?.GetComponentInParent<MatchLocalPlayerPosition>()?.transform;
             matchLocalPlayerPositions = FindObjectsByType<MatchLocalPlayerPosition>(FindObjectsSortMode.None);
         }
 
