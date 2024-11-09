@@ -1,3 +1,6 @@
+## Version 3.0.2
+- Prevented an error that would occur when landing on a moon with no sun.
+
 ## Version 3.0.1
 - Fixed an issue preventing API users from setting a body cam's target before it has started.
 
