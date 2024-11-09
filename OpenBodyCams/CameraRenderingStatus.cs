@@ -1,4 +1,4 @@
-﻿namespace OpenBodyCams
+namespace OpenBodyCams
 {
     public enum CameraRenderingStatus
     {
@@ -10,5 +10,7 @@
         TargetInvalid,
         // The camera is disabled to save resources while its target is onboard the ship.
         TargetDisabledOnShip,
+        // The camera is disabled due to the renderer displaying the body cam not being visible.
+        Culled,
     }
 }

@@ -1266,14 +1266,15 @@ namespace OpenBodyCams
                 && spectatedPlayer.isInHangarShipRoom
                 && IsScreenPowered());
 
+            CameraRenderingStatus newStatus = CameraRenderingStatus.Culled;
             if (enableCameraThisFrame)
             {
-                var newStatus = GetUpdatedCameraStatus();
+                newStatus = GetUpdatedCameraStatus();
                 if (newStatus == CameraRenderingStatus.TargetDisabledOnShip && (!disableCameraWhileTargetIsOnShip || keepCameraOn))
                     newStatus = CameraRenderingStatus.Rendering;
-                SetStatus(newStatus);
                 enableCameraThisFrame = !IsBlanked;
             }
+            SetStatus(newStatus);
 
             if (!enableCameraThisFrame)
             {
