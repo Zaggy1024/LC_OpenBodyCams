@@ -714,7 +714,7 @@ namespace OpenBodyCams
         {
             if (newStatus != cameraStatus)
             {
-                bool blankedChanged = CameraShouldRender(cameraStatus) == CameraShouldRender(newStatus);
+                bool blankedChanged = CameraShouldRender(cameraStatus) != CameraShouldRender(newStatus);
                 cameraStatus = newStatus;
                 UpdateScreenMaterial();
                 if (blankedChanged)
