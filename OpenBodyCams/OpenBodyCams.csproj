@@ -8,11 +8,13 @@
     </PropertyGroup>
 
     <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-      <DebugType>full</DebugType>
+        <DebugType>embedded</DebugType>
+        <Optimize>True</Optimize>
+        <DefineConstants>ENABLE_PROFILER</DefineConstants>
     </PropertyGroup>
 
     <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-      <DebugType>embedded</DebugType>
+        <DebugType>embedded</DebugType>
     </PropertyGroup>
 
     <ItemGroup>

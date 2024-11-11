@@ -255,6 +255,13 @@ public class Plugin : BaseUnityPlugin
         ShipUpgrades.Initialize();
 
         Cosmetics.Initialize(harmony);
+
+#if ENABLE_PROFILER
+        Application.SetStackTraceLogType(LogType.Log, StackTraceLogType.None);
+        Application.SetStackTraceLogType(LogType.Warning, StackTraceLogType.None);
+        Application.SetStackTraceLogType(LogType.Error, StackTraceLogType.None);
+        Application.SetStackTraceLogType(LogType.Assert, StackTraceLogType.None);
+#endif
     }
 
     private void UpdateReferencedObjectDestructionDetectionEnabled()

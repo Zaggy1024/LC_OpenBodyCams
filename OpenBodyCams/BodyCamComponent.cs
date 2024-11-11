@@ -4,6 +4,7 @@ using System.Data;
 using System.Linq;
 
 using GameNetcodeStuff;
+using Unity.Profiling;
 using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.HighDefinition;
@@ -392,8 +393,19 @@ namespace OpenBodyCams
             }
         }
 
+#if ENABLE_PROFILER
+        private const string profilerMarkerPrefix = "OpenBodyCams:";
+        private static readonly ProfilerMarker markerBeforeCullingAnyCamera = new($"{profilerMarkerPrefix}BeforeCullingAnyCamera");
+        private static readonly ProfilerMarker markerBeforeRenderingAnyCamera = new($"{profilerMarkerPrefix}BeforeRenderingAnyCamera");
+        private static readonly ProfilerMarker markerAfterRenderingAnyCamera = new($"{profilerMarkerPrefix}BeforeRenderingAnyCamera");
+#endif
+
         internal static void BeforeCullingAnyCamera(Camera camera)
         {
+#if ENABLE_PROFILER
+            markerBeforeCullingAnyCamera.Begin(camera);
+#endif
+
             RevertLastOverrides();
 
             var bodyCamCount = AllBodyCams.Length;
@@ -404,13 +416,21 @@ namespace OpenBodyCams
                 {
                     lastBodyCamCulled = bodyCam;
                     bodyCam.ApplyCullingOverrides();
-                    return;
+                    break;
                 }
             }
+
+#if ENABLE_PROFILER
+            markerBeforeCullingAnyCamera.End();
+#endif
         }
 
         internal static void BeforeRenderingAnyCamera(Camera camera)
         {
+#if ENABLE_PROFILER
+            markerBeforeRenderingAnyCamera.Begin(camera);
+#endif
+
             RevertLastOverrides();
 
             var bodyCamCount = AllBodyCams.Length;
@@ -421,14 +441,26 @@ namespace OpenBodyCams
                 {
                     lastBodyCamRendered = bodyCam;
                     bodyCam.ApplyRenderingOverrides();
-                    return;
+                    break;
                 }
             }
+
+#if ENABLE_PROFILER
+            markerBeforeRenderingAnyCamera.End();
+#endif
         }
 
         internal static void AfterRenderingAnyCamera(Camera camera)
         {
+#if ENABLE_PROFILER
+            markerAfterRenderingAnyCamera.Begin(camera);
+#endif
+
             RevertLastOverrides();
+
+#if ENABLE_PROFILER
+            markerAfterRenderingAnyCamera.End();
+#endif
         }
 
         void Awake()
