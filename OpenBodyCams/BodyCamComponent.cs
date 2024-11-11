@@ -1221,8 +1221,6 @@ namespace OpenBodyCams
                 // Grab the clamped value from the component.
                 targetIndirectSunlightDimmer = sunIndirectHDRP.lightDimmer;
             }
-
-            SetTargetWeathersVisible(true);
         }
 
         private void RevertRenderingOverrides()
@@ -1233,8 +1231,6 @@ namespace OpenBodyCams
             var sunIndirectHDRP = TimeOfDay.Instance.indirectLightData;
             if (sunIndirectHDRP != null)
                 sunIndirectHDRP.lightDimmer = originalIndirectSunlightDimmer;
-
-            SetTargetWeathersVisible(false);
         }
 
         private void UpdateTargetStatusDuringUpdate()
