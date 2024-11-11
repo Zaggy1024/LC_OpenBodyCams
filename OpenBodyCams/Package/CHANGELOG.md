@@ -1,3 +1,6 @@
+## Version 3.0.3
+- Fixed an issue with the OnBlankedSet event that caused the PiP body cam to never display when DisableCameraWhileTargetIsOnShip is true.
+
 ## Version 3.0.2
 - Prevented an error that would occur when landing on a moon with no sun.
 
