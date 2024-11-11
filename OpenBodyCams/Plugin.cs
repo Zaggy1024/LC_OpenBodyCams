@@ -217,7 +217,7 @@ public class Plugin : BaseUnityPlugin
         FixMaskedConversionForClients = Config.Bind("Misc", "FixMaskedConversionForClients", true, "If enabled, the mod will patch a bug that causes maps and body cams to be unable to target a player that was converted into a masked enemy.");
 
         // Experimental:
-        DisplayWeatherBasedOnPerspective = Config.Bind("Experimental", "DisplayWeatherBasedOnPerspective", BoolWithDefault.Default, "If enabled, a clone of each weather effect will be simulated on the body cam target. This allows rain and fog effects to be visible on body cams when far from the viewer. This may cause issues with some modded weathers.\n\nThe Default value ");
+        DisplayWeatherBasedOnPerspective = Config.Bind("Experimental", "DisplayWeatherBasedOnPerspective", BoolWithDefault.Default, "If enabled, a clone of each weather effect will be simulated on the body cam target. This allows rain and fog effects to be visible on body cams when far from the viewer. This may cause issues with some modded weathers.\n\nThe Default value will leave the feature disabled, but may be changed in future versions.");
 
         DisplayWeatherBasedOnPerspective.SettingChanged += (_, _) => BodyCamComponent.CreateTargetWeatherEffectsForAllCams();
 
