@@ -121,3 +121,10 @@ The `ManualCameraRenderer` argument must be a map renderer where its `cam` field
 
 # Credits
 - smxrez - Body cam antenna 3D model
+
+# Donations
+https://ko-fi.com/zaggy1024
+
+Any donations are appreciated to help support my continued improvement and maintenance of this and other Lethal Company mods!
+
+Note that donations will not influence the priority of bug fixes or feature implementations.
