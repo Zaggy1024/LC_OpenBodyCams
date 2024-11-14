@@ -1102,6 +1102,10 @@ namespace OpenBodyCams
             if (currentAttachmentPoint == null)
                 return;
 
+            var localPlayer = StartOfRound.Instance.localPlayerController;
+            if (localPlayer == null)
+                return;
+
             CameraContainer.SetPositionAndRotation(currentAttachmentPoint.position, currentAttachmentPoint.rotation);
 
             vanillaMapNightVisionLightWasEnabled = vanillaMapNightVisionLight.enabled;
@@ -1110,8 +1114,6 @@ namespace OpenBodyCams
             nightVisionLight.enabled = true;
             greenFlashRenderer.forceRenderingOff = false;
             fogShaderPlaneRenderer.forceRenderingOff = false;
-
-            var localPlayer = StartOfRound.Instance.localPlayerController;
 
             ViewPerspective.Apply(ref currentPlayerModelState, Perspective.FirstPerson);
             if ((object)currentPlayer != localPlayer)
@@ -1167,13 +1169,15 @@ namespace OpenBodyCams
             if (currentAttachmentPoint == null)
                 return;
 
+            var localPlayer = StartOfRound.Instance.localPlayerController;
+            if (localPlayer == null)
+                return;
+
             vanillaMapNightVisionLight.enabled = vanillaMapNightVisionLightWasEnabled;
 
             nightVisionLight.enabled = false;
             greenFlashRenderer.forceRenderingOff = true;
             fogShaderPlaneRenderer.forceRenderingOff = true;
-
-            var localPlayer = StartOfRound.Instance.localPlayerController;
 
             ViewPerspective.Restore(ref currentPlayerModelState);
             if ((object)currentPlayer != localPlayer)
@@ -1203,7 +1207,7 @@ namespace OpenBodyCams
             if (sunRootTransform != null)
                 sunRootTransform.localScale = originalSunRootScale;
 
-            SetMatchLocalPlayerPositions(GameNetworkManager.Instance.localPlayerController.transform.position);
+            SetMatchLocalPlayerPositions(localPlayer.transform.position);
 
             SetTargetWeathersVisible(false);
         }
