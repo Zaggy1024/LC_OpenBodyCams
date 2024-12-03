@@ -23,28 +23,32 @@ namespace OpenBodyCams
         public static BodyCamComponent[] GetAllBodyCams() { return [.. AllBodyCams]; }
 
         public delegate bool TargetChangedToTransform(MonoBehaviour bodyCam, Transform target, ref Transform attachmentPoint, ref Vector3 offset, ref Quaternion angle, ref Renderer[] renderersToHide);
-        // Called before the target is assigned to a transform. Currently, this will not be called
-        // for players, masked enemies, or radar boosters.
-        //
-        // This can be used to override the attachment point and offset of the body cam on any
-        // custom radar targets. Return true if you have set the attachment point, or if you
-        // would like the body cam to attach to the root of your radar target.
-        //
-        // If you are only interested in reacting to the target of a body cam changing, please
-        // use OnTargetChanged instead.
-        //
-        // The bodyCam parameter is always a non-null instance of BodyCamComponent.
+        /// <summary>
+        /// Called before the target is assigned to a transform. Currently, this will not be called
+        /// for players, masked enemies, or radar boosters.
+        ///
+        /// This can be used to override the attachment point and offset of the body cam on any
+        /// custom radar targets. Return true if you have set the attachment point, or if you
+        /// would like the body cam to attach to the root of your radar target.
+        ///
+        /// If you are only interested in reacting to the target of a body cam changing, please
+        /// use OnTargetChanged instead.
+        ///
+        /// The bodyCam parameter is always a non-null instance of BodyCamComponent.
+        /// </summary>
         public static event TargetChangedToTransform? BeforeTargetChangedToTransform;
 
         public delegate void RenderersToHideTransformer(MonoBehaviour bodyCam, ref Renderer[] renderers);
-        // This can be used to append to or override the renderers that are hidden for non-player
-        // targets. Any renderers in the list passed by reference to this event's handler will be
-        // hidden when the body cam this component controls is rendered.
-        //
-        // The list provided to the event will be empty for players, but the renderers returned
-        // will still be hidden, along with all the player models that are hidden/shown by default.
-        //
-        // The bodyCam parameter is always a non-null instance of BodyCamComponent.
+        /// <summary>
+        /// This can be used to append to or override the renderers that are hidden for non-player
+        /// targets. Any renderers in the list passed by reference to this event's handler will be
+        /// hidden when the body cam this component controls is rendered.
+        ///
+        /// The list provided to the event will be empty for players, but the renderers returned
+        /// will still be hidden, along with all the player models that are hidden/shown by default.
+        ///
+        /// The bodyCam parameter is always a non-null instance of BodyCamComponent.
+        /// </summary>
         public static event RenderersToHideTransformer? RenderersToHideTransformers;
 
         public Camera? GetCamera()
@@ -53,27 +57,39 @@ namespace OpenBodyCams
             return Camera;
         }
 
-        // This event is fired whenever the camera is created/recreated. No settings from the old
-        // camera instances will carry over to a new camera, so this should be used to apply any
-        // necessary settings to the new camera instance.
+        /// <summary>
+        /// This event is fired whenever the camera is created/recreated. No settings from the old
+        /// camera instances will carry over to a new camera, so this should be used to apply any
+        /// necessary settings to the new camera instance.
+        /// </summary>
         public event Action<Camera>? OnCameraCreated;
-        // This event will fire any time the render texture is created/recreated. The texture may
-        // change when settings in the OpenBodyCams config are changed, or when any of this
-        // component's properties that affect camera or texture settings are changed.
+        /// <summary>
+        /// This event will fire any time the render texture is created/recreated. The texture may
+        /// change when settings in the OpenBodyCams config are changed, or when any of this
+        /// component's properties that affect camera or texture settings are changed.
+        /// </summary>
         public event Action<RenderTexture>? OnRenderTextureCreated;
-        // Use this event to hide/show the output of the body cam wherever it is used. If this
-        // event is ignored, then frozen or invalid video may display on your materials.
+        /// <summary>
+        /// Use this event to hide/show the output of the body cam wherever it is used. If this
+        /// event is ignored, then frozen or invalid video may display on your materials.
+        /// </summary>
         public event Action<bool>? OnBlankedSet;
-        // This event is fired when the camera's rendering status changes. See members of CameraRenderingStatus.
+        /// <summary>
+        /// This event is fired when the camera's rendering status changes. See members of CameraRenderingStatus.
+        /// </summary>
         public event Action<CameraRenderingStatus>? OnCameraStatusChanged;
-        // This event is fired when the screen is powered off or on.
+        /// <summary>
+        /// This event is fired when the screen is powered off or on.
+        /// </summary>
         public event Action<bool>? OnScreenPowerChanged;
 
         public event BodyCam.BodyCamStatusUpdate? OnTargetChanged;
 
-        // Used by API users to indicate whether the camera this component controls is remote, i.e.
-        // wirelessly connected to the ship. This is intended to be used by other mods to incorporate
-        // effects like static based on gameplay events.
+        /// <summary>
+        /// Used by API users to indicate whether the camera this component controls is remote, i.e.
+        /// wirelessly connected to the ship. This is intended to be used by other mods to incorporate
+        /// effects like static based on gameplay events.
+        /// </summary>
         public bool IsRemoteCamera
         {
             get { return isRemoteCamera; }
@@ -87,12 +103,16 @@ namespace OpenBodyCams
             }
         }
 
-        // Forces the camera to continue rendering regardless of its renderer's visibility,
-        // as well as ignoring the option to disable cameras while their target is on the ship.
+        /// <summary>
+        /// Forces the camera to continue rendering regardless of its renderer's visibility,
+        /// as well as ignoring the option to disable cameras while their target is on the ship.
+        /// </summary>
         public bool ForceEnableCamera { get => keepCameraOn; set => keepCameraOn = value; }
 
-        // The resolution of the render texture that is created and assigned to the camera
-        // every time it is instantiated.
+        /// <summary>
+        /// The resolution of the render texture that is created and assigned to the camera
+        /// every time it is instantiated.
+        /// </summary>
         public Vector2Int Resolution
         {
             get => resolution;
@@ -103,15 +123,21 @@ namespace OpenBodyCams
             }
         }
 
-        // Whether the camera is currently rendering to the texture.
+        /// <summary>
+        /// Whether the camera is currently rendering to the texture.
+        /// </summary>
         public bool IsBlanked { get => !CameraShouldRender(cameraStatus); }
 
-        // Whether the camera is currently rendering to the texture.
+        /// <summary>
+        /// Whether the camera is currently rendering to the texture.
+        /// </summary>
         public CameraRenderingStatus CameraStatus { get => cameraStatus; }
 
-        // The framerate at which to render the camera. Lower values may improve game performance.
-        //
-        // A value of 0 will result in rendering the camera every game frame.
+        /// <summary>
+        /// The framerate at which to render the camera. Lower values may improve game performance.
+        ///
+        /// A value of 0 will result in rendering the camera every game frame.
+        /// </summary>
         public float Framerate
         {
             get => 1f / timePerFrame;
@@ -124,13 +150,17 @@ namespace OpenBodyCams
             }
         }
 
-        // The player that the body cam is currently attached to and displaying the perspective of.
+        /// <summary>
+        /// The player that the body cam is currently attached to and displaying the perspective of.
+        /// </summary>
         public PlayerControllerB? CurrentPlayerTarget => currentPlayer;
-        // The transform that the body cam is currently attached to. When the target is a player,
-        // this will be the same as CurrentPlayerTarget.transform.
-        //
-        // When using this, please note that mods may set the target to any object, so this is not
-        // only restricted to players, enemies, and radar boosters.
+        /// <summary>
+        /// The transform that the body cam is currently attached to. When the target is a player,
+        /// this will be the same as CurrentPlayerTarget.transform.
+        ///
+        /// When using this, please note that mods may set the target to any object, so this is not
+        /// only restricted to players, enemies, and radar boosters.
+        /// </summary>
         public Transform? CurrentTarget => currentActualTarget;
         #nullable restore
         #endregion

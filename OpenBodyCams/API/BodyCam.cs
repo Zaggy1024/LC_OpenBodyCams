@@ -18,13 +18,17 @@ public static class BodyCam
 
     public delegate void BodyCamStatusUpdate(MonoBehaviour bodyCam);
 
-    // Called when a body cam is created.
-    //
-    // The bodyCam parameter is always a non-null instance of BodyCamComponent.
+    /// <summary>
+    /// Called when a body cam is created.
+    ///
+    /// The bodyCam parameter is always a non-null instance of BodyCamComponent.
+    /// </summary>
     public static event BodyCamStatusUpdate? OnBodyCamInstantiated;
-    // Called when a body cam is destroyed.
-    //
-    // The bodyCam parameter is always a non-null instance of BodyCamComponent.
+    /// <summary>
+    /// Called when a body cam is destroyed.
+    ///
+    /// The bodyCam parameter is always a non-null instance of BodyCamComponent.
+    /// </summary>
     public static event BodyCamStatusUpdate? OnBodyCamDestroyed;
 
     public static bool BodyCamsAreAvailable
@@ -40,13 +44,17 @@ public static class BodyCam
     public static BodyCamComponent? MainBodyCam => ShipObjects.MainBodyCam;
 
     public delegate GameObject[] GetPlayerFirstPersonCosmetics(PlayerControllerB player, out bool hasViewmodelReplacement);
-    // An event called whenever OpenBodyCams collects the first person cosmetics for a player. Use this to allow
-    // any objects attached to the player that are visible in first person to be hidden when OpenBodyCams switches
-    // the perspective to third-person.
+    /// <summary>
+    /// An event called whenever OpenBodyCams collects the first person cosmetics for a player. Use this to allow
+    /// any objects attached to the player that are visible in first person to be hidden when OpenBodyCams switches
+    /// the perspective to third-person.
+    /// </summary>
     public static event GetPlayerFirstPersonCosmetics? PlayerFirstPersonCosmeticsGetters;
-    // An event called whenever OpenBodyCams collects the third person cosmetics for a player. Use this to allow
-    // any objects attached to the player that are visible in third person to be hidden when OpenBodyCams switches
-    // the perspective to first-person.
+    /// <summary>
+    /// An event called whenever OpenBodyCams collects the third person cosmetics for a player. Use this to allow
+    /// any objects attached to the player that are visible in third person to be hidden when OpenBodyCams switches
+    /// the perspective to first-person.
+    /// </summary>
     public delegate GameObject[] GetPlayerThirdPersonCosmetics(PlayerControllerB player);
     public static event GetPlayerThirdPersonCosmetics? PlayerThirdPersonCosmeticsGetters;
 
