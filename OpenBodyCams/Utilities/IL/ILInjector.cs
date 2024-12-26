@@ -294,14 +294,14 @@ public class ILInjector(IEnumerable<CodeInstruction> instructions, ILGenerator g
             throw new InvalidOperationException(INVALID);
 
         this.instructions.InsertRange(index, instructions);
+        if (matchEnd >= index)
+            matchEnd += instructions.Length;
         return this;
     }
 
     public ILInjector Insert(params CodeInstruction[] instructions)
     {
         InsertInPlace(instructions);
-        if (matchEnd >= index)
-            matchEnd += instructions.Length;
         index += instructions.Length;
         return this;
     }
