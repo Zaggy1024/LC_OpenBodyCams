@@ -190,7 +190,9 @@ internal static class InstructionUtilities
             return 7;
         if (opcode == OpCodes.Ldc_I4_8)
             return 8;
-        if (opcode == OpCodes.Ldc_I4 || opcode == OpCodes.Ldc_I4_S)
+        if (opcode == OpCodes.Ldc_I4_S)
+            return instruction.operand as sbyte?;
+        if (opcode == OpCodes.Ldc_I4)
             return instruction.operand as int?;
         return null;
     }
