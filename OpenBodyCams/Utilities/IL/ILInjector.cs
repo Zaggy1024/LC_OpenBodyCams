@@ -349,11 +349,11 @@ public class ILInjector(IEnumerable<CodeInstruction> instructions, ILGenerator g
         if (header.Length > 0)
             builder.AppendLine();
 
-        var end = Math.Min(index + 1 + context, instructions.Count);
-
         GetLastMatchRangeAbsolute(out var matchStart, out var matchEnd);
 
-        for (var i = Math.Max(index - context, 0); i < end; i++)
+        var end = Math.Min(matchEnd + 1 + context, instructions.Count);
+
+        for (var i = Math.Max(matchStart - context, 0); i < end; i++)
         {
             if (matchEnd == -1 && i == index)
             {
