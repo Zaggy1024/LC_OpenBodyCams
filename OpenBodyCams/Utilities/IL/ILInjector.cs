@@ -306,6 +306,27 @@ public class ILInjector(IEnumerable<CodeInstruction> instructions, ILGenerator g
         return this;
     }
 
+    public ILInjector InsertInPlaceAfterBranch(params CodeInstruction[] instructions)
+    {
+        if (!IsValid)
+            throw new InvalidOperationException(INVALID);
+
+        var labels = Instruction.labels;
+        this.instructions.InsertRange(index, instructions);
+        Instruction.labels.AddRange(labels);
+        labels.Clear();
+        if (matchEnd >= index)
+            matchEnd += instructions.Length;
+        return this;
+    }
+
+    public ILInjector InsertAfterBranch(params CodeInstruction[] instructions)
+    {
+        InsertInPlaceAfterBranch(instructions);
+        index += instructions.Length;
+        return this;
+    }
+
     public ILInjector Remove(int count = 1)
     {
         instructions.RemoveRange(index, count);
