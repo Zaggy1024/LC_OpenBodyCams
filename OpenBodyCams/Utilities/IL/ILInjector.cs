@@ -329,6 +329,9 @@ public class ILInjector(IEnumerable<CodeInstruction> instructions, ILGenerator g
 
     public ILInjector Remove(int count = 1)
     {
+        if (!IsValid)
+            throw new InvalidOperationException(INVALID);
+
         instructions.RemoveRange(index, count);
         if (matchEnd > index)
             matchEnd = Math.Max(index, matchEnd - count);
