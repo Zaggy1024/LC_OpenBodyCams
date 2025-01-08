@@ -102,7 +102,7 @@ internal static class MoreCompanyCompatibility
 
         //   spawnedCosmetic.gameObject.SetActive(isActive)
         // + if (isLocalPlayer)
-        // +     SetLocalCosmeticsLayers(spawnedCosmetic);
+        // +     MoreCompanyCompatibility.SetLocalCosmeticsLayers(spawnedCosmetic);
         injector
             .Find([
                 ILMatcher.Ldloc(),
