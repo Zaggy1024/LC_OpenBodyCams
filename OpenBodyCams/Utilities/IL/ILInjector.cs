@@ -36,6 +36,8 @@ public class ILInjector(IEnumerable<CodeInstruction> instructions, ILGenerator g
 
     public ILInjector Forward(int offset)
     {
+        if (!IsValid)
+            return this;
         matchEnd = index;
         index = Math.Clamp(index + offset, -1, instructions.Count);
         return this;
