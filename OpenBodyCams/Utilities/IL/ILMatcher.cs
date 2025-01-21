@@ -8,11 +8,9 @@ using HarmonyLib;
 
 namespace OpenBodyCams.Utilities.IL;
 
-public interface ILMatcher
+internal interface ILMatcher
 {
     public bool Matches(CodeInstruction instruction);
-
-    private static OpCode[] branchInstructions = [OpCodes.Br, OpCodes.Br_S, OpCodes.Brfalse, OpCodes.Brfalse_S];
 
     public static NotMatcher Not(ILMatcher matcher) => new(matcher);
 
@@ -78,28 +76,28 @@ public interface ILMatcher
     }
 }
 
-public class NotMatcher(ILMatcher matcher) : ILMatcher
+internal class NotMatcher(ILMatcher matcher) : ILMatcher
 {
     private readonly ILMatcher matcher = matcher;
 
     public bool Matches(CodeInstruction instruction) => !matcher.Matches(instruction);
 }
 
-public class OpcodeMatcher(OpCode opcode) : ILMatcher
+internal class OpcodeMatcher(OpCode opcode) : ILMatcher
 {
     private readonly OpCode opcode = opcode;
 
     public bool Matches(CodeInstruction instruction) => instruction.opcode == opcode;
 }
 
-public class OpcodesMatcher(OpCode[] opcodes) : ILMatcher
+internal class OpcodesMatcher(OpCode[] opcodes) : ILMatcher
 {
     private readonly OpCode[] opcodes = opcodes;
 
     public bool Matches(CodeInstruction instruction) => opcodes.Contains(instruction.opcode);
 }
 
-public class OpcodeOperandMatcher(OpCode opcode, object operand) : ILMatcher
+internal class OpcodeOperandMatcher(OpCode opcode, object operand) : ILMatcher
 {
     private readonly OpCode opcode = opcode;
     private readonly object operand = operand;
@@ -107,7 +105,7 @@ public class OpcodeOperandMatcher(OpCode opcode, object operand) : ILMatcher
     public bool Matches(CodeInstruction instruction) => instruction.opcode == opcode && instruction.operand == operand;
 }
 
-public class InstructionMatcher(CodeInstruction instruction) : ILMatcher
+internal class InstructionMatcher(CodeInstruction instruction) : ILMatcher
 {
     private readonly OpCode opcode = instruction.opcode;
     private readonly object operand = instruction.operand;
@@ -130,40 +128,40 @@ public class InstructionMatcher(CodeInstruction instruction) : ILMatcher
     }
 }
 
-public class LdargMatcher(int? arg) : ILMatcher
+internal class LdargMatcher(int? arg) : ILMatcher
 {
     private readonly int? arg = arg;
 
     public bool Matches(CodeInstruction instruction) => arg.HasValue ? instruction.GetLdargIndex() == arg : instruction.GetLdargIndex().HasValue;
 }
 
-public class LdlocMatcher(int? loc) : ILMatcher
+internal class LdlocMatcher(int? loc) : ILMatcher
 {
     private readonly int? loc = loc;
 
     public bool Matches(CodeInstruction instruction) => loc.HasValue ? instruction.GetLdlocIndex() == loc : instruction.GetLdlocIndex().HasValue;
 }
 
-public class StlocMatcher(int? loc) : ILMatcher
+internal class StlocMatcher(int? loc) : ILMatcher
 {
     private readonly int? loc = loc;
 
     public bool Matches(CodeInstruction instruction) => loc.HasValue ? instruction.GetStlocIndex() == loc : instruction.GetStlocIndex().HasValue;
 }
 
-public class LdcI32Matcher(int? value) : ILMatcher
+internal class LdcI32Matcher(int? value) : ILMatcher
 {
     private readonly int? value = value;
 
     public bool Matches(CodeInstruction instruction) => (!value.HasValue && instruction.GetLdcI32().HasValue) || instruction.GetLdcI32() == value;
 }
 
-public class BranchMatcher : ILMatcher
+internal class BranchMatcher : ILMatcher
 {
     public bool Matches(CodeInstruction instruction) => instruction.Branches(out _);
 }
 
-public class PredicateMatcher(Func<CodeInstruction, bool> predicate) : ILMatcher
+internal class PredicateMatcher(Func<CodeInstruction, bool> predicate) : ILMatcher
 {
     private readonly Func<CodeInstruction, bool> predicate = predicate;
 

@@ -8,10 +8,9 @@ using HarmonyLib;
 
 namespace OpenBodyCams.Utilities.IL;
 
-public class ILInjector(IEnumerable<CodeInstruction> instructions, ILGenerator generator = null)
+internal class ILInjector(IEnumerable<CodeInstruction> instructions, ILGenerator generator = null)
 {
     private const string INVALID = "Injector is invalid";
-    private const string MATCH_END_INVALID = "The end of the last search was invalid";
 
     private List<CodeInstruction> instructions = instructions.ToList();
     private ILGenerator generator = generator;

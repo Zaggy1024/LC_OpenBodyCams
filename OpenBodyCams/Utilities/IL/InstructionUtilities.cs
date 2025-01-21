@@ -8,7 +8,6 @@ namespace OpenBodyCams.Utilities.IL;
 
 internal static class InstructionUtilities
 {
-
     public static CodeInstruction MakeLdarg(int index)
     {
         return index switch
