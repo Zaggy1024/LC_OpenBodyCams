@@ -408,8 +408,17 @@ namespace OpenBodyCams
                 bodyCam.MarkTargetStatusChanged();
         }
 
+#if ENABLE_PROFILER
+        private const string profilerMarkerPrefix = "OpenBodyCams:";
+        private static readonly ProfilerMarker markerRevertCullingOverrides = new($"{profilerMarkerPrefix}RevertCullingOverrides");
+#endif
+
         private static void RevertLastOverrides()
         {
+#if ENABLE_PROFILER
+            using var markerAuto = markerRevertCullingOverrides.Auto();
+#endif
+
             if (lastBodyCamCulled != null)
             {
                 lastBodyCamCulled.RevertCullingOverrides();
@@ -424,10 +433,9 @@ namespace OpenBodyCams
         }
 
 #if ENABLE_PROFILER
-        private const string profilerMarkerPrefix = "OpenBodyCams:";
         private static readonly ProfilerMarker markerBeforeCullingAnyCamera = new($"{profilerMarkerPrefix}BeforeCullingAnyCamera");
         private static readonly ProfilerMarker markerBeforeRenderingAnyCamera = new($"{profilerMarkerPrefix}BeforeRenderingAnyCamera");
-        private static readonly ProfilerMarker markerAfterRenderingAnyCamera = new($"{profilerMarkerPrefix}BeforeRenderingAnyCamera");
+        private static readonly ProfilerMarker markerAfterRenderingAnyCamera = new($"{profilerMarkerPrefix}AfterRenderingAnyCamera");
 #endif
 
         internal static void BeforeCullingAnyCamera(Camera camera)
@@ -1125,8 +1133,17 @@ namespace OpenBodyCams
             }
         }
 
+#if ENABLE_PROFILER
+        private static readonly ProfilerMarker markerApplyCullingOverrides = new($"{profilerMarkerPrefix}ApplyCullingOverrides");
+        private static readonly ProfilerMarker markerApplyViewPerspective = new($"{profilerMarkerPrefix}ViewPerspective.Apply");
+#endif
+
         private void ApplyCullingOverrides()
         {
+#if ENABLE_PROFILER
+            using var markerAuto = markerApplyCullingOverrides.Auto();
+#endif
+
             UpdateTargetStatusBeforeRender();
 
             if (currentAttachmentPoint == null)
@@ -1145,9 +1162,15 @@ namespace OpenBodyCams
             greenFlashRenderer.forceRenderingOff = false;
             fogShaderPlaneRenderer.forceRenderingOff = false;
 
-            ViewPerspective.Apply(ref currentPlayerModelState, Perspective.FirstPerson);
-            if ((object)currentPlayer != localPlayer)
-                ViewPerspective.Apply(ref localPlayerModelState, Perspective.ThirdPerson);
+            {
+#if ENABLE_PROFILER
+                using var markerApplyAuto = markerApplyViewPerspective.Auto();
+#endif
+
+                ViewPerspective.Apply(ref currentPlayerModelState, Perspective.FirstPerson);
+                if ((object)currentPlayer != localPlayer)
+                    ViewPerspective.Apply(ref localPlayerModelState, Perspective.ThirdPerson);
+            }
 
             bool warnedNullMesh = false;
             foreach (var mesh in currentRenderersToHide)
