@@ -12,6 +12,12 @@ internal interface ILMatcher
 {
     public bool Matches(CodeInstruction instruction);
 
+    public ILMatcher CaptureAs(out CodeInstruction variable)
+    {
+        variable = new CodeInstruction(OpCodes.Nop, null);
+        return new InstructionCapturingMatcher(this, variable);
+    }
+
     public static ILMatcher Not(ILMatcher matcher) => new NotMatcher(matcher);
 
     public static ILMatcher Opcode(OpCode opcode) => new OpcodeMatcher(opcode);
@@ -166,4 +172,23 @@ internal class PredicateMatcher(Func<CodeInstruction, bool> predicate) : ILMatch
     private readonly Func<CodeInstruction, bool> predicate = predicate;
 
     public bool Matches(CodeInstruction instruction) => predicate(instruction);
+}
+
+internal class InstructionCapturingMatcher(ILMatcher matcher, CodeInstruction variable) : ILMatcher
+{
+    private readonly ILMatcher matcher = matcher;
+    private readonly CodeInstruction variable = variable;
+
+    public bool Matches(CodeInstruction instruction)
+    {
+        var isMatch = matcher.Matches(instruction);
+        if (isMatch)
+        {
+            variable.opcode = instruction.opcode;
+            variable.operand = instruction.operand;
+            variable.blocks = [.. instruction.blocks];
+            variable.labels = [.. instruction.labels];
+        }
+        return isMatch;
+    }
 }
