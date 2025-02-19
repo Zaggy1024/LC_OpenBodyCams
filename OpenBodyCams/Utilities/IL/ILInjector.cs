@@ -368,7 +368,9 @@ internal class ILInjector(IEnumerable<CodeInstruction> instructions, ILGenerator
 
     public ILInjector ReplaceLastMatch(params CodeInstruction[] instructions)
     {
+        var labels = Instruction.labels;
         RemoveLastMatch();
+        Instruction.labels.AddRange(labels);
         Insert(instructions);
         return this;
     }
