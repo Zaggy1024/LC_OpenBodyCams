@@ -18,6 +18,18 @@ internal interface ILMatcher
         return new InstructionCapturingMatcher(this, variable);
     }
 
+    public ILMatcher CaptureLabelOperandAs(out Label label)
+    {
+        label = default;
+        unsafe
+        {
+            fixed (Label* labelPtr = &label)
+            {
+                return new LabelCapturingMatcher(this, labelPtr);
+            }
+        }
+    }
+
     public static ILMatcher Not(ILMatcher matcher) => new NotMatcher(matcher);
 
     public static ILMatcher Opcode(OpCode opcode) => new OpcodeMatcher(opcode);
@@ -189,6 +201,20 @@ internal class InstructionCapturingMatcher(ILMatcher matcher, CodeInstruction va
             variable.blocks = [.. instruction.blocks];
             variable.labels = [.. instruction.labels];
         }
+        return isMatch;
+    }
+}
+
+internal unsafe class LabelCapturingMatcher(ILMatcher matcher, Label* label) : ILMatcher
+{
+    private readonly ILMatcher matcher = matcher;
+    private readonly Label* label = label;
+
+    public bool Matches(CodeInstruction instruction)
+    {
+        var isMatch = matcher.Matches(instruction);
+        if (isMatch)
+            *label = (Label)instruction.operand;
         return isMatch;
     }
 }
