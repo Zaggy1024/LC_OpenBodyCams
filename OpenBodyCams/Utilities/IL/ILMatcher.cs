@@ -12,62 +12,62 @@ internal interface ILMatcher
 {
     public bool Matches(CodeInstruction instruction);
 
-    public static NotMatcher Not(ILMatcher matcher) => new(matcher);
+    public static ILMatcher Not(ILMatcher matcher) => new NotMatcher(matcher);
 
-    public static OpcodeMatcher Opcode(OpCode opcode) => new(opcode);
-    public static OpcodesMatcher Opcodes(params OpCode[] opcodes) => new(opcodes);
-    public static OpcodeOperandMatcher OpcodeOperand(OpCode opcode, object operand) => new(opcode, operand);
-    public static InstructionMatcher Instruction(CodeInstruction instruction) => new(instruction);
+    public static ILMatcher Opcode(OpCode opcode) => new OpcodeMatcher(opcode);
+    public static ILMatcher Opcodes(params OpCode[] opcodes) => new OpcodesMatcher(opcodes);
+    public static ILMatcher OpcodeOperand(OpCode opcode, object operand) => new OpcodeOperandMatcher(opcode, operand);
+    public static ILMatcher Instruction(CodeInstruction instruction) => new InstructionMatcher(instruction);
 
-    public static LdargMatcher Ldarg(int? arg = null) => new(arg);
-    public static LdlocMatcher Ldloc(int? loc = null) => new(loc);
-    public static StlocMatcher Stloc(int? loc = null) => new(loc);
-    public static LdcI32Matcher Ldc(int? value = null) => new(value);
+    public static ILMatcher Ldarg(int? arg = null) => new LdargMatcher(arg);
+    public static ILMatcher Ldloc(int? loc = null) => new LdlocMatcher(loc);
+    public static ILMatcher Stloc(int? loc = null) => new StlocMatcher(loc);
+    public static ILMatcher Ldc(int? value = null) => new LdcI32Matcher(value);
 
-    public static BranchMatcher Branch() => new();
+    public static ILMatcher Branch() => new BranchMatcher();
 
-    public static OpcodeOperandMatcher Ldfld(FieldInfo field)
+    public static ILMatcher Ldfld(FieldInfo field)
     {
         if (field == null)
             Plugin.Instance.Logger.LogWarning($"Field passed to ILMatcher.Ldfld() was null\n{new StackTrace()}");
-        return new(OpCodes.Ldfld, field);
+        return new OpcodeOperandMatcher(OpCodes.Ldfld, field);
     }
-    public static OpcodeOperandMatcher Ldsfld(FieldInfo field)
+    public static ILMatcher Ldsfld(FieldInfo field)
     {
         if (field == null)
             Plugin.Instance.Logger.LogWarning($"Field passed to ILMatcher.Ldsfld() was null\n{new StackTrace()}");
-        return new(OpCodes.Ldsfld, field);
+        return new OpcodeOperandMatcher(OpCodes.Ldsfld, field);
     }
-    public static OpcodeOperandMatcher Stfld(FieldInfo field)
+    public static ILMatcher Stfld(FieldInfo field)
     {
         if (field == null)
             Plugin.Instance.Logger.LogWarning($"Field passed to ILMatcher.Stfld() was null\n{new StackTrace()}");
-        return new(OpCodes.Stfld, field);
+        return new OpcodeOperandMatcher(OpCodes.Stfld, field);
     }
-    public static OpcodeOperandMatcher Stsfld(FieldInfo field)
+    public static ILMatcher Stsfld(FieldInfo field)
     {
         if (field == null)
             Plugin.Instance.Logger.LogWarning($"Field passed to ILMatcher.Stsfld() was null\n{new StackTrace()}");
-        return new(OpCodes.Stsfld, field);
+        return new OpcodeOperandMatcher(OpCodes.Stsfld, field);
     }
 
-    public static OpcodeOperandMatcher Callvirt(MethodBase method)
+    public static ILMatcher Callvirt(MethodBase method)
     {
         if (method == null)
             Plugin.Instance.Logger.LogWarning($"Method passed to ILMatcher.Callvirt() was null\n{new StackTrace()}");
         return OpcodeOperand(OpCodes.Callvirt, method);
     }
-    public static OpcodeOperandMatcher Call(MethodBase method)
+    public static ILMatcher Call(MethodBase method)
     {
         if (method == null)
             Plugin.Instance.Logger.LogWarning($"Method passed to ILMatcher.Call() was null\n{new StackTrace()}");
         return OpcodeOperand(OpCodes.Call, method);
     }
 
-    public static PredicateMatcher Predicate(Func<CodeInstruction, bool> predicate) => new(predicate);
-    public static PredicateMatcher Predicate(Func<FieldInfo, bool> predicate)
+    public static ILMatcher Predicate(Func<CodeInstruction, bool> predicate) => new PredicateMatcher(predicate);
+    public static ILMatcher Predicate(Func<FieldInfo, bool> predicate)
     {
-        return new(insn =>
+        return new PredicateMatcher(insn =>
         {
             if (insn.operand is not FieldInfo field)
                 return false;
