@@ -286,12 +286,12 @@ internal class ILInjector(IEnumerable<CodeInstruction> instructions, ILGenerator
     public ILInjector AddLabel(out Label label)
     {
         DefineLabel(out label);
-        Instruction.labels.Add(label);
-        return this;
+        return AddLabel(label);
     }
 
     public ILInjector AddLabel(Label label)
     {
+        Instruction = new(Instruction);
         Instruction.labels.Add(label);
         return this;
     }
@@ -320,9 +320,12 @@ internal class ILInjector(IEnumerable<CodeInstruction> instructions, ILGenerator
             throw new InvalidOperationException(INVALID);
 
         var labels = Instruction.labels;
+        Instruction = new(Instruction);
+        Instruction.labels.Clear();
+
         this.instructions.InsertRange(index, instructions);
         Instruction.labels.AddRange(labels);
-        labels.Clear();
+
         if (matchEnd >= index)
             matchEnd += instructions.Length;
         return this;
@@ -370,11 +373,14 @@ internal class ILInjector(IEnumerable<CodeInstruction> instructions, ILGenerator
 
     public ILInjector ReplaceLastMatch(params CodeInstruction[] instructions)
     {
+        if (instructions.Length == 0)
+            throw new ArgumentException("Cannot replace a match with an empty array.");
+
         var labels = Instruction.labels;
         RemoveLastMatch();
         var insertIndex = index;
         Insert(instructions);
-        instructions[insertIndex].labels.AddRange(labels);
+        this.instructions[insertIndex].labels.AddRange(labels);
         return this;
     }
 
