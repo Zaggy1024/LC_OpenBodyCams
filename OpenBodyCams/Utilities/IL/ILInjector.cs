@@ -274,18 +274,20 @@ internal class ILInjector(IEnumerable<CodeInstruction> instructions, ILGenerator
         return instructions.GetRange(start, size);
     }
 
-    public Label DefineLabel()
+    public ILInjector DefineLabel(out Label label)
     {
         if (generator == null)
             throw new InvalidOperationException("No ILGenerator was provided");
-        return generator.DefineLabel();
+
+        label = generator.DefineLabel();
+        return this;
     }
 
-    public Label AddLabel()
+    public ILInjector AddLabel(out Label label)
     {
-        var label = DefineLabel();
+        DefineLabel(out label);
         Instruction.labels.Add(label);
-        return label;
+        return this;
     }
 
     public ILInjector AddLabel(Label label)
