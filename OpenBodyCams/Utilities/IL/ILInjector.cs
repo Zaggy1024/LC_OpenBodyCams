@@ -141,6 +141,9 @@ internal class ILInjector(IEnumerable<CodeInstruction> instructions, ILGenerator
 
     public ILInjector FindLabel(Label label)
     {
+        if (label == default)
+            return this;
+
         matchEnd = index;
 
         for (index = 0; index < instructions.Count; index++)
