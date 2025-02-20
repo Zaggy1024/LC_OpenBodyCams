@@ -371,16 +371,18 @@ internal class ILInjector(IEnumerable<CodeInstruction> instructions, ILGenerator
         return this;
     }
 
-    public ILInjector ReplaceLastMatch(params CodeInstruction[] instructions)
+    public ILInjector ReplaceLastMatch(params CodeInstruction[] replacementInstructions)
     {
-        if (instructions.Length == 0)
+        if (replacementInstructions.Length == 0)
             throw new ArgumentException("Cannot replace a match with an empty array.");
 
-        var labels = Instruction.labels;
-        RemoveLastMatch();
-        var insertIndex = index;
-        Insert(instructions);
-        this.instructions[insertIndex].labels.AddRange(labels);
+        GetLastMatchRange(out var start, out var size);
+        var labels = instructions[start].labels;
+        instructions.RemoveRange(start, size);
+        instructions.InsertRange(start, replacementInstructions);
+        index = start;
+        matchEnd = start + replacementInstructions.Length;
+        instructions[start].labels.AddRange(labels);
         return this;
     }
 
