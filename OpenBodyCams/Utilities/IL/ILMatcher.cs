@@ -18,15 +18,17 @@ internal interface ILMatcher
         return new InstructionCapturingMatcher(this, variable);
     }
 
-    public ILMatcher CaptureLabelOperandAs(out Label label)
+    public unsafe ILMatcher CaptureLabelOperandAs(out Label label)
     {
-        label = default;
-        unsafe
+        return CaptureOperandAs(out label);
+    }
+
+    public unsafe ILMatcher CaptureOperandAs<T>(out T operand) where T : unmanaged
+    {
+        operand = default;
+        fixed (T* operandPtr = &operand)
         {
-            fixed (Label* labelPtr = &label)
-            {
-                return new LabelCapturingMatcher(this, labelPtr);
-            }
+            return new OperandCapturingMatcher<T>(this, operandPtr);
         }
     }
 
@@ -205,16 +207,16 @@ internal class InstructionCapturingMatcher(ILMatcher matcher, CodeInstruction va
     }
 }
 
-internal unsafe class LabelCapturingMatcher(ILMatcher matcher, Label* label) : ILMatcher
+internal unsafe class OperandCapturingMatcher<T>(ILMatcher matcher, T* operand) : ILMatcher where T : unmanaged
 {
     private readonly ILMatcher matcher = matcher;
-    private readonly Label* label = label;
+    private readonly T* operand = operand;
 
     public bool Matches(CodeInstruction instruction)
     {
         var isMatch = matcher.Matches(instruction);
         if (isMatch)
-            *label = (Label)instruction.operand;
+            *operand = (T)instruction.operand;
         return isMatch;
     }
 }
