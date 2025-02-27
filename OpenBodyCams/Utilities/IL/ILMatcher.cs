@@ -18,11 +18,6 @@ internal interface ILMatcher
         return new InstructionCapturingMatcher(this, variable);
     }
 
-    public unsafe ILMatcher CaptureLabelOperandAs(out Label label)
-    {
-        return CaptureOperandAs(out label);
-    }
-
     public unsafe ILMatcher CaptureOperandAs<T>(out T operand) where T : unmanaged
     {
         operand = default;
