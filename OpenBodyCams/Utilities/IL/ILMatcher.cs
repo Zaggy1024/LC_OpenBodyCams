@@ -171,7 +171,7 @@ internal class LdcI32Matcher(int? value) : ILMatcher
 {
     private readonly int? value = value;
 
-    public bool Matches(CodeInstruction instruction) => (!value.HasValue && instruction.GetLdcI32().HasValue) || instruction.GetLdcI32() == value;
+    public bool Matches(CodeInstruction instruction) => value.HasValue ? instruction.GetLdcI32() == value : instruction.GetLdcI32().HasValue;
 }
 
 internal class BranchMatcher : ILMatcher
