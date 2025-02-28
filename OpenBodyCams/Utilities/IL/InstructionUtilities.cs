@@ -23,9 +23,9 @@ internal static class InstructionUtilities
 
     public static int PopCount(this CodeInstruction instruction)
     {
-        if (instruction.opcode == OpCodes.Call || instruction.opcode == OpCodes.Callvirt)
+        if (instruction.opcode == OpCodes.Call || instruction.opcode == OpCodes.Callvirt || instruction.opcode == OpCodes.Newobj)
         {
-            var method = (MethodInfo)instruction.operand;
+            var method = (MethodBase)instruction.operand;
             var parameterCount = method.GetParameters().Length;
             if (!method.IsStatic)
                 parameterCount++;
@@ -63,10 +63,9 @@ internal static class InstructionUtilities
 
     public static int PushCount(this CodeInstruction instruction)
     {
-        if (instruction.opcode == OpCodes.Call || instruction.opcode == OpCodes.Callvirt)
+        if (instruction.opcode == OpCodes.Call || instruction.opcode == OpCodes.Callvirt || instruction.opcode == OpCodes.Newobj)
         {
-            var method = (MethodInfo)instruction.operand;
-            if (method.ReturnType == typeof(void))
+            if (instruction.operand is MethodInfo method && method.ReturnType == typeof(void))
                 return 0;
             return 1;
         }
