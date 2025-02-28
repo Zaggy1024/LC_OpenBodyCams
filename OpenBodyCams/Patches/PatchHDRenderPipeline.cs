@@ -71,7 +71,7 @@ internal static class PatchHDRenderPipeline
             .Find([
                 ILMatcher.Call(typeof(HDRenderPipeline).GetMethod(nameof(HDRenderPipeline.PrepareAndCullCamera), BindingFlags.NonPublic | BindingFlags.Instance, [typeof(Camera), typeof(XRPass), typeof(bool), typeof(List<HDRenderPipeline.RenderRequest>), typeof(ScriptableRenderContext), typeof(HDRenderPipeline.RenderRequest).MakeByRefType(), typeof(CubemapFace)])),
             ])
-            .GoToPush(6)
+            .GoToPush(7)
             .Forward(1);
 
         if (!injector.IsValid)

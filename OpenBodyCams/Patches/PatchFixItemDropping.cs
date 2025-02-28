@@ -32,7 +32,7 @@ internal static class PatchFixItemDropping
             .Find([
                 ILMatcher.Call(typeof(PlayerControllerB).GetMethod(nameof(PlayerControllerB.SetObjectAsNoLongerHeld), [typeof(bool), typeof(bool), typeof(Vector3), typeof(GrabbableObject), typeof(int)]))
             ])
-            .GoToPush(0);
+            .GoToPush(1);
 
         if (!injector.IsValid)
         {

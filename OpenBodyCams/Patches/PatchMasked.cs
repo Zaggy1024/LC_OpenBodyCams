@@ -74,7 +74,7 @@ internal static class PatchMaskedPlayerEnemy
 
         injector
             .Find(ILMatcher.Callvirt(typeof(PlayerControllerB).GetMethod(nameof(PlayerControllerB.KillPlayer))))
-            .GoToPush(3);
+            .GoToPush(4);
 
         if (!injector.IsValid || injector.Instruction.opcode != OpCodes.Ldc_I4_0)
         {

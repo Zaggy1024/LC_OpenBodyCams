@@ -121,7 +121,7 @@ internal class ILInjector(IEnumerable<CodeInstruction> instructions, ILGenerator
             stackPosition += instruction.PushCount();
             stackPosition -= instruction.PopCount();
 
-            if (stackPosition > popIndex)
+            if (stackPosition >= popIndex)
                 return this;
 
             index--;
