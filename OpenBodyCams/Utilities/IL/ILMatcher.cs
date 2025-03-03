@@ -38,6 +38,7 @@ internal interface ILMatcher
     public static ILMatcher Ldloc(int? loc = null) => new LdlocMatcher(loc);
     public static ILMatcher Stloc(int? loc = null) => new StlocMatcher(loc);
     public static ILMatcher Ldc(int? value = null) => new LdcI32Matcher(value);
+    public static ILMatcher LdcF32(float? value = null) => new LdcF32Matcher(value);
 
     public static ILMatcher Branch() => new BranchMatcher();
 
@@ -169,6 +170,13 @@ internal class LdcI32Matcher(int? value) : ILMatcher
     private readonly int? value = value;
 
     public bool Matches(CodeInstruction instruction) => value.HasValue ? instruction.GetLdcI32() == value : instruction.GetLdcI32().HasValue;
+}
+
+internal class LdcF32Matcher(float? value) : ILMatcher
+{
+    private readonly float? value = value;
+
+    public bool Matches(CodeInstruction instruction) => instruction.opcode == OpCodes.Ldc_R4 && (!value.HasValue || (float)instruction.operand == value.Value);
 }
 
 internal class BranchMatcher : ILMatcher
