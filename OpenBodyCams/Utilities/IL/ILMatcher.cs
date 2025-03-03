@@ -27,6 +27,11 @@ internal interface ILMatcher
         }
     }
 
+    public ILMatcher Debug()
+    {
+        return new DebuggingMatcher(this);
+    }
+
     public static ILMatcher Not(ILMatcher matcher) => new NotMatcher(matcher);
 
     public static ILMatcher Opcode(OpCode opcode) => new OpcodeMatcher(opcode);
@@ -220,6 +225,19 @@ internal unsafe class OperandCapturingMatcher<T>(ILMatcher matcher, T* operand) 
         var isMatch = matcher.Matches(instruction);
         if (isMatch)
             *operand = (T)instruction.operand;
+        return isMatch;
+    }
+}
+
+internal class DebuggingMatcher(ILMatcher matcher) : ILMatcher
+{
+    private readonly ILMatcher matcher = matcher;
+
+    public bool Matches(CodeInstruction instruction)
+    {
+        var isMatch = matcher.Matches(instruction);
+        if (isMatch)
+            Plugin.Instance.Logger.LogInfo($"{matcher} matched {instruction}");
         return isMatch;
     }
 }
