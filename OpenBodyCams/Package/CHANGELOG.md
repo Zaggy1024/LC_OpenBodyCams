@@ -1,3 +1,6 @@
+## Version 3.0.4
+- Fixed an unintended side effect of FixMaskedConversionForClients where players being converted to masked would drop their items.
+
 ## Version 3.0.3
 - Fixed an issue with the OnBlankedSet event that caused the PiP body cam to never display when DisableCameraWhileTargetIsOnShip is true.
 
