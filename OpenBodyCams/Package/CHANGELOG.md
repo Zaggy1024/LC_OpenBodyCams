@@ -1,3 +1,6 @@
+## Version 3.0.5
+- Removed debug prints from the FixMaskedConversionForClients transpiler.
+
 ## Version 3.0.4
 - Fixed an unintended side effect of FixMaskedConversionForClients where players being converted to masked would drop their items.
 
