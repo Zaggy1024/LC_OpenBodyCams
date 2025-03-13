@@ -1,8 +1,12 @@
+using System.Collections;
 using System.Collections.Generic;
+using System.Reflection;
 using System.Reflection.Emit;
 
 using GameNetcodeStuff;
 using HarmonyLib;
+using Unity.Netcode;
+using UnityEngine;
 
 using OpenBodyCams.Utilities.IL;
 
@@ -63,28 +67,59 @@ internal static class PatchMaskedPlayerEnemy
             .ReleaseInstructions();
     }
 
-    [HarmonyTranspiler]
-    [HarmonyPatch(nameof(MaskedPlayerEnemy.killAnimation), MethodType.Enumerator)]
-    private static IEnumerable<CodeInstruction> killAnimationTranspiler(IEnumerable<CodeInstruction> instructions)
+    private static void StartCoroutineToSetPlayerMimicked(int playerID, in NetworkObjectReference maskedReference)
     {
         if (!Plugin.FixMaskedConversionForClients.Value)
-            return instructions;
+            return;
 
-        var injector = new ILInjector(instructions);
+        var player = StartOfRound.Instance.allPlayerScripts[playerID];
+        player.StartCoroutine(SetPlayerMimicked(player, maskedReference));
+    }
 
-        injector
-            .Find(ILMatcher.Callvirt(typeof(PlayerControllerB).GetMethod(nameof(PlayerControllerB.KillPlayer))))
-            .GoToPush(4);
+    private static IEnumerator SetPlayerMimicked(PlayerControllerB player, NetworkObjectReference maskedReference)
+    {
+        NetworkObject maskedObject = null;
+        yield return new WaitUntil(() => maskedReference.TryGet(out maskedObject));
+        if (!maskedObject.TryGetComponent<MaskedPlayerEnemy>(out var masked))
+            yield break;
+        player.redirectToEnemy = masked;
+    }
 
-        if (!injector.IsValid || injector.Instruction.opcode != OpCodes.Ldc_I4_0)
+    [HarmonyTranspiler]
+    [HarmonyPatch(nameof(MaskedPlayerEnemy.waitForMimicEnemySpawn), MethodType.Enumerator)]
+    private static IEnumerable<CodeInstruction> waitForMimicEnemySpawnTranspiler(IEnumerable<CodeInstruction> instructions, MethodBase method)
+    {
+        //   IEnumerator waitForMimicEnemySpawn(NetworkObjectReference netObjectRef, bool inFactory, int playerKilled)
+        //   {
+        // +   StartCoroutineToSetPlayerMimicked(playerKilled, in netObjectRef)
+        //     ...
+        //   }
+        var injector = new ILInjector(instructions)
+            .Find([
+                ILMatcher.Ldarg(0),
+                ILMatcher.Predicate(insn => insn.opcode == OpCodes.Ldfld && ((FieldInfo)insn.operand).Name.EndsWith("state")),
+                ILMatcher.StlocCapture(out var stateLocalIndex),
+                ILMatcher.Ldloc(in stateLocalIndex),
+                ILMatcher.Opcode(OpCodes.Switch),
+            ]);
+
+        if (!injector.IsValid)
         {
-            Plugin.Instance.Logger.LogWarning("Failed to change the masked kill animation to spawn a body.");
-            Plugin.Instance.Logger.LogWarning("Clients may not be able to see through the perspective of their converted teammates.");
+            Plugin.Instance.Logger.LogError($"Failed to find the switch statement in {nameof(MaskedPlayerEnemy)}.{nameof(MaskedPlayerEnemy.waitForMimicEnemySpawn)}");
             return instructions;
         }
 
-        injector.Instruction.opcode = OpCodes.Ldc_I4_1;
-
-        return injector.ReleaseInstructions();
+        var switchLabels = (Label[])injector.LastMatchedInstruction.operand;
+        return injector
+            .FindLabel(switchLabels[0])
+            .InsertAfterBranch([
+                new(OpCodes.Ldarg_0),
+                new(OpCodes.Ldfld, method.DeclaringType.GetField("playerKilled")),
+                new(OpCodes.Ldarg_0),
+                new(OpCodes.Ldflda, method.DeclaringType.GetField("netObjectRef")),
+                new(OpCodes.Call, typeof(PatchMaskedPlayerEnemy).GetMethod(nameof(StartCoroutineToSetPlayerMimicked), BindingFlags.NonPublic | BindingFlags.Static, [typeof(int), typeof(NetworkObjectReference).MakeByRefType()])),
+            ])
+            .PrintContext(20)
+            .ReleaseInstructions();
     }
 }
