@@ -45,6 +45,37 @@ internal interface ILMatcher
     public static ILMatcher Ldc(int? value = null) => new LdcI32Matcher(value);
     public static ILMatcher LdcF32(float? value = null) => new LdcF32Matcher(value);
 
+    public unsafe static ILMatcher LdlocCapture(out int localIndex)
+    {
+        localIndex = -1;
+        fixed (int* localIndexPtr = &localIndex)
+        {
+            return new LdlocCapturingMatcher(localIndexPtr);
+        }
+    }
+    public unsafe static ILMatcher Ldloc(in int localIndex)
+    {
+        fixed (int* localIndexPtr = &localIndex)
+        {
+            return new LdlocByRefMatcher(localIndexPtr);
+        }
+    }
+    public unsafe static ILMatcher StlocCapture(out int localIndex)
+    {
+        localIndex = -1;
+        fixed (int* localIndexPtr = &localIndex)
+        {
+            return new StlocCapturingMatcher(localIndexPtr);
+        }
+    }
+    public unsafe static ILMatcher Stloc(in int localIndex)
+    {
+        fixed (int* localIndexPtr = &localIndex)
+        {
+            return new StlocByRefMatcher(localIndexPtr);
+        }
+    }
+
     public static ILMatcher Branch() => new BranchMatcher();
 
     public static ILMatcher Ldfld(FieldInfo field, [CallerMemberName] string callerName = "", [CallerFilePath] string sourceFilePath = "", [CallerLineNumber] int sourceLineNumber = 0)
@@ -227,6 +258,52 @@ internal unsafe class OperandCapturingMatcher<T>(ILMatcher matcher, T* operand) 
             *operand = (T)instruction.operand;
         return isMatch;
     }
+}
+
+internal unsafe class LdlocCapturingMatcher(int* localIndex) : ILMatcher
+{
+    private readonly int* localIndex = localIndex;
+
+    public bool Matches(CodeInstruction instruction)
+    {
+        var matchedIndex = instruction.GetLdlocIndex();
+        if (matchedIndex.HasValue)
+        {
+            *localIndex = matchedIndex.Value;
+            return true;
+        }
+        return false;
+    }
+}
+
+internal unsafe class LdlocByRefMatcher(int* localIndexPtr) : ILMatcher
+{
+    private readonly int* localIndexPtr = localIndexPtr;
+
+    public bool Matches(CodeInstruction instruction) => instruction.GetLdlocIndex() == *localIndexPtr;
+}
+
+internal unsafe class StlocCapturingMatcher(int* localIndex) : ILMatcher
+{
+    private readonly int* localIndex = localIndex;
+
+    public bool Matches(CodeInstruction instruction)
+    {
+        var matchedIndex = instruction.GetStlocIndex();
+        if (matchedIndex.HasValue)
+        {
+            *localIndex = matchedIndex.Value;
+            return true;
+        }
+        return false;
+    }
+}
+
+internal unsafe class StlocByRefMatcher(int* localIndexPtr) : ILMatcher
+{
+    private readonly int* localIndexPtr = localIndexPtr;
+
+    public bool Matches(CodeInstruction instruction) => instruction.GetStlocIndex() == *localIndexPtr;
 }
 
 internal class DebuggingMatcher(ILMatcher matcher) : ILMatcher
