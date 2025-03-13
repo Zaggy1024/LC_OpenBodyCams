@@ -119,7 +119,6 @@ internal static class PatchMaskedPlayerEnemy
                 new(OpCodes.Ldflda, method.DeclaringType.GetField("netObjectRef")),
                 new(OpCodes.Call, typeof(PatchMaskedPlayerEnemy).GetMethod(nameof(StartCoroutineToSetPlayerMimicked), BindingFlags.NonPublic | BindingFlags.Static, [typeof(int), typeof(NetworkObjectReference).MakeByRefType()])),
             ])
-            .PrintContext(20)
             .ReleaseInstructions();
     }
 }
