@@ -115,6 +115,12 @@ internal interface ILMatcher
             Plugin.Instance.Logger.LogWarning($"Method passed to ILMatcher.Call() was null at {sourceFilePath}#{sourceLineNumber} ({callerName})");
         return OpcodeOperand(OpCodes.Call, method);
     }
+    public static ILMatcher Newobj(ConstructorInfo ctor, [CallerMemberName] string callerName = "", [CallerFilePath] string sourceFilePath = "", [CallerLineNumber] int sourceLineNumber = 0)
+    {
+        if (ctor == null)
+            Plugin.Instance.Logger.LogWarning($"Constructor passed to ILMatcher.Newobj() was null at {sourceFilePath}#{sourceLineNumber} ({callerName})");
+        return OpcodeOperand(OpCodes.Newobj, ctor);
+    }
 
     public static ILMatcher Predicate(Func<CodeInstruction, bool> predicate) => new PredicateMatcher(predicate);
     public static ILMatcher Predicate(Func<FieldInfo, bool> predicate)
