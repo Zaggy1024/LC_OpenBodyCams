@@ -23,7 +23,7 @@
         <PackageReference Include="BepInEx.BaseLib" Version="5.4.21.0" Publicize="true" />
         <PackageReference Include="BepInEx.Core" Version="5.4.21.0" />
         <PackageReference Include="BepInEx.AssemblyPublicizer.MSBuild" Version="0.4.1" PrivateAssets="all" />
-        <PackageReference Include="LethalCompany.GameLibs.Steam" Version="64.0.0-ngd.0" Private="False" Publicize="true" />
+        <PackageReference Include="LethalCompany.GameLibs.Steam" Version="70.0.0-ngd.0" Private="False" Publicize="true" />
     </ItemGroup>
 
     <ItemGroup Condition="'$(TargetFramework.TrimEnd(`0123456789`))' == 'net'">

@@ -183,7 +183,6 @@ namespace OpenBodyCams
         private static FrameSettingsOverrideMask mainCameraCustomFrameSettingsMask;
         private static Material fogShaderMaterial;
         private static GameObject nightVisionPrefab;
-        private static Light vanillaMapNightVisionLight;
         #endregion
 
         #region Static state
@@ -232,8 +231,6 @@ namespace OpenBodyCams
         #endregion
 
         #region Camera rendering state
-        private bool vanillaMapNightVisionLightWasEnabled;
-
         private PlayerModelState localPlayerModelState;
 
         private PlayerControllerB currentPlayer;
@@ -344,14 +341,12 @@ namespace OpenBodyCams
             var nightVisionLight = nightVisionPrefab.GetComponent<Light>();
             nightVisionLight.enabled = false;
 
-            vanillaMapNightVisionLight = StartOfRound.Instance.mapScreen.mapCameraLight;
-
             UpdateAllCameraSettings();
         }
 
         internal static bool HasFinishedGameStartSetup()
         {
-            return vanillaMapNightVisionLight != null;
+            return nightVisionPrefab != null;
         }
 
         public static void UpdateAllCameraSettings()
@@ -1155,9 +1150,6 @@ namespace OpenBodyCams
 
             CameraContainer.SetPositionAndRotation(currentAttachmentPoint.position, currentAttachmentPoint.rotation);
 
-            vanillaMapNightVisionLightWasEnabled = vanillaMapNightVisionLight.enabled;
-            vanillaMapNightVisionLight.enabled = false;
-
             nightVisionLight.enabled = true;
             greenFlashRenderer.forceRenderingOff = false;
             fogShaderPlaneRenderer.forceRenderingOff = false;
@@ -1225,8 +1217,6 @@ namespace OpenBodyCams
             var localPlayer = StartOfRound.Instance.localPlayerController;
             if (localPlayer == null)
                 return;
-
-            vanillaMapNightVisionLight.enabled = vanillaMapNightVisionLightWasEnabled;
 
             nightVisionLight.enabled = false;
             greenFlashRenderer.forceRenderingOff = true;
