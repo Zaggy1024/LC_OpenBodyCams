@@ -305,25 +305,25 @@ internal class ILInjector(IEnumerable<CodeInstruction> instructions, ILGenerator
         return this;
     }
 
-    public ILInjector InsertInPlace(params CodeInstruction[] instructions)
+    public ILInjector InsertInPlace(ICollection<CodeInstruction> instructions)
     {
         if (!IsValid)
             throw new InvalidOperationException(INVALID);
 
         this.instructions.InsertRange(index, instructions);
         if (matchEnd >= index)
-            matchEnd += instructions.Length;
+            matchEnd += instructions.Count;
         return this;
     }
 
-    public ILInjector Insert(params CodeInstruction[] instructions)
+    public ILInjector Insert(ICollection<CodeInstruction> instructions)
     {
         InsertInPlace(instructions);
-        index += instructions.Length;
+        index += instructions.Count;
         return this;
     }
 
-    public ILInjector InsertInPlaceAfterBranch(params CodeInstruction[] instructions)
+    public ILInjector InsertInPlaceAfterBranch(ICollection<CodeInstruction> instructions)
     {
         if (!IsValid)
             throw new InvalidOperationException(INVALID);
@@ -336,14 +336,14 @@ internal class ILInjector(IEnumerable<CodeInstruction> instructions, ILGenerator
         Instruction.labels.AddRange(labels);
 
         if (matchEnd >= index)
-            matchEnd += instructions.Length;
+            matchEnd += instructions.Count;
         return this;
     }
 
-    public ILInjector InsertAfterBranch(params CodeInstruction[] instructions)
+    public ILInjector InsertAfterBranch(ICollection<CodeInstruction> instructions)
     {
         InsertInPlaceAfterBranch(instructions);
-        index += instructions.Length;
+        index += instructions.Count;
         return this;
     }
 
