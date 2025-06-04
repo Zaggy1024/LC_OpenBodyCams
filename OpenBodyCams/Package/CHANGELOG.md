@@ -1,3 +1,6 @@
+## Version 3.0.6
+- Updated to support v70, removing the hiding of the pre-v70 map night vision light. This change will be backwards compatible.
+
 ## Version 3.0.5
 - Removed debug prints from the FixMaskedConversionForClients transpiler.
 
