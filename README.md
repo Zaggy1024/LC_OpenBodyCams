@@ -1,9 +1,9 @@
 # OpenBodyCams
 An open-source implementation of a body/head camera that is displayed on the bottom right monitor in the ship, with the goal of appearing almost identical to the player's actual perspective while providing good performance.
 
-When LethalLib is installed, the body cam will not be available until an antenna is bought as a ship upgrade in the store.
-
 The camera view will display only the first person hands and hide the third person model as well as many mods' third-person cosmetics to prevent obstructed vision. Vanilla enemies that cling to the player are also supported.
+
+**Note:** When LethalLib is installed, the body cam will not be available until an antenna is bought as a ship upgrade in the store. This means that the mod will not function as client-side anymore, and will prevent you from joining hosts that don't also have OpenBodyCams with its ship upgrade enabled. If you wish to join such lobbies with LethalLib installed, you must disable the ship upgrade in the config.
 
 Please **report any issues [here](https://github.com/Zaggy1024/LC_OpenBodyCams/issues)**, and include any relevant information according to [the Debugging section](#debugging).
 
