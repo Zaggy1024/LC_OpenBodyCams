@@ -134,6 +134,11 @@ namespace OpenBodyCams
         public CameraRenderingStatus CameraStatus { get => cameraStatus; }
 
         /// <summary>
+        /// Whether the current target should be considered invalid if it would otherwise be rendered.
+        /// </summary>
+        public bool ForceTargetInvalid { get; set; }
+
+        /// <summary>
         /// The framerate at which to render the camera. Lower values may improve game performance.
         ///
         /// A value of 0 will result in rendering the camera every game frame.
@@ -793,7 +798,7 @@ namespace OpenBodyCams
             if (!EnableCamera)
                 return CameraRenderingStatus.Disabled;
 
-            if (currentActualTarget == null)
+            if (currentActualTarget == null || ForceTargetInvalid)
                 return CameraRenderingStatus.TargetInvalid;
 
             if (currentPlayer is not null)

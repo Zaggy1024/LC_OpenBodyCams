@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Linq;
 
 using UnityEngine;
@@ -67,6 +67,11 @@ namespace OpenBodyCams
         {
             if (BodyCam != null && MapRenderer != null)
                 UpdateBodyCamTarget();
+        }
+
+        private void Update()
+        {
+            BodyCam.ForceTargetInvalid = MapRenderer.playerIsInCaves;
         }
 
         public void UpdateBodyCamTarget()
