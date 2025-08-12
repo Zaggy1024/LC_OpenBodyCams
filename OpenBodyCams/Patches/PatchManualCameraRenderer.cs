@@ -46,8 +46,9 @@ internal static class PatchManualCameraRenderer
         if ((object)__instance == ShipObjects.CameraReplacedByBodyCam && __result && !ShipObjects.MainBodyCam.IsBlanked)
             __result = false;
 
-        // The internal ship camera makes the monitors visible, and since it renders while the monitors are visible, it nevers tops rendering.
-        // This causes the map screen to by extension to never become invisible while the player is in the ship.
+        // The internal ship camera has the ship monitors in its field of view, which causes its monitor as well as the radar map monitor and
+        // external ship camera monitor to remain visible. Therefore, those cameras never stop rendering until the player leaves the ship
+        // to force them to stop.
 
         // To counteract this, implement a manual frustum test for the internal ship camera, excluding itself to prevent the loop.
         if ((object)__instance == ShipObjects.InternalCameraRenderer)
@@ -59,8 +60,8 @@ internal static class PatchManualCameraRenderer
             return;
         }
 
-        // By doing the above, we also cause the map screen to stop rendering when entering the terminal. Therefore, we need to test whether
-        // the terminal is in use and enable it if so.
+        // By doing the above, we cause the map screen to stop rendering when entering the terminal, since the radar map monitor leaves
+        // the player's field of view. Therefore, we need to force the radar map camera to be enabled when the terminal is in use.
         if ((object)__instance == StartOfRound.Instance.mapScreen)
         {
             if (__result)
@@ -73,7 +74,9 @@ internal static class PatchManualCameraRenderer
             return;
         }
 
-        // The door screen also relies on this bug, so we need to test whether it is visible and enable it if so.
+        // The door screen also relies on this bug. In vanilla, it will not render until the player faces the monitors at the front of
+        // the ship. With the above fix for the internal camera, it will never render while only the door screen is in view. Therefore,
+        // we need to force it enabled if the player is looking at the door screen.
         if ((object)__instance == ShipObjects.ExternalCameraRenderer)
         {
             if (!ShipObjects.DoorScreenUsesExternalCamera)
