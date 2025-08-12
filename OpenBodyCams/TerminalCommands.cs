@@ -82,7 +82,7 @@ public static class TerminalCommands
 
     public static void SetBodyCamBlanked(bool blanked)
     {
-        PiPImage.color = blanked ? Color.black : Color.white;
+        PiPImage.enabled = !blanked;
     }
 
     private static void DisablePiPImage()
