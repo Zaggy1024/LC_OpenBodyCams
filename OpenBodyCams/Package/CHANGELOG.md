@@ -1,3 +1,7 @@
+## Version 3.0.7
+- Made map-synced body cams lose signal when their player target goes into caves.
+- Made the body cam in the terminal hide itself when it cannot display its target, instead of blacking it out.
+
 ## Version 3.0.6
 - Updated to support v70, removing the hiding of the pre-v70 map night vision light. This change will be backwards compatible.
 
