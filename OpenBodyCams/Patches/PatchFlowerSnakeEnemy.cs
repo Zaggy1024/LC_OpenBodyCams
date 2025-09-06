@@ -23,6 +23,9 @@ internal static class PatchFlowerSnakeEnemy
     {
         if (FlowerSnakesAttachedToPlayers != null)
         {
+            if (player.playerClientId < 0 || (int)player.playerClientId >= FlowerSnakesAttachedToPlayers.Length)
+                return;
+
             foreach (var clingingFlowerSnake in FlowerSnakesAttachedToPlayers[player.playerClientId])
             {
                 if (clingingFlowerSnake == null)

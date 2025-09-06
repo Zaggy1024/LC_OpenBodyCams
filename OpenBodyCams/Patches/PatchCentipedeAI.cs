@@ -21,6 +21,9 @@ internal class PatchCentipedeAI
     {
         if (CentipedesAttachedToPlayers != null)
         {
+            if (player.playerClientId < 0 || (int)player.playerClientId >= CentipedesAttachedToPlayers.Length)
+                return;
+
             foreach (var clingingCentipede in CentipedesAttachedToPlayers[player.playerClientId])
             {
                 if (clingingCentipede == null)
