@@ -1,15 +1,11 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection.Emit;
-using System.Reflection;
-using System.Text;
 
 using HarmonyLib;
 using GameNetcodeStuff;
 
 using OpenBodyCams.Utilities;
-using OpenBodyCams.Utilities.IL;
 
 namespace OpenBodyCams.Patches;
 
