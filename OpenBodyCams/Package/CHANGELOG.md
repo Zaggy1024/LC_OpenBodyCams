@@ -1,3 +1,6 @@
+## Version 3.0.8
+- Prevented exceptions in the tulip snake and centipede patches if the player count is modified.
+
 ## Version 3.0.7
 - Made map-synced body cams lose signal when their player target goes into caves.
 - Made the body cam in the terminal hide itself when it cannot display its target, instead of blacking it out.
