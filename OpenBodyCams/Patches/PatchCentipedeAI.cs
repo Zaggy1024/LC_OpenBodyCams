@@ -19,46 +19,45 @@ internal class PatchCentipedeAI
 
     public static void SetClingingAnimationPositionsForPlayer(PlayerControllerB player, Perspective perspective)
     {
-        if (CentipedesAttachedToPlayers != null)
+        if (CentipedesAttachedToPlayers == null)
+            return;
+        if (player.playerClientId < 0 || (int)player.playerClientId >= CentipedesAttachedToPlayers.Length)
+            return;
+
+        foreach (var clingingCentipede in CentipedesAttachedToPlayers[player.playerClientId])
         {
-            if (player.playerClientId < 0 || (int)player.playerClientId >= CentipedesAttachedToPlayers.Length)
-                return;
-
-            foreach (var clingingCentipede in CentipedesAttachedToPlayers[player.playerClientId])
+            if (clingingCentipede == null)
+                continue;
+            if (clingingCentipede.isEnemyDead)
+                continue;
+            if (clingingCentipede.clingingToDeadBody)
+                continue;
+            if (clingingCentipede.clingingToPlayer == null)
             {
-                if (clingingCentipede == null)
-                    continue;
-                if (clingingCentipede.isEnemyDead)
-                    continue;
-                if (clingingCentipede.clingingToDeadBody)
-                    continue;
-                if (clingingCentipede.clingingToPlayer == null)
+                if (!HasWarnedClingingMismatch)
                 {
-                    if (!HasWarnedClingingMismatch)
-                    {
-                        Plugin.Instance.Logger.LogWarning($"{clingingCentipede} should be clinging to a player according to our hooks, but it is not.");
-                        HasWarnedClingingMismatch = true;
-                    }
-                    continue;
+                    Plugin.Instance.Logger.LogWarning($"{clingingCentipede} should be clinging to a player according to our hooks, but it is not.");
+                    HasWarnedClingingMismatch = true;
                 }
-
-                var originallyClingedToLocalPlayer = clingingCentipede.clingingToLocalClient;
-
-                switch (perspective)
-                {
-                    case Perspective.Original:
-                        break;
-                    case Perspective.FirstPerson:
-                        clingingCentipede.clingingToLocalClient = true;
-                        break;
-                    case Perspective.ThirdPerson:
-                        clingingCentipede.clingingToLocalClient = false;
-                        break;
-                }
-
-                clingingCentipede.UpdatePositionToClingingPlayerHead();
-                clingingCentipede.clingingToLocalClient = originallyClingedToLocalPlayer;
+                continue;
             }
+
+            var originallyClingedToLocalPlayer = clingingCentipede.clingingToLocalClient;
+
+            switch (perspective)
+            {
+                case Perspective.Original:
+                    break;
+                case Perspective.FirstPerson:
+                    clingingCentipede.clingingToLocalClient = true;
+                    break;
+                case Perspective.ThirdPerson:
+                    clingingCentipede.clingingToLocalClient = false;
+                    break;
+            }
+
+            clingingCentipede.UpdatePositionToClingingPlayerHead();
+            clingingCentipede.clingingToLocalClient = originallyClingedToLocalPlayer;
         }
     }
 

@@ -17,38 +17,37 @@ internal static class PatchFlowerSnakeEnemy
 
     public static void SetClingingAnimationPositionsForPlayer(PlayerControllerB player, Perspective perspective)
     {
-        if (FlowerSnakesAttachedToPlayers != null)
+        if (FlowerSnakesAttachedToPlayers == null)
+            return;
+        if (player.playerClientId < 0 || (int)player.playerClientId >= FlowerSnakesAttachedToPlayers.Length)
+            return;
+
+        foreach (var clingingFlowerSnake in FlowerSnakesAttachedToPlayers[player.playerClientId])
         {
-            if (player.playerClientId < 0 || (int)player.playerClientId >= FlowerSnakesAttachedToPlayers.Length)
-                return;
-
-            foreach (var clingingFlowerSnake in FlowerSnakesAttachedToPlayers[player.playerClientId])
+            if (clingingFlowerSnake == null)
+                continue;
+            if (clingingFlowerSnake.clingingToPlayer == null)
             {
-                if (clingingFlowerSnake == null)
-                    continue;
-                if (clingingFlowerSnake.clingingToPlayer == null)
+                if (!HasWarnedClingingMismatch)
                 {
-                    if (!HasWarnedClingingMismatch)
-                    {
-                        Plugin.Instance.Logger.LogWarning($"{clingingFlowerSnake} should be clinging to a player according to our hooks, but it is not.");
-                        HasWarnedClingingMismatch = true;
-                    }
-                    continue;
+                    Plugin.Instance.Logger.LogWarning($"{clingingFlowerSnake} should be clinging to a player according to our hooks, but it is not.");
+                    HasWarnedClingingMismatch = true;
                 }
-
-                var localPlayer = GameNetworkManager.Instance.localPlayerController;
-                switch (perspective)
-                {
-                    case Perspective.FirstPerson:
-                        GameNetworkManager.Instance.localPlayerController = player;
-                        break;
-                    case Perspective.ThirdPerson:
-                        GameNetworkManager.Instance.localPlayerController = StartOfRound.Instance.allPlayerScripts.First(p => p != localPlayer);
-                        break;
-                }
-                clingingFlowerSnake.SetClingingAnimationPosition();
-                GameNetworkManager.Instance.localPlayerController = localPlayer;
+                continue;
             }
+
+            var localPlayer = GameNetworkManager.Instance.localPlayerController;
+            switch (perspective)
+            {
+                case Perspective.FirstPerson:
+                    GameNetworkManager.Instance.localPlayerController = player;
+                    break;
+                case Perspective.ThirdPerson:
+                    GameNetworkManager.Instance.localPlayerController = StartOfRound.Instance.allPlayerScripts.First(p => p != localPlayer);
+                    break;
+            }
+            clingingFlowerSnake.SetClingingAnimationPosition();
+            GameNetworkManager.Instance.localPlayerController = localPlayer;
         }
     }
 
