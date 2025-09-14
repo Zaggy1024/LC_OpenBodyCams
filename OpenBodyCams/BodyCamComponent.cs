@@ -1175,7 +1175,7 @@ namespace OpenBodyCams
                 if (mesh == null)
                 {
                     if (!warnedNullMesh)
-                        Plugin.Instance.Logger.LogError($"Mesh obstructing the body cam on {name} which should be hidden was unexpectedly null.");
+                        Plugin.Instance.Logger.LogError($"Mesh on {currentActualTarget.name} that would obstruct the {name} body cam was unexpectedly null.");
                     warnedNullMesh = true;
                     continue;
                 }
