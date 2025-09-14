@@ -1,3 +1,6 @@
+## Version 3.0.9
+- Started printing the body cam's current target within the error indicating that a renderer on the current target was found to be null. This should help to narrow down the cause.
+
 ## Version 3.0.8
 - Prevented exceptions in the tulip snake and centipede patches if the player count is modified.
 
