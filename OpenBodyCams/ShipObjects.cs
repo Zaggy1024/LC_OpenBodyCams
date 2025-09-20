@@ -228,6 +228,7 @@ namespace OpenBodyCams
 
             var overlayObj = UnityEngine.Object.Instantiate(Plugin.Assets.LoadAsset<GameObject>("Assets/OpenBodyCams/Prefabs/BodyCamOverlayCanvas.prefab"));
             overlayObj.transform.SetParent(GameObject.Find("Systems/UI").transform, false);
+            overlayObj.transform.position = new Vector3(0, 1000, 0);
             Overlay = overlayObj.AddComponent<OverlayManager>();
             Overlay.BodyCam = MainBodyCam;
         }
