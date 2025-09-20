@@ -1,3 +1,6 @@
+## Version 3.0.10
+- Fixed the body cam monitor turning black when landing on Dine with Universal Radar enabled.
+
 ## Version 3.0.9
 - Started printing the body cam's current target within the error indicating that a renderer on the current target was found to be null. This should help to narrow down the cause.
 
