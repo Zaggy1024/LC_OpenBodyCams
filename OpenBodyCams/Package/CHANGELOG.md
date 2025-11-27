@@ -1,3 +1,6 @@
+## Version 3.0.11
+- Disabled camera rendering when targeting a player whose dead body has been deactivated, i.e. when killed by the company monster.
+
 ## Version 3.0.10
 - Fixed the body cam monitor turning black when landing on Dine with Universal Radar enabled.
 
