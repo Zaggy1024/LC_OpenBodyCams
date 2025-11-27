@@ -822,6 +822,8 @@ namespace OpenBodyCams
 
                 if (currentPlayer.deadBody != null)
                 {
+                    if (!currentPlayer.deadBody.gameObject.activeSelf)
+                        return CameraRenderingStatus.TargetInvalid;
                     if (currentPlayer.deadBody.isInShip)
                         return CameraRenderingStatus.TargetDisabledOnShip;
                     return CameraRenderingStatus.Rendering;
