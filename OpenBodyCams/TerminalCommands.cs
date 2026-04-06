@@ -123,11 +123,7 @@ public static class TerminalCommands
 
             viewKeyword.compatibleNouns = [
                 .. viewKeyword.compatibleNouns ?? [],
-                new CompatibleNoun()
-                {
-                    noun = BodyCamKeyword,
-                    result = ViewBodyCamNode,
-                }
+                new CompatibleNoun(BodyCamKeyword, ViewBodyCamNode)
             ];
 
             BodyCamFailedNode = ScriptableObject.CreateInstance<TerminalNode>();
@@ -264,11 +260,7 @@ public static class TerminalCommands
 
     private static void AddCompatibleNoun(TerminalKeyword keyword, TerminalKeyword compatibleKeyword, TerminalNode result)
     {
-        AddCompatibleNoun(keyword, new CompatibleNoun()
-        {
-            noun = compatibleKeyword,
-            result = result,
-        });
+        AddCompatibleNoun(keyword, new CompatibleNoun(compatibleKeyword, result));
     }
 
     static void AddNewlyCreatedCommands()
