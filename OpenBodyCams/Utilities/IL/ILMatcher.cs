@@ -81,44 +81,44 @@ internal interface ILMatcher
     public static ILMatcher Ldfld(FieldInfo field, [CallerMemberName] string callerName = "", [CallerFilePath] string sourceFilePath = "", [CallerLineNumber] int sourceLineNumber = 0)
     {
         if (field == null)
-            Plugin.Instance.Logger.LogWarning($"Field passed to ILMatcher.Ldfld() was null at {sourceFilePath}#{sourceLineNumber} ({callerName})");
+            Plugin.Instance.Logger.LogWarning($"Field passed to ILMatcher.Ldfld() was null at {sourceFilePath}:{sourceLineNumber} ({callerName})");
         return new OpcodeOperandMatcher(OpCodes.Ldfld, field);
     }
     public static ILMatcher Ldsfld(FieldInfo field, [CallerMemberName] string callerName = "", [CallerFilePath] string sourceFilePath = "", [CallerLineNumber] int sourceLineNumber = 0)
     {
         if (field == null)
-            Plugin.Instance.Logger.LogWarning($"Field passed to ILMatcher.Ldsfld() was null at {sourceFilePath}#{sourceLineNumber} ({callerName})");
+            Plugin.Instance.Logger.LogWarning($"Field passed to ILMatcher.Ldsfld() was null at {sourceFilePath}:{sourceLineNumber} ({callerName})");
         return new OpcodeOperandMatcher(OpCodes.Ldsfld, field);
     }
     public static ILMatcher Stfld(FieldInfo field, [CallerMemberName] string callerName = "", [CallerFilePath] string sourceFilePath = "", [CallerLineNumber] int sourceLineNumber = 0)
     {
         if (field == null)
-            Plugin.Instance.Logger.LogWarning($"Field passed to ILMatcher.Stfld() was null at {sourceFilePath}#{sourceLineNumber} ({callerName})");
+            Plugin.Instance.Logger.LogWarning($"Field passed to ILMatcher.Stfld() was null at {sourceFilePath}:{sourceLineNumber} ({callerName})");
         return new OpcodeOperandMatcher(OpCodes.Stfld, field);
     }
     public static ILMatcher Stsfld(FieldInfo field, [CallerMemberName] string callerName = "", [CallerFilePath] string sourceFilePath = "", [CallerLineNumber] int sourceLineNumber = 0)
     {
         if (field == null)
-            Plugin.Instance.Logger.LogWarning($"Field passed to ILMatcher.Stsfld() was null at {sourceFilePath}#{sourceLineNumber} ({callerName})");
+            Plugin.Instance.Logger.LogWarning($"Field passed to ILMatcher.Stsfld() was null at {sourceFilePath}:{sourceLineNumber} ({callerName})");
         return new OpcodeOperandMatcher(OpCodes.Stsfld, field);
     }
 
     public static ILMatcher Callvirt(MethodBase method, [CallerMemberName] string callerName = "", [CallerFilePath] string sourceFilePath = "", [CallerLineNumber] int sourceLineNumber = 0)
     {
         if (method == null)
-            Plugin.Instance.Logger.LogWarning($"Method passed to ILMatcher.Callvirt() was null at {sourceFilePath}#{sourceLineNumber} ({callerName})");
+            Plugin.Instance.Logger.LogWarning($"Method passed to ILMatcher.Callvirt() was null at {sourceFilePath}:{sourceLineNumber} ({callerName})");
         return OpcodeOperand(OpCodes.Callvirt, method);
     }
     public static ILMatcher Call(MethodBase method, [CallerMemberName] string callerName = "", [CallerFilePath] string sourceFilePath = "", [CallerLineNumber] int sourceLineNumber = 0)
     {
         if (method == null)
-            Plugin.Instance.Logger.LogWarning($"Method passed to ILMatcher.Call() was null at {sourceFilePath}#{sourceLineNumber} ({callerName})");
+            Plugin.Instance.Logger.LogWarning($"Method passed to ILMatcher.Call() was null at {sourceFilePath}:{sourceLineNumber} ({callerName})");
         return OpcodeOperand(OpCodes.Call, method);
     }
     public static ILMatcher Newobj(ConstructorInfo ctor, [CallerMemberName] string callerName = "", [CallerFilePath] string sourceFilePath = "", [CallerLineNumber] int sourceLineNumber = 0)
     {
         if (ctor == null)
-            Plugin.Instance.Logger.LogWarning($"Constructor passed to ILMatcher.Newobj() was null at {sourceFilePath}#{sourceLineNumber} ({callerName})");
+            Plugin.Instance.Logger.LogWarning($"Constructor passed to ILMatcher.Newobj() was null at {sourceFilePath}:{sourceLineNumber} ({callerName})");
         return OpcodeOperand(OpCodes.Newobj, ctor);
     }
 
