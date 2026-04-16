@@ -96,7 +96,9 @@ internal static class InstructionUtilities
             return 2;
         if (opcode == OpCodes.Ldarg_3)
             return 3;
-        if (opcode == OpCodes.Ldarg || opcode == OpCodes.Ldarg_S)
+        if (opcode == OpCodes.Ldarg_S)
+            return instruction.operand as byte?;
+        if (opcode == OpCodes.Ldarg)
             return instruction.operand as int?;
         return null;
     }
