@@ -32,6 +32,10 @@ internal interface ILMatcher
         return new DebuggingMatcher(this);
     }
 
+    public static ILMatcher StackDelta(int pushes, int pops) => new StackDeltaMatcher(pushes, pops);
+    public static ILMatcher Push(int pushes) => StackDelta(pushes, 0);
+    public static ILMatcher Pop(int pops) => StackDelta(0, pops);
+
     public static ILMatcher Not(ILMatcher matcher) => new NotMatcher(matcher);
 
     public static ILMatcher Opcode(OpCode opcode) => new OpcodeMatcher(opcode);
@@ -132,6 +136,14 @@ internal interface ILMatcher
             return predicate(field);
         });
     }
+}
+
+internal class StackDeltaMatcher(int pushes, int pops) : ILMatcher
+{
+    private readonly int pushes = pushes;
+    private readonly int pops = pops;
+
+    public bool Matches(CodeInstruction instruction) => instruction.PushCount() == pushes && instruction.PopCount() == pops;
 }
 
 internal class NotMatcher(ILMatcher matcher) : ILMatcher
