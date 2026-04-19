@@ -57,7 +57,7 @@ internal interface ILMatcher
             return new LdlocCapturingMatcher(localIndexPtr);
         }
     }
-    public unsafe static ILMatcher Ldloc(in int localIndex)
+    public unsafe static ILMatcher LdlocFrom(in int localIndex)
     {
         fixed (int* localIndexPtr = &localIndex)
         {
@@ -72,7 +72,7 @@ internal interface ILMatcher
             return new StlocCapturingMatcher(localIndexPtr);
         }
     }
-    public unsafe static ILMatcher Stloc(in int localIndex)
+    public unsafe static ILMatcher StlocFrom(in int localIndex)
     {
         fixed (int* localIndexPtr = &localIndex)
         {

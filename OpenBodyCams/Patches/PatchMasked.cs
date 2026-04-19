@@ -99,7 +99,7 @@ internal static class PatchMaskedPlayerEnemy
                 ILMatcher.Ldarg(0),
                 ILMatcher.Predicate(insn => insn.opcode == OpCodes.Ldfld && ((FieldInfo)insn.operand).Name.EndsWith("state")),
                 ILMatcher.StlocCapture(out var stateLocalIndex),
-                ILMatcher.Ldloc(in stateLocalIndex),
+                ILMatcher.LdlocFrom(in stateLocalIndex),
                 ILMatcher.Opcode(OpCodes.Switch),
             ]);
 
