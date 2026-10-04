@@ -1,3 +1,6 @@
+## Version 3.0.13
+- Prevented exceptions when the indirect sun light isn't present.
+
 ## Version 3.0.12
 - Updated to support v80+. Note that it will likely not function on prior versions.
 
