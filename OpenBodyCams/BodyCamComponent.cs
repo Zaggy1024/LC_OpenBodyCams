@@ -1193,12 +1193,15 @@ namespace OpenBodyCams
             var sunDirect = TimeOfDay.Instance.sunDirect;
             if (sunDirect != null)
             {
-                var sunIndirect = TimeOfDay.Instance.sunIndirect;
-
                 originalDirectSunlightEnabled = sunDirect.enabled;
-                originalIndirectSunlightEnabled = sunIndirect.enabled;
                 sunDirect.enabled = targetSunlightEnabled;
-                sunIndirect.enabled = targetSunlightEnabled;
+
+                var sunIndirect = TimeOfDay.Instance.sunIndirect;
+                if (sunIndirect != null)
+                {
+                    originalIndirectSunlightEnabled = sunIndirect.enabled;
+                    sunIndirect.enabled = targetSunlightEnabled;
+                }
             }
 
             var blackSkyVolume = StartOfRound.Instance.blackSkyVolume;
@@ -1245,10 +1248,13 @@ namespace OpenBodyCams
             var sunDirect = TimeOfDay.Instance.sunDirect;
             if (sunDirect != null)
             {
-                var sunIndirect = TimeOfDay.Instance.sunIndirect;
-
                 sunDirect.enabled = originalDirectSunlightEnabled;
-                sunIndirect.enabled = originalIndirectSunlightEnabled;
+
+                var sunIndirect = TimeOfDay.Instance.sunIndirect;
+                if (sunIndirect != null)
+                {
+                    sunIndirect.enabled = originalIndirectSunlightEnabled;
+                }
             }
 
             var blackSkyVolume = StartOfRound.Instance.blackSkyVolume;
